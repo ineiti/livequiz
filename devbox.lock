@@ -1,0 +1,93 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "bun@latest": {
+      "last_modified": "2024-02-26T19:46:43Z",
+      "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#bun",
+      "source": "devbox-search",
+      "version": "1.0.29",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/vasy23jzcpk4vahmb76gs550gz5ibp7s-bun-1.0.29"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/f669mpd7ini29ibwhvl7mi5d7vxpgvx3-bun-1.0.29"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/jk432rp4sfm9y912yy071cxdx30bbhvm-bun-1.0.29"
+        }
+      }
+    },
+    "git@latest": {
+      "last_modified": "2024-02-26T19:46:43Z",
+      "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#git",
+      "source": "devbox-search",
+      "version": "2.43.1",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/ycg59v1gfzmv8bnnrlpqhprnfn7y6v7b-git-2.43.1"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/idq6ygdm30ka8f577qih3ysl7jjhbp7b-git-2.43.1"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/5pp0150mbgr2r6lg4x84l2d7hgk38f3d-git-2.43.1"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/g6343av5x49smrfb16j61cif88xahjvz-git-2.43.1"
+        }
+      }
+    },
+    "nodejs@latest": {
+      "last_modified": "2024-02-26T19:46:43Z",
+      "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#nodejs_21",
+      "source": "devbox-search",
+      "version": "21.6.2",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/n9xcy53g63rk8vwb2yx5fb7i72rprpd1-nodejs-21.6.2"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/mqvmpikgnk7bxvi977ysd0z81bjpflzj-nodejs-21.6.2"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/mdwxb1kdajvahhbpq3dhnaf3b01h7yb8-nodejs-21.6.2"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/va3sggfgfb709lm31bzvpjfyapjdy435-nodejs-21.6.2"
+        }
+      }
+    },
+    "vim@latest": {
+      "last_modified": "2024-02-26T19:46:43Z",
+      "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#vim",
+      "source": "devbox-search",
+      "version": "9.1.0075",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/pyjljl0636hm0msvp3s7wddny9nkrlpk-vim-9.1.0075"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/5d14cxx9nnfw4jyp4xnx0invnnn0l0d5-vim-9.1.0075"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/8g15fjb0zx0qzfhkm4nc0bg2qny6a935-vim-9.1.0075"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/y56kl969hm03i78vla8zr2si524c5v9s-vim-9.1.0075"
+        }
+      }
+    },
+    "vscode@latest": {
+      "last_modified": "2024-02-24T23:06:34Z",
+      "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#vscode",
+      "source": "devbox-search",
+      "version": "1.86.2",
+      "systems": {
+        "x86_64-linux": {
+          "store_path": "/nix/store/zgy8a5y2asybvzvpyb84p67blfzwgmg9-vscode-1.86.2"
+        }
+      }
+    }
+  }
+}
