@@ -24,6 +24,7 @@ export class Questions {
     currentQuestion = 0;
     chapter = "";
     selections: boolean[][] = [];
+    done: boolean[] = [];
     empty = true;
 
     title = "undefined";
@@ -59,6 +60,7 @@ export class Questions {
                         this.empty = false;
                         this.questions.push(current);
                         this.selections.push(current.choices.map((_) => false));
+                        this.done.push(false);
                         current = emptyQuestion();
                         hint = false;
                     }
@@ -97,13 +99,25 @@ export class Questions {
         this.update();
     }
 
+    goto(q: number) {
+        if (q >= 0 && q < this.questions.length) {
+            this.currentQuestion = q;
+        }
+        this.update();
+    }
+
     updateSelection(event: MatSelectionList) {
-        if (event.selectedOptions.selected.length > this.maxChoices) {
+        const selected = event.selectedOptions.selected.length;
+        if (selected > this.maxChoices) {
             event.selectedOptions.selected[0].toggle();
+        } else if (selected === this.maxChoices) {
+            this.done[this.currentQuestion] = true;
+        } else if (selected < this.maxChoices) {
+            this.done[this.currentQuestion] = false;
         }
         this.selections[this.currentQuestion] = this.selections[this.currentQuestion].map((_, i) => {
             return event.selectedOptions.selected.some((sel) => sel.value === i);
-        })
+        });
         this.update();
     }
 

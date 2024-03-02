@@ -7,12 +7,19 @@
 </mat-form-field>
 
 <div *ngIf="!questions.empty">
-    <h4 [innerHTML]="questions.title"></h4>
+    <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
+        <button mat-button [disabled]="questions.first" (click)="questions.previous()"
+            style="margin: auto 1em auto; height: 2em;">Previous</button>
+        <mat-grid-list [cols]="gridWidth(questions.questions.length)" rowHeight="2em">
+            @for (q of questions.questions; track $index) {
+            <mat-grid-tile (click)="questions.goto($index)" [class]="tileClass($index)">{{$index+1}}</mat-grid-tile>
+            }
+        </mat-grid-list>
+        <button mat-button [disabled]="questions.last" (click)="questions.next()"
+            style="margin: auto 0 auto 1em; height: 2em;">Next</button>
+    </div>
 
-    <button mat-button [disabled]="questions.first" (click)="questions.previous()">Previous</button>
-    <button mat-button [disabled]="questions.last" (click)="questions.next()">Next</button>
-    <mat-progress-bar mode="determinate" [value]="questions.percentage"
-    style="margin: 1em 0 1em;"></mat-progress-bar>
+    <h4 [innerHTML]="questions.title"></h4>
 
     <p [innerHTML]="questions.description"></p>
 

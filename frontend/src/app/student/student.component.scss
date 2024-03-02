@@ -1,0 +1,29 @@
+.questionTile {
+    cursor: pointer;
+    border: solid 1px black;
+}
+
+.questionTile:hover {
+    background-color: aqua;
+}
+
+.questionTileOdd {
+    background-color: #eee;
+}
+
+.questionTileDone {
+    background-color: #ddf;
+}
+
+.questionTileDone.questionTileOdd {
+    background-color: #bbf;
+}
+
+.questionTileDone.questionTileChosen {
+    background-color: aquamarine;
+}
+
+.questionTileChosen {
+    background-color: aquamarine;
+}
+
