@@ -4,7 +4,8 @@
     "nodejs@latest",
     "vscode@latest",
     "vim@latest",
-    "bun@latest"
+    "bun@latest",
+    "rustup@latest"
   ],
   "shell": {
     "init_hook": [

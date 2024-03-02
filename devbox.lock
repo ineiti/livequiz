@@ -58,6 +58,27 @@
         }
       }
     },
+    "rustup@latest": {
+      "last_modified": "2024-02-24T23:06:34Z",
+      "plugin_version": "0.0.1",
+      "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#rustup",
+      "source": "devbox-search",
+      "version": "1.26.0",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/aq1krqfcib3811f8n9y7cv4ybqymdj80-rustup-1.26.0"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/4yjhm4n7l81vqxlymanngflpyhwwjrbk-rustup-1.26.0"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/623yx50y1bswv71d0r4ss5fkhsh8vylf-rustup-1.26.0"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/rs66y4kzwh1n8cz2ia0qw5m4fhahqwia-rustup-1.26.0"
+        }
+      }
+    },
     "vim@latest": {
       "last_modified": "2024-02-26T19:46:43Z",
       "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#vim",

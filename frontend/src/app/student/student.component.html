@@ -1,9 +1,7 @@
-<h2>Take the Quiz</h2>
-
-<h3>{{questions.chapter}}</h3>
+<h2>{{questions.chapter}}</h2>
 <mat-form-field>
     <mat-label>Your name:</mat-label>
-    <input matInput [(ngModel)]="name">
+    <input matInput [(ngModel)]="name" (keyup)="updateName()">
 </mat-form-field>
 
 <div *ngIf="!questions.empty">
@@ -19,12 +17,12 @@
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
 
-    <h4 [innerHTML]="questions.title"></h4>
+    <h3 [innerHTML]="questions.title"></h3>
 
     <p [innerHTML]="questions.description"></p>
 
     <div *ngIf="questions.maxChoices === 1; else multiQuestion">
-        <mat-selection-list #choicesList multiple="false" (selectionChange)="questions.updateSelection(choicesList)">
+        <mat-selection-list #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)">
             @for (choice of questions.choices; track $index) {
             <mat-list-option [value]="$index" togglePosition="before" [selected]="questions.selected[$index]">
                 <span [innerHTML]="choice"></span>
@@ -33,7 +31,7 @@
         </mat-selection-list>
     </div>
     <ng-template #multiQuestion>
-        <mat-selection-list #choicesList multiple="true" (selectionChange)="questions.updateSelection(choicesList)">
+        <mat-selection-list #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)">
             @for (choice of questions.choices; track $index) {
             <mat-list-option [value]="$index" togglePosition="before" [selected]="questions.selected[$index]">
                 <span [innerHTML]="choice"></span>
