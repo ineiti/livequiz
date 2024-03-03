@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Connection, ConnectionMock, Result, ResultState } from '../lib/connection';
+import { Connection, ConnectionMock, Result, ResultState } from '../../lib/connection';
 import { Buffer } from 'buffer';
 import { AnswerService } from './answer.service';
 import { Questionnaire, QuestionnaireService } from './questionnaire.service';

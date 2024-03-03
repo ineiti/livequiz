@@ -1,7 +1,7 @@
 <h2>{{answers.questionnaire.chapter}}</h2>
 <mat-form-field>
     <mat-label>Your name:</mat-label>
-    <input matInput [(ngModel)]="name" (keyup)="updateName()">
+    <input matInput [(ngModel)]="user.name" (keyup)="updateName()">
 </mat-form-field>
 
 <div *ngIf="!answers.empty">

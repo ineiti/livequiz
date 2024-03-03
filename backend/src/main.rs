@@ -35,7 +35,7 @@ impl User {
         let mut u = Self {
             secret,
             name: None,
-            answers: vec!["empty".to_string(); pos],
+            answers: vec!["empty".to_string(); pos + 1],
         };
         u.answers[pos] = sel;
         u
@@ -126,6 +126,8 @@ async fn get_show_answers(config: &State<Config>) -> String {
 async fn set_show_answers(config: &State<Config>, secret: String, show: String) {
     if config.admin_secret == secret {
         *config.show_answers.lock().await = show == "true";
+    } else {
+        println!("Wrong secret");
     }
 }
 

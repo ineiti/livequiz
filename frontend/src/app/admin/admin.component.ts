@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
-import { ConnectionService } from '../connection.service';
+import { ConnectionService } from '../services/connection.service';
 import { Result, ResultState } from '../../lib/connection';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AnswerService } from '../answer.service';
+import { AnswerService } from '../services/answer.service';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Buffer } from 'buffer';
-import { Question, Questionnaire, QuestionnaireService } from '../questionnaire.service';
+import { Question, Questionnaire, QuestionnaireService } from '../services/questionnaire.service';
 import { ReturnStatement } from '@angular/compiler';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-admin',
@@ -23,29 +24,38 @@ import { ReturnStatement } from '@angular/compiler';
 export class AdminComponent {
   users: Result[] = [];
   displayedColumns = [1, 3, 2];
-  results = false;
+  showResults = false;
   selectedClasses: string[][] = [];
   questionnaire = new Questionnaire("");
 
-  constructor(private connection: ConnectionService, private qservice: QuestionnaireService) {
+  constructor(private connection: ConnectionService, private qservice: QuestionnaireService,
+    private user: UserService) {
     qservice.loaded.subscribe((q) => this.questionnaire = q);
   }
 
   async ngOnInit() {
     await this.update();
+    this.showResults = await this.connection.getShowAnswers();
   }
 
   async update() {
     this.users = await this.connection.getResults();
     this.users.forEach((u) => {
       for (; u.answers.length < this.questionnaire.questions.length; u.answers.push("empty")) { }
-    })
+    });
+    this.users.sort((a, b) => a.name.localeCompare(b.name));
     this.updateSelectedClass();
   }
 
   async updateSelectedClass() {
     this.selectedClasses = this.users.map((user) =>
-      user.answers ? user.answers.map((c) => `userAnswer_${c}`) : [""]
+      user.answers ? user.answers.map((c) => {
+        let cl = c;
+        if (c === "correct" && !this.showResults) {
+          cl = "answered";
+        }
+        return `userAnswer_${cl}`;
+      }) : [""]
     )
   }
 
@@ -65,8 +75,9 @@ export class AdminComponent {
     this.update();
   }
 
-  showResults(event: MatSlideToggleChange) {
-    this.results = event.checked;
+  showResultsUpdate(event: MatSlideToggleChange) {
+    this.showResults = event.checked;
+    this.connection.setShowAnswers(this.user.secretHex(), this.showResults);
     this.updateSelectedClass();
   }
 }

@@ -8,8 +8,9 @@ import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { uniqueNamesGenerator, colors, animals } from 'unique-names-generator';
 import { Buffer } from 'buffer';
-import { ConnectionService } from '../connection.service';
-import { AnswerService } from '../answer.service';
+import { ConnectionService } from '../services/connection.service';
+import { AnswerService } from '../services/answer.service';
+import { UserService } from '../services/user.service';
 
 const GRID_MAX_WIDTH = 13;
 
@@ -22,43 +23,20 @@ const GRID_MAX_WIDTH = 13;
   styleUrl: './student.component.scss'
 })
 export class StudentComponent {
-  name = "undefined";
   showHints = true;
-  userSecret = Buffer.alloc(32);
 
-  constructor(private connection: ConnectionService, public answers: AnswerService) {
-  }
-
-  async ngOnInit() {
-    const user_secret = localStorage.getItem('user-secret');
-    if (user_secret === null) {
-      self.crypto.getRandomValues(this.userSecret);
-      localStorage.setItem('user-secret', this.userSecret.toString('hex'));
-    } else {
-      this.userSecret = Buffer.from(user_secret, 'hex');
-    }
-
-    const name = localStorage.getItem('user-name');
-    if (name === null) {
-      this.name = uniqueNamesGenerator({
-        dictionaries: [colors, animals],
-        separator: '-',
-      });
-    } else {
-      this.name = name;
-    }
-    this.updateName();
+  constructor(private connection: ConnectionService, public answers: AnswerService,
+    public user: UserService) {
   }
 
   updateSelection(event: MatSelectionList) {
     this.answers.updateSelection(event);
-    this.connection.updateQuestion(this.userSecret, this.answers.currentQuestion,
+    this.connection.updateQuestion(this.user.secret, this.answers.currentQuestion,
       this.answers.result);
   }
 
   updateName() {
-    localStorage.setItem('user-name', this.name);
-    this.connection.updateName(this.userSecret, this.name);
+    this.user.updateName();
   }
 
   tileClass(index: number): string {

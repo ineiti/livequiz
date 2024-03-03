@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
-import { AnswerService } from '../app/answer.service';
-import { Questionnaire } from '../app/questionnaire.service';
+import { AnswerService } from '../app/services/answer.service';
+import { Questionnaire } from '../app/services/questionnaire.service';
 
 export type ResultState = ("correct" | "answered" | "empty")
 
@@ -38,12 +38,13 @@ export class Connection {
     }
 
     async getShowAnswers(): Promise<boolean> {
-        const response = await fetch(`${this.url}/api/v1/getShowAnswers`);
-        return (await response.text()) === "true";
+        const response = await (await fetch(`${this.url}/api/v1/getShowAnswers`)).text();
+        console.log(`getShowAnswer: ${response}`)
+        return response === "true";
     }
 
     async setShowAnswers(secret: string, show: boolean) {
-        await fetch(`${this.url}/api/vi/setShowAnswers?secret=${secret}&show=${show}`)
+        await fetch(`${this.url}/api/v1/setShowAnswers?secret=${secret}&show=${show}`)
     }
 
 }
@@ -98,7 +99,7 @@ export class ConnectionMock {
     async getShowAnswers(): Promise<boolean> {
         return this.show_answers;
     }
-    
+
     async setShowAnswers(secret: string, show: boolean) {
         this.show_answers = show;
     }

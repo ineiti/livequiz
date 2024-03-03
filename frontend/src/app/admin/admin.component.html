@@ -4,7 +4,7 @@
 <button mat-button (click)="update()" style="margin-bottom: 1em;">Update</button>
 
 <div *ngIf="users.length > 0">
-  <mat-slide-toggle (change)="showResults($event)" style="margin-bottom: 1em;">
+  <mat-slide-toggle (change)="showResultsUpdate($event)" [checked]="showResults" style="margin-bottom: 1em;">
     Show Results
   </mat-slide-toggle>
   <table style="width: 100%">
