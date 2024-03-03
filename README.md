@@ -10,7 +10,6 @@ The admin view shows all students, and what they answered already.
   - add statistics to each column of how many answered correctly
   - automatically update view every few seconds
 - student view:
-  - store the answers in the local storage for later retrieval
   - add a switch so that students directly see if they answered correctly or not
   - when results are shown, show the chosen and the correct result
 - general
@@ -28,6 +27,7 @@ The admin view shows all students, and what they answered already.
 # CHANGELOG
 
 2024-03-03:
+- student_view: store the answers in the local storage for later retrieval
 - backend: store quizzes on disk
 - backend: get the quiz from the backend instead of having it in the frontend:
 - admin_view: "show results" actually works: only if it's enabled should the correct answers be shown

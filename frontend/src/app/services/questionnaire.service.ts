@@ -10,24 +10,34 @@ export class Question {
   hint: string = ""
   maxChoices: number = 0
   choices: string[] = []
-  solution: boolean[] = []
+  original: number[] = []
 
   shuffle() {
-    this.solution = this.choices.map((_, i) => i < this.maxChoices)
+    this.original = this.choices.map((_, i) => i)
     for (let i = this.choices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [this.choices[i], this.choices[j]] = [this.choices[j], this.choices[i]];
-      [this.solution[i], this.solution[j]] = [this.solution[j], this.solution[i]];
+      [this.original[i], this.original[j]] = [this.original[j], this.original[i]];
     }
   }
 
   result(selected: boolean[]): ResultState {
-    if (selected.length === 0){
+    if (selected.length === 0) {
       return "empty";
     }
     return selected
-      .filter((s, i) => s && this.solution[i])
+      .filter((s, i) => s && (this.original[i] < this.maxChoices))
       .length === this.maxChoices ? "correct" : "answered";
+  }
+
+  origToThis(selected: boolean[]): boolean[] {
+    return this.original.map((t) => selected[t]);
+  }
+
+  thisToOrig(selected: boolean[]): boolean[] {
+    let ret: boolean[] = [];
+    this.original.map((t, o) => ret[t] = selected[o]);
+    return ret;
   }
 }
 
@@ -35,7 +45,7 @@ export class Questionnaire {
   questions: Question[] = [];
   chapter = "";
 
-  constructor(text: string){
+  constructor(text: string) {
     let current = new Question();
     let hint = false;
     for (const line of text.split("\n")) {
@@ -85,7 +95,7 @@ export class Questionnaire {
   providedIn: 'root'
 })
 export class QuestionnaireService {
-  public loaded = new ReplaySubject<Questionnaire>();
+  public loaded = new BehaviorSubject<Questionnaire>(new Questionnaire(""));
 
   constructor(private connection: ConnectionService) {
     connection.getQuestionnaire().then((q) => {

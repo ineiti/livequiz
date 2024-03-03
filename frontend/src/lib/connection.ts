@@ -39,7 +39,6 @@ export class Connection {
 
     async getShowAnswers(): Promise<boolean> {
         const response = await (await fetch(`${this.url}/api/v1/getShowAnswers`)).text();
-        console.log(`getShowAnswer: ${response}`)
         return response === "true";
     }
 
