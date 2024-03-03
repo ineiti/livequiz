@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
-import { QuestionsService } from '../app/questions.service';
+import { AnswerService } from '../app/answer.service';
+import { Questionnaire } from '../app/questionnaire.service';
 
 export type ResultState = ("correct" | "answered" | "empty")
 
@@ -25,11 +26,26 @@ export class Connection {
     async getResults(): Promise<Result[]> {
         const result = await fetch(`${this.url}/api/v1/getResults`);
         let res = await result.json();
-        if (res.array === undefined){
+        if (res.array === undefined) {
             res.array = [];
         }
         return res;
     }
+
+    async getQuestionnaire(): Promise<string> {
+        const response = await fetch(`${this.url}/api/v1/getQuestionnaire`);
+        return await response.text();
+    }
+
+    async getShowAnswers(): Promise<boolean> {
+        const response = await fetch(`${this.url}/api/v1/getShowAnswers`);
+        return (await response.text()) === "true";
+    }
+
+    async setShowAnswers(secret: string, show: boolean) {
+        await fetch(`${this.url}/api/vi/setShowAnswers?secret=${secret}&show=${show}`)
+    }
+
 }
 
 interface UserAnswers {
@@ -39,8 +55,9 @@ interface UserAnswers {
 
 export class ConnectionMock {
     users = new Map<string, UserAnswers>();
+    show_answers = false;
 
-    constructor(private questions: QuestionsService) {
+    constructor(private questions: Questionnaire) {
     }
 
     getUser(secret: Buffer): UserAnswers {
@@ -71,5 +88,18 @@ export class ConnectionMock {
 
     async getResults(): Promise<Result[]> {
         return [...this.users].map(([_, u]) => { return { name: u.result.name, answers: u.result.answers } });
+    }
+
+    async getQuestionnaire(): Promise<string> {
+        const response = await fetch("./assets/questions.md");
+        return await response.text();
+    }
+
+    async getShowAnswers(): Promise<boolean> {
+        return this.show_answers;
+    }
+    
+    async setShowAnswers(secret: string, show: boolean) {
+        this.show_answers = show;
     }
 }

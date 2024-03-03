@@ -9,7 +9,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { uniqueNamesGenerator, colors, animals } from 'unique-names-generator';
 import { Buffer } from 'buffer';
 import { ConnectionService } from '../connection.service';
-import { QuestionsService } from '../questions.service';
+import { AnswerService } from '../answer.service';
 
 const GRID_MAX_WIDTH = 13;
 
@@ -22,12 +22,11 @@ const GRID_MAX_WIDTH = 13;
   styleUrl: './student.component.scss'
 })
 export class StudentComponent {
-  currentQuestion = 0;
   name = "undefined";
   showHints = true;
   userSecret = Buffer.alloc(32);
 
-  constructor(private connection: ConnectionService, public questions: QuestionsService) {
+  constructor(private connection: ConnectionService, public answers: AnswerService) {
   }
 
   async ngOnInit() {
@@ -52,9 +51,9 @@ export class StudentComponent {
   }
 
   updateSelection(event: MatSelectionList) {
-    this.questions.updateSelection(event);
-    this.connection.updateQuestion(this.userSecret, this.questions.currentQuestion,
-      this.questions.selected.map<[boolean, number]>((s, i) => [s, i]).filter((s) => s[0]).map((s) => s[1]));
+    this.answers.updateSelection(event);
+    this.connection.updateQuestion(this.userSecret, this.answers.currentQuestion,
+      this.answers.result);
   }
 
   updateName() {
@@ -63,9 +62,9 @@ export class StudentComponent {
   }
 
   tileClass(index: number): string {
-    return "questionTile" + (this.questions.currentQuestion === index ? " questionTileChosen" : "") +
+    return "questionTile" + (this.answers.currentQuestion === index ? " questionTileChosen" : "") +
       (index % 2 === 1 ? " questionTileOdd" : "") +
-      (this.questions.done[index] ? " questionTileDone" : "");
+      (this.answers.done[index] ? " questionTileDone" : "");
   }
 
   gridWidth(a: number): number {

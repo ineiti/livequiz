@@ -12,6 +12,7 @@ The admin view shows all students, and what they answered already.
 - student view:
     - store the answers in the local storage for later retrieval
     - add a switch so that students directly see if they answered correctly or not
+    - when results are shown, show the chosen and the correct result
 - general
     - add a quiz-id, so that students only see their results
     - get the quiz from the backend instead of having it in the frontend:

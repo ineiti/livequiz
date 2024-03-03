@@ -1,30 +1,30 @@
-<h2>{{questions.chapter}}</h2>
+<h2>{{answers.questionnaire.chapter}}</h2>
 <mat-form-field>
     <mat-label>Your name:</mat-label>
     <input matInput [(ngModel)]="name" (keyup)="updateName()">
 </mat-form-field>
 
-<div *ngIf="!questions.empty">
+<div *ngIf="!answers.empty">
     <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
-        <button mat-button [disabled]="questions.first" (click)="questions.previous()"
+        <button mat-button [disabled]="answers.first" (click)="answers.previous()"
             style="margin: auto 1em auto; height: 2em;">Previous</button>
-        <mat-grid-list [cols]="gridWidth(questions.questions.length)" rowHeight="2em">
-            @for (q of questions.questions; track $index) {
-            <mat-grid-tile (click)="questions.goto($index)" [class]="tileClass($index)">{{$index+1}}</mat-grid-tile>
+        <mat-grid-list [cols]="gridWidth(answers.questionnaire.questions.length)" rowHeight="2em">
+            @for (q of answers.questionnaire.questions; track $index) {
+            <mat-grid-tile (click)="answers.goto($index)" [class]="tileClass($index)">{{$index+1}}</mat-grid-tile>
             }
         </mat-grid-list>
-        <button mat-button [disabled]="questions.last" (click)="questions.next()"
+        <button mat-button [disabled]="answers.last" (click)="answers.next()"
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
 
-    <h3 [innerHTML]="questions.title"></h3>
+    <h3 [innerHTML]="answers.title"></h3>
 
-    <p [innerHTML]="questions.description"></p>
+    <p [innerHTML]="answers.description"></p>
 
-    <div *ngIf="questions.maxChoices === 1; else multiQuestion">
+    <div *ngIf="answers.maxChoices === 1; else multiQuestion">
         <mat-selection-list #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)">
-            @for (choice of questions.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="questions.selected[$index]">
+            @for (choice of answers.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]">
                 <span [innerHTML]="choice"></span>
             </mat-list-option>
             }
@@ -32,14 +32,14 @@
     </div>
     <ng-template #multiQuestion>
         <mat-selection-list #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)">
-            @for (choice of questions.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="questions.selected[$index]">
+            @for (choice of answers.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]">
                 <span [innerHTML]="choice"></span>
             </mat-list-option>
             }
         </mat-selection-list>
     </ng-template>
 
-    <p *ngIf="showHints" [innerHTML]="questions.hint"></p>
+    <p *ngIf="showHints" [innerHTML]="answers.hint"></p>
 
 </div>

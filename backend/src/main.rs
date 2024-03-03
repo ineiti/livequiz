@@ -1,10 +1,12 @@
 use std::collections::HashMap;
+use std::env;
 
 use rocket::http::Header;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
+use rocket::tokio::fs;
 use rocket::{tokio::sync::Mutex, State};
-use rocket::{Request, Response};
+use rocket::{Build, Request, Response, Rocket};
 
 #[macro_use]
 extern crate rocket;
@@ -76,14 +78,76 @@ async fn get_results(users: &State<Users>) -> Json<Vec<User>> {
     Json(list.values().cloned().collect())
 }
 
+#[derive(Debug)]
+struct Config {
+    questionnaire: String,
+    admin_secret: String,
+    show_answers: Mutex<bool>,
+}
+
+const CONFIG_QUESTIONNAIRE_STRING: &str = "QUESTIONNAIRE_STRING";
+const CONFIG_QUESTIONNAIRE: &str = "QUESTIONNAIRE";
+const CONFIG_ADMIN_SECRET: &str = "ADMIN_SECRET";
+
+impl Config {
+    pub async fn new() -> Self {
+        let questionnaire = Self::get_questionnaire().await;
+        Self {
+            questionnaire,
+            admin_secret: env::var(CONFIG_ADMIN_SECRET)
+                .expect(&format!("Need '{CONFIG_ADMIN_SECRET}'")),
+            show_answers: Mutex::new(false),
+        }
+    }
+
+    async fn get_questionnaire() -> String {
+        if let Ok(q) = env::var(CONFIG_QUESTIONNAIRE_STRING) {
+            return q;
+        }
+        fs::read_to_string(env::var(CONFIG_QUESTIONNAIRE).expect(&format!(
+            "Need '{CONFIG_QUESTIONNAIRE}' environment variable"
+        )))
+        .await
+        .expect("Couldn't read file")
+    }
+}
+
+#[get("/api/v1/getQuestionnaire")]
+async fn get_questionnaire(config: &State<Config>) -> String {
+    config.questionnaire.clone()
+}
+
+#[get("/api/v1/getShowAnswers")]
+async fn get_show_answers(config: &State<Config>) -> String {
+    format!("{}", config.show_answers.lock().await)
+}
+
+#[get("/api/v1/setShowAnswers?<secret>&<show>")]
+async fn set_show_answers(config: &State<Config>, secret: String, show: String) {
+    if config.admin_secret == secret {
+        *config.show_answers.lock().await = show == "true";
+    }
+}
+
 #[launch]
-fn rocket() -> _ {
+async fn rocket() -> Rocket<Build> {
     rocket::build()
         .attach(CORS)
-        .mount("/", routes![update_name, update_question, get_results])
+        .mount(
+            "/",
+            routes![
+                update_name,
+                update_question,
+                get_results,
+                get_questionnaire,
+                get_show_answers,
+                set_show_answers
+            ],
+        )
         .manage(Users {
             list: Mutex::new(HashMap::new()),
         })
+        .manage(Config::new().await)
 }
 
 use rocket::fairing::{Fairing, Info, Kind};
@@ -112,7 +176,7 @@ impl Fairing for CORS {
 
 #[cfg(test)]
 mod test {
-    use rocket::local::blocking::{Client, LocalResponse};
+    use rocket::local::asynchronous::{Client, LocalResponse};
 
     use super::*;
 
@@ -120,23 +184,31 @@ mod test {
         c: Client,
     }
 
+    const QUESTIONNAIRE_TEST: &str =
+        "# Test Questions\n\n## Q1\nQuestion\n=1\n- choice1\n- choice2\n## End";
+
     impl TestClient {
-        fn new() -> Self {
+        async fn new() -> Self {
+            env::set_var(CONFIG_QUESTIONNAIRE_STRING, QUESTIONNAIRE_TEST);
+            env::set_var(CONFIG_ADMIN_SECRET, "1234");
             Self {
-                c: Client::tracked(rocket()).expect("valid rocket instance"),
+                c: Client::tracked(rocket().await)
+                    .await
+                    .expect("valid rocket instance"),
             }
         }
 
-        fn update_name(&self, secret: &str, name: &str) -> LocalResponse {
+        async fn update_name(&self, secret: &str, name: &str) -> LocalResponse {
             self.c
                 .get(format!(
                     "/api/v1/updateName?secret={}&name={}",
                     secret, name
                 ))
                 .dispatch()
+                .await
         }
 
-        fn update_question(
+        async fn update_question(
             &self,
             secret: &str,
             question: usize,
@@ -145,25 +217,56 @@ mod test {
             self.c
                 .get(format!(
                     "/api/v1/updateQuestion?secret={}&question={}&selected={}",
-                    secret,
-                    question,
-                    selected
+                    secret, question, selected
                 ))
                 .dispatch()
+                .await
         }
 
-        fn get_results(&self) -> Vec<User> {
+        async fn get_results(&self) -> Vec<User> {
             self.c
                 .get("/api/v1/getResults")
                 .dispatch()
+                .await
                 .into_json()
+                .await
                 .expect("Expected JSON")
+        }
+
+        async fn get_questionnaire(&self) -> String {
+            self.c
+                .get("/api/v1/getQuestionnaire")
+                .dispatch()
+                .await
+                .into_string()
+                .await
+                .expect("No questionnaire")
+        }
+
+        async fn get_show_answers(&self) -> String {
+            self.c
+                .get("/api/v1/getShowAnswers")
+                .dispatch()
+                .await
+                .into_string()
+                .await
+                .expect("No questionnaire")
+        }
+
+        async fn set_show_answers(&self, secret: String, show: String) {
+            self.c
+                .get(&format!(
+                    "/api/v1/setShowAnswers?secret={}&show={}",
+                    secret, show
+                ))
+                .dispatch()
+                .await;
         }
     }
 
-    #[test]
-    fn test_add_name() {
-        let client = TestClient::new();
+    #[async_test]
+    async fn test_add_name() {
+        let client = TestClient::new().await;
         let mut user1 = User {
             secret: "1234".to_string(),
             name: Some("foo".to_string()),
@@ -173,19 +276,21 @@ mod test {
             200,
             client
                 .update_name(&user1.secret, user1.name.as_ref().unwrap())
+                .await
                 .status()
                 .code
         );
-        assert_eq!(vec![user1.clone()], client.get_results());
+        assert_eq!(vec![user1.clone()], client.get_results().await);
         user1.name = Some("bar".to_string());
         assert_eq!(
             200,
             client
                 .update_name(&user1.secret, user1.name.as_ref().unwrap())
+                .await
                 .status()
                 .code
         );
-        assert_eq!(vec![user1.clone()], client.get_results());
+        assert_eq!(vec![user1.clone()], client.get_results().await);
 
         let user2 = User {
             secret: "1235".to_string(),
@@ -196,27 +301,50 @@ mod test {
             200,
             client
                 .update_name(&user2.secret, user2.name.as_ref().unwrap())
+                .await
                 .status()
                 .code
         );
-        let mut users = client.get_results();
+        let mut users = client.get_results().await;
         users.sort();
         assert_eq!(vec![user1, user2], users);
     }
 
-    #[test]
-    fn test_update_question() {
-        let client = TestClient::new();
+    #[async_test]
+    async fn test_update_question() {
+        let client = TestClient::new().await;
         let mut user = User {
             secret: "1234".to_string(),
             name: Some("foo".to_string()),
             answers: vec!["empty".to_string(), "correct".to_string()],
         };
-        client.update_name(&user.secret, &user.name.as_ref().unwrap());
-        client.update_question(&user.secret, 1, &user.answers[1]);
-        assert_eq!(vec![user.clone()], client.get_results());
+        client
+            .update_name(&user.secret, &user.name.as_ref().unwrap())
+            .await;
+        client
+            .update_question(&user.secret, 1, &user.answers[1])
+            .await;
+        assert_eq!(vec![user.clone()], client.get_results().await);
         user.answers.insert(2, "correct".to_string());
-        client.update_question(&user.secret, 2, &user.answers[2]);
-        assert_eq!(vec![user], client.get_results());
+        client
+            .update_question(&user.secret, 2, &user.answers[2])
+            .await;
+        assert_eq!(vec![user], client.get_results().await);
+    }
+
+    #[async_test]
+    async fn test_questionnaire() {
+        let client = TestClient::new().await;
+        assert_eq!(client.get_questionnaire().await, QUESTIONNAIRE_TEST);
+    }
+
+    #[async_test]
+    async fn test_show_answers() {
+        let client = TestClient::new().await;
+        assert_eq!("false", client.get_show_answers().await);
+        client.set_show_answers("12".to_string(), "true".to_string()).await;
+        assert_eq!("false", client.get_show_answers().await);
+        client.set_show_answers("1234".to_string(), "true".to_string()).await;
+        assert_eq!("true", client.get_show_answers().await);
     }
 }
