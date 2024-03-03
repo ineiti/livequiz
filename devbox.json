@@ -5,7 +5,8 @@
     "vscode@latest",
     "vim@latest",
     "bun@latest",
-    "rustup@latest"
+    "rustup@latest",
+    "libiconv@latest"
   ],
   "shell": {
     "init_hook": [

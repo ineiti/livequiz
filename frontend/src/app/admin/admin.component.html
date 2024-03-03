@@ -1,6 +1,7 @@
 <h2>Overview of Users</h2>
 
 <button mat-button (click)="addUser()" style="margin-bottom: 1em;">Add User</button>
+<button mat-button (click)="update()" style="margin-bottom: 1em;">Update</button>
 
 <div *ngIf="users.length > 0">
   <mat-slide-toggle (change)="showResults($event)" style="margin-bottom: 1em;">
@@ -13,7 +14,7 @@
     </tr>
     @for (user of users; track $index){
     <tr>
-      <td>{{user.name}}</td>
+      <td>{{user.name.slice(0, 20)}}</td>
       @for (choice of user.answers; track idx; let idx = $index, e = $even){
       <td [class]="selectedClasses[$index][idx]"></td>
       }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConnectionMock, Result } from '../lib/connection';
+import { Connection, ConnectionMock, Result, ResultState } from '../lib/connection';
 import { Buffer } from 'buffer';
 import { QuestionsService } from './questions.service';
 
@@ -7,12 +7,18 @@ import { QuestionsService } from './questions.service';
   providedIn: 'root'
 })
 export class ConnectionService {
-  private connection = new ConnectionMock(this.questions);
+  private connection = new Connection("http://localhost:8000");
+  // private connection = new ConnectionMock(this.questions);
 
   constructor(private questions: QuestionsService) { }
 
   async updateQuestion(secret: Buffer, question: number, selected: number[]) {
-    await this.connection.updateQuestion(secret, question, selected);
+    console.log(`Selected is: ${selected}`);
+    let result: ResultState = "empty";
+    if (selected.length > 0) {
+      result = this.questions.questions[question].correct(selected) ? "correct" : "answered";
+    }
+    await this.connection.updateQuestion(secret, question, result);
   }
 
   async updateName(secret: Buffer, name: string) {
@@ -20,7 +26,11 @@ export class ConnectionService {
   }
 
   async getResults(): Promise<Result[]> {
-    return this.connection.getResults();
+    let res = await this.connection.getResults();
+    res.forEach((u) => {
+      for (; u.answers.length < this.questions.questions.length; u.answers.push("empty")) { }
+    })
+    return res;
   }
 
 }

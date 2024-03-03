@@ -38,6 +38,20 @@
         }
       }
     },
+    "libiconv@latest": {
+      "last_modified": "2024-02-24T23:06:34Z",
+      "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#libiconv",
+      "source": "devbox-search",
+      "version": "2.38",
+      "systems": {
+        "aarch64-linux": {
+          "store_path": "/nix/store/dspzvadiq5wq3k9x85whv6afc4nq8fnl-glibc-iconv-2.38"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/sw0wd1grsv2xrf5swlaaaim6wh5jcibx-glibc-iconv-2.38"
+        }
+      }
+    },
     "nodejs@latest": {
       "last_modified": "2024-02-26T19:46:43Z",
       "resolved": "github:NixOS/nixpkgs/548a86b335d7ecd8b57ec617781f5e652ab0c38e#nodejs_21",

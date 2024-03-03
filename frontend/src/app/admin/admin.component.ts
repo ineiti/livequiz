@@ -37,7 +37,7 @@ export class AdminComponent {
 
   async updateSelectedClass() {
     this.selectedClasses = this.users.map((user) =>
-      user.answers.map((c) => `userAnswer_${c}`)
+      user.answers ? user.answers.map((c) => `userAnswer_${c}`) : [""]
     )
   }
 

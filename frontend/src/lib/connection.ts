@@ -12,19 +12,23 @@ export class Connection {
     constructor(private url: string) {
     }
 
-    async updateQuestion(secret: Buffer, question: number, selected: number[]) {
-        await fetch(`${this.url}/api/v1/updateQuestion/?secret=${secret.toString('hex')}&` +
-            `question=${question}&selected=${selected.join(',')}`);
+    async updateQuestion(secret: Buffer, question: number, result: ResultState) {
+        await fetch(`${this.url}/api/v1/updateQuestion?secret=${secret.toString('hex')}&` +
+            `question=${question}&selected=${result}`);
     }
 
     async updateName(secret: Buffer, name: string) {
-        await fetch(`${this.url}/api/v1/updateName/?secret=${secret.toString('hex')}&` +
+        await fetch(`${this.url}/api/v1/updateName?secret=${secret.toString('hex')}&` +
             `name=${name}`);
     }
 
     async getResults(): Promise<Result[]> {
         const result = await fetch(`${this.url}/api/v1/getResults`);
-        return await result.json();
+        let res = await result.json();
+        if (res.array === undefined){
+            res.array = [];
+        }
+        return res;
     }
 }
 
@@ -53,10 +57,9 @@ export class ConnectionMock {
         return user;
     }
 
-    async updateQuestion(secret: Buffer, question: number, selected: number[]) {
+    async updateQuestion(secret: Buffer, question: number, result: ResultState) {
         const user = this.getUser(secret);
-        user.result.answers[question] =
-            this.questions.questions[question].correct(selected) ? "correct" : "answered";
+        user.result.answers[question] = result;
         this.users.set(secret.toString('hex'), user);
     }
 
