@@ -13,7 +13,6 @@ The admin view shows all students, and what they answered already.
   - add a switch so that students directly see if they answered correctly or not
   - when results are shown, show the chosen and the correct result
 - general
-  - add docker-compose.yaml with Dockerfile
   - add a quiz-id, so that students only see their results
   - admin can upload quizzes
   - admin can choose which quizz is shown
@@ -25,6 +24,9 @@ The admin view shows all students, and what they answered already.
     - updatable: students can update their questions
 
 # CHANGELOG
+
+2024-03-04:
+- add docker-compose.yaml with Dockerfile
 
 2024-03-03:
 - student_view: store the answers in the local storage for later retrieval

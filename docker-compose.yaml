@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  livequiz:
+    image: ghcr.io/ineiti/livequiz:latest
+    build: .
+    environment:
+      - ADMIN_SECRET=
+      - QUESTIONNAIRE=./questionnaire.md
+    volumes:
+      - ./questionnaire.md:.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailu.rule=Host(`gasser.blue`,`mail.gasser.blue`)"
+      - "traefik.http.routers.mailu.entrypoints=websecure"
+      - "traefik.http.routers.mailu.tls.certresolver=myresolver"
+      - "traefik.http.services.mailu.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_traefik"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external:
+      name: traefik_traefik

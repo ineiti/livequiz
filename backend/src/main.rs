@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use std::env;
 
-use rocket::http::Header;
+use rocket::fs::FileServer;
+use rocket::http::{Header, Status};
+use rocket::response::Redirect;
+use rocket::response::Responder;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
 use rocket::tokio::fs;
@@ -42,7 +45,7 @@ impl User {
     }
 }
 
-#[get("/api/v1/updateName?<secret>&<name>")]
+#[get("/v1/updateName?<secret>&<name>")]
 async fn update_name(users: &State<Users>, secret: String, name: String) -> &'static str {
     let mut list = users.list.lock().await;
     list.entry(secret.clone())
@@ -56,7 +59,7 @@ async fn update_name(users: &State<Users>, secret: String, name: String) -> &'st
     "{}"
 }
 
-#[get("/api/v1/updateQuestion?<secret>&<question>&<selected>")]
+#[get("/v1/updateQuestion?<secret>&<question>&<selected>")]
 async fn update_question(
     users: &State<Users>,
     secret: String,
@@ -71,7 +74,7 @@ async fn update_question(
     "{}"
 }
 
-#[get("/api/v1/getResults")]
+#[get("/v1/getResults")]
 async fn get_results(users: &State<Users>) -> Json<Vec<User>> {
     let list = users.list.lock().await;
     println!("List is {list:?}");
@@ -112,17 +115,17 @@ impl Config {
     }
 }
 
-#[get("/api/v1/getQuestionnaire")]
+#[get("/v1/getQuestionnaire")]
 async fn get_questionnaire(config: &State<Config>) -> String {
     config.questionnaire.clone()
 }
 
-#[get("/api/v1/getShowAnswers")]
+#[get("/v1/getShowAnswers")]
 async fn get_show_answers(config: &State<Config>) -> String {
     format!("{}", config.show_answers.lock().await)
 }
 
-#[get("/api/v1/setShowAnswers?<secret>&<show>")]
+#[get("/v1/setShowAnswers?<secret>&<show>")]
 async fn set_show_answers(config: &State<Config>, secret: String, show: String) {
     if config.admin_secret == secret {
         *config.show_answers.lock().await = show == "true";
@@ -133,10 +136,10 @@ async fn set_show_answers(config: &State<Config>, secret: String, show: String) 
 
 #[launch]
 async fn rocket() -> Rocket<Build> {
-    rocket::build()
+    let rb = rocket::build()
         .attach(CORS)
         .mount(
-            "/",
+            "/api",
             routes![
                 update_name,
                 update_question,
@@ -149,7 +152,15 @@ async fn rocket() -> Rocket<Build> {
         .manage(Users {
             list: Mutex::new(HashMap::new()),
         })
-        .manage(Config::new().await)
+        .manage(Config::new().await);
+
+    if let Ok(web) = env::var("STATIC_PAGE") {
+        rb.mount("/student", FileServer::from(web.clone()).rank(10))
+            .mount("/admin", FileServer::from(web.clone()).rank(10))
+            .mount("/", FileServer::from(web.clone()))
+    } else {
+        rb
+    }
 }
 
 use rocket::fairing::{Fairing, Info, Kind};
@@ -344,9 +355,13 @@ mod test {
     async fn test_show_answers() {
         let client = TestClient::new().await;
         assert_eq!("false", client.get_show_answers().await);
-        client.set_show_answers("12".to_string(), "true".to_string()).await;
+        client
+            .set_show_answers("12".to_string(), "true".to_string())
+            .await;
         assert_eq!("false", client.get_show_answers().await);
-        client.set_show_answers("1234".to_string(), "true".to_string()).await;
+        client
+            .set_show_answers("1234".to_string(), "true".to_string())
+            .await;
         assert_eq!("true", client.get_show_answers().await);
     }
 }
