@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { AnswerService } from './answer.service';
 import { ResultState } from '../../lib/connection';
 
 export class Question {
@@ -38,6 +37,10 @@ export class Question {
     let ret: boolean[] = [];
     this.original.map((t, o) => ret[t] = selected[o]);
     return ret;
+  }
+
+  correct(): number[] {
+    return this.original.map((o, i) => [o, i]).filter((o) => o[0] < this.maxChoices).map((o) => o[1])
   }
 }
 

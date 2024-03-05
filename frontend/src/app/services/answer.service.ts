@@ -25,6 +25,7 @@ export class AnswerService {
   selected: boolean[] = [];
   hint = "";
   result: ResultState = "empty";
+  correct: number[] = [];
 
   constructor(private qservice: QuestionnaireService, private user: UserService) {
     qservice.loaded.subscribe((q) => {
@@ -80,6 +81,7 @@ export class AnswerService {
       this.result = cq.result(this.selected);
       this.hint = cq.hint;
       this.title = cq.title;
+      this.correct = cq.correct();
     }
   }
 }

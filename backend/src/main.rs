@@ -2,9 +2,7 @@ use std::collections::HashMap;
 use std::env;
 
 use rocket::fs::FileServer;
-use rocket::http::{Header, Status};
-use rocket::response::Redirect;
-use rocket::response::Responder;
+use rocket::http::Header;
 use rocket::serde::Deserialize;
 use rocket::serde::{json::Json, Serialize};
 use rocket::tokio::fs;

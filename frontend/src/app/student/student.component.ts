@@ -23,26 +23,28 @@ const GRID_MAX_WIDTH = 13;
   styleUrl: './student.component.scss'
 })
 export class StudentComponent {
-  showHints = true;
+  showResults = true;
+  tileClasses: string[] = [];
+  resultClasses: string[] = [];
 
   constructor(private connection: ConnectionService, public answers: AnswerService,
     public user: UserService) {
+  }
+
+  async ngOnInit() {
+    this.showResults = await this.connection.getShowAnswers();
+    this.update();
   }
 
   updateSelection(event: MatSelectionList) {
     this.answers.updateSelection(event);
     this.connection.updateQuestion(this.user.secret, this.answers.currentQuestion,
       this.answers.result);
+    this.update();
   }
 
   updateName() {
     this.user.updateName();
-  }
-
-  tileClass(index: number): string {
-    return "questionTile" + (this.answers.currentQuestion === index ? " questionTileChosen" : "") +
-      (index % 2 === 1 ? " questionTileOdd" : "") +
-      (this.answers.done[index] ? " questionTileDone" : "");
   }
 
   gridWidth(a: number): number {
@@ -50,5 +52,30 @@ export class StudentComponent {
       return a;
     }
     return Math.min(GRID_MAX_WIDTH, Math.ceil(a / (Math.ceil(a / GRID_MAX_WIDTH))) | 1)
+  }
+
+  update() {
+    for (let question = 0; question < this.answers.choices.length; question++) {
+      this.tileClasses[question] = "questionTile" + (this.answers.currentQuestion === question ? " questionTileChosen" : "") +
+        (question % 2 === 1 ? " questionTileOdd" : "") +
+        (this.answers.done[question] ? " questionTileDone" : "");
+      this.resultClasses[question] = this.answers.selected[question] ? "questionSelectionWrong" : "";
+    }
+    for (let correct = 0; correct < this.answers.maxChoices; correct++) {
+      this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect";
+    }
+  }
+
+  previous() {
+    this.goto(this.answers.currentQuestion - 1);
+  }
+
+  next() {
+    this.goto(this.answers.currentQuestion + 1);
+  }
+
+  goto(question: number) {
+    this.answers.goto(question);
+    this.update();
   }
 }
