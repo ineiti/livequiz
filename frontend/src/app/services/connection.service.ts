@@ -30,6 +30,10 @@ export class ConnectionService {
     return this.connection.getQuestionnaire();
   }
 
+  async updateQuestionnaire(secret: Buffer) {
+    this.connection.updateQuestionnaire(secret);
+  }
+
   async getShowAnswers(): Promise<boolean> {
     return this.connection.getShowAnswers();
   }

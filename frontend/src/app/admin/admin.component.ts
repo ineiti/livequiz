@@ -23,18 +23,21 @@ import { UserService } from '../services/user.service';
 })
 export class AdminComponent {
   users: Result[] = [];
-  displayedColumns = [1, 3, 2];
+  displayedColumns: number[] = [];
   showResults = false;
   selectedClasses: string[][] = [];
   questionnaire = new Questionnaire("");
+  title = "Not available";
 
   constructor(private connection: ConnectionService, private qservice: QuestionnaireService,
     private user: UserService) {
-    qservice.loaded.subscribe((q) => this.questionnaire = q);
+    qservice.loaded.subscribe((q) => {
+      this.questionnaire = q;
+      this.update();
+    });
   }
 
   async ngOnInit() {
-    await this.update();
     this.showResults = await this.connection.getShowAnswers();
   }
 
@@ -45,6 +48,12 @@ export class AdminComponent {
     });
     this.users.sort((a, b) => a.name.localeCompare(b.name));
     this.updateSelectedClass();
+    this.title = this.qservice.loaded.value.chapter;
+    this.displayedColumns = this.questionnaire.questions.map((_, i) => i);
+  }
+
+  async updateQuestionnaire(){
+    await this.connection.updateQuestionnaire(this.user.secret);
   }
 
   async updateSelectedClass() {

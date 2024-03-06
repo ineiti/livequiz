@@ -6,7 +6,8 @@
     "vim@latest",
     "bun@latest",
     "rustup@latest",
-    "libiconv@latest"
+    "libiconv@latest",
+    "openssh@latest"
   ],
   "shell": {
     "init_hook": [

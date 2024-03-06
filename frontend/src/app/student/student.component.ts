@@ -55,14 +55,18 @@ export class StudentComponent {
   }
 
   update() {
-    for (let question = 0; question < this.answers.choices.length; question++) {
+    for (let question = 0; question < this.answers.questionnaire.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.answers.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         (this.answers.done[question] ? " questionTileDone" : "");
-      this.resultClasses[question] = this.answers.selected[question] ? "questionSelectionWrong" : "";
     }
-    for (let correct = 0; correct < this.answers.maxChoices; correct++) {
-      this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect";
+    if (this.showResults) {
+      for (let question = 0; question < this.answers.choices.length; question++) {
+        this.resultClasses[question] = this.answers.selected[question] ? "questionSelectionWrong" : "";
+      }
+      for (let correct = 0; correct < this.answers.maxChoices; correct++) {
+        this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect";
+      }
     }
   }
 

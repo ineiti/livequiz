@@ -72,6 +72,26 @@
         }
       }
     },
+    "openssh@latest": {
+      "last_modified": "2024-02-24T23:06:34Z",
+      "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#openssh",
+      "source": "devbox-search",
+      "version": "9.6p1",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/1v4kaz5lc227iqb4w9a1jpccqqpnkd91-openssh-9.6p1"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/blkhaqk3kxhbaa3d34s0mwz7z5mf2xmh-openssh-9.6p1"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/j8fkxrlkfqj3biljiy5r83ckmmjhccgp-openssh-9.6p1"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/g1xqrhyyn0v7zg7n5nyah4fknx3as063-openssh-9.6p1"
+        }
+      }
+    },
     "rustup@latest": {
       "last_modified": "2024-02-24T23:06:34Z",
       "plugin_version": "0.0.1",

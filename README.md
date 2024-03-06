@@ -16,15 +16,19 @@ The admin view shows all students, and what they answered already.
   - add a quiz-id, so that students only see their results
   - admin can upload quizzes
   - admin can choose which quizz is shown
+  - add questions which are verified with regular expressions
+  - modes
+    - exam mode: only once the admin switch is flicked will the students see if they answered correctly
+    - live mode: after every question, students see if they answered correctly
+      - updatable: students can update their questions
 - backend
   - use rxjs to propagate state changes like quizState (showResult, frozen, ...) and studentAnswers (for admin)
   - store user data on disk
-- modes
-  - exam mode: only once the admin switch is flicked will the students see if they answered correctly
-  - live mode: after every question, students see if they answered correctly
-    - updatable: students can update their questions
 
 # CHANGELOG
+
+2024-03-06:
+- added first real questionnaires
 
 2024-03-04:
 - add docker-compose.yaml with Dockerfile

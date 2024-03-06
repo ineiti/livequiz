@@ -81,7 +81,7 @@ async fn get_results(users: &State<Users>) -> Json<Vec<User>> {
 
 #[derive(Debug)]
 struct Config {
-    questionnaire: String,
+    questionnaire: Mutex<String>,
     admin_secret: String,
     show_answers: Mutex<bool>,
 }
@@ -92,13 +92,17 @@ const CONFIG_ADMIN_SECRET: &str = "ADMIN_SECRET";
 
 impl Config {
     pub async fn new() -> Self {
-        let questionnaire = Self::get_questionnaire().await;
+        let questionnaire = Mutex::new(Self::get_questionnaire().await);
         Self {
             questionnaire,
             admin_secret: env::var(CONFIG_ADMIN_SECRET)
                 .expect(&format!("Need '{CONFIG_ADMIN_SECRET}'")),
             show_answers: Mutex::new(false),
         }
+    }
+
+    async fn update_questionnaire(&self) {
+        *self.questionnaire.lock().await = Self::get_questionnaire().await;
     }
 
     async fn get_questionnaire() -> String {
@@ -115,7 +119,7 @@ impl Config {
 
 #[get("/v1/getQuestionnaire")]
 async fn get_questionnaire(config: &State<Config>) -> String {
-    config.questionnaire.clone()
+    config.questionnaire.lock().await.clone()
 }
 
 #[get("/v1/getShowAnswers")]
@@ -132,6 +136,15 @@ async fn set_show_answers(config: &State<Config>, secret: String, show: String) 
     }
 }
 
+#[get("/v1/updateQuestionnaire?<secret>")]
+async fn update_questionnaire(config: &State<Config>, secret: String) {
+    if config.admin_secret == secret {
+        config.update_questionnaire().await;
+    } else {
+        println!("Wrong secret");
+    }
+}
+
 #[launch]
 async fn rocket() -> Rocket<Build> {
     let rb = rocket::build()
@@ -143,6 +156,7 @@ async fn rocket() -> Rocket<Build> {
                 update_question,
                 get_results,
                 get_questionnaire,
+                update_questionnaire,
                 get_show_answers,
                 set_show_answers
             ],
@@ -154,8 +168,8 @@ async fn rocket() -> Rocket<Build> {
 
     if let Ok(web) = env::var("STATIC_PAGE") {
         rb.mount("/student", FileServer::from(web.clone()).rank(10))
-            .mount("/admin", FileServer::from(web.clone()).rank(10))
-            .mount("/", FileServer::from(web.clone()))
+            .mount("/admin", FileServer::from(web.clone()).rank(9))
+            .mount("/", FileServer::from(web.clone()).rank(8))
     } else {
         rb
     }

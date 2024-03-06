@@ -37,6 +37,10 @@ export class Connection {
         return await response.text();
     }
 
+    async updateQuestionnaire(secret: Buffer) {
+        await fetch(`${this.url}/api/v1/updateQuestionnaire?secret=${secret.toString('hex')}`);
+    }
+
     async getShowAnswers(): Promise<boolean> {
         const response = await (await fetch(`${this.url}/api/v1/getShowAnswers`)).text();
         return response === "true";

@@ -11,10 +11,12 @@ export class UserService {
   secret = Buffer.alloc(32);
   name = "undefined";
   selectedStorage: boolean[][] = [];
+  selectionStorageName = "user-selection";
 
   constructor(private connection: ConnectionService, private questionnaire: QuestionnaireService) {
     questionnaire.loaded.subscribe((qst) => {
       this.selectedStorage = qst.questions.map((q) => q.choices.map(() => false));
+      this.selectionStorageName = `user-selection-${qst.chapter}`;
       this.init();
     })
   }
@@ -38,7 +40,7 @@ export class UserService {
       this.name = name;
     }
 
-    const selStorage = localStorage.getItem('user-selection');
+    const selStorage = localStorage.getItem(this.selectionStorageName);
     if (selStorage !== null) {
       this.selectedStorage = JSON.parse(selStorage);
     }
@@ -57,7 +59,7 @@ export class UserService {
 
   updateSelections(question: number, selected: boolean[]) {
     this.selectedStorage[question] = this.question(question).thisToOrig(selected);
-    localStorage.setItem('user-selection', JSON.stringify(this.selectedStorage));
+    localStorage.setItem(this.selectionStorageName, JSON.stringify(this.selectedStorage));
   }
 
   getSelections(question: number): boolean[] {
