@@ -40,3 +40,7 @@ The admin view shows all students, and what they answered already.
 - backend: get the quiz from the backend instead of having it in the frontend:
 - admin_view: "show results" actually works: only if it's enabled should the correct answers be shown
 - first version with frontend and backend
+
+# Installation
+
+Launch the docker-compose.yml
