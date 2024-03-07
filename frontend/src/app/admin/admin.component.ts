@@ -35,10 +35,10 @@ export class AdminComponent {
       this.questionnaire = q;
       this.update();
     });
-  }
-
-  async ngOnInit() {
-    this.showResults = await this.connection.getShowAnswers();
+    connection.showResults.subscribe((show) => {
+      this.showResults = show;
+      this.updateSelectedClass();
+    })
   }
 
   async update() {

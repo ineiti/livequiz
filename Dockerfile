@@ -1,15 +1,14 @@
 FROM node:20 as www
 WORKDIR /root
-COPY frontend .
+COPY frontend/package* .
 RUN npm ci
-RUN ls
+COPY frontend .
 RUN npm run build
 
 FROM rust:1.76-buster as server
 WORKDIR /root
 COPY backend .
 RUN cargo build -r
-RUN ls
 
 FROM debian:buster
 WORKDIR /root

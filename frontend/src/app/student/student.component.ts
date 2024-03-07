@@ -6,8 +6,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { uniqueNamesGenerator, colors, animals } from 'unique-names-generator';
-import { Buffer } from 'buffer';
 import { ConnectionService } from '../services/connection.service';
 import { AnswerService } from '../services/answer.service';
 import { UserService } from '../services/user.service';
@@ -29,11 +27,10 @@ export class StudentComponent {
 
   constructor(private connection: ConnectionService, public answers: AnswerService,
     public user: UserService) {
-  }
-
-  async ngOnInit() {
-    this.showResults = await this.connection.getShowAnswers();
-    this.update();
+    connection.showResults.subscribe((show) => {
+      this.showResults = show;
+      this.update();
+    })
   }
 
   updateSelection(event: MatSelectionList) {
@@ -60,12 +57,13 @@ export class StudentComponent {
         (question % 2 === 1 ? " questionTileOdd" : "") +
         (this.answers.done[question] ? " questionTileDone" : "");
     }
+    for (let question = 0; question < this.answers.choices.length; question++) {
+      this.resultClasses[question] = "question " + this.showResults ?
+        (this.answers.selected[question] ? "questionSelectionWrong" : "") : "";
+    }
     if (this.showResults) {
-      for (let question = 0; question < this.answers.choices.length; question++) {
-        this.resultClasses[question] = this.answers.selected[question] ? "questionSelectionWrong" : "";
-      }
       for (let correct = 0; correct < this.answers.maxChoices; correct++) {
-        this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect";
+        this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect question";
       }
     }
   }

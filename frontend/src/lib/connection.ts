@@ -60,8 +60,10 @@ interface UserAnswers {
 export class ConnectionMock {
     users = new Map<string, UserAnswers>();
     show_answers = false;
+    questionnaire = new Questionnaire("");
 
-    constructor(private questions: Questionnaire) {
+    constructor() {
+        this.getQuestionnaire().then((text) => this.questionnaire = new Questionnaire(text));
     }
 
     getUser(secret: Buffer): UserAnswers {
@@ -71,11 +73,14 @@ export class ConnectionMock {
                 secret: secret,
                 result: {
                     name: "unknown",
-                    answers: Array(this.questions.questions.length).map(() => "empty")
+                    answers: Array(this.questionnaire.questions.length).map(() => "empty")
                 },
             }
         }
         return user;
+    }
+
+    async updateQuestionnaire(secret: Buffer) {
     }
 
     async updateQuestion(secret: Buffer, question: number, result: ResultState) {

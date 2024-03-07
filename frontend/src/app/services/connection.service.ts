@@ -1,17 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Connection, ConnectionMock, Result, ResultState } from '../../lib/connection';
 import { Buffer } from 'buffer';
-import { AnswerService } from './answer.service';
-import { Questionnaire, QuestionnaireService } from './questionnaire.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConnectionService {
-  private connection = new Connection("http://localhost:8000");
-  // private connection = new ConnectionMock(this.questions);
+  showResults = new BehaviorSubject(false);
+  // private connection = new Connection("https://livequiz.fledg.re");
+  // private connection = new Connection("http://localhost:8000");
+  private connection = new ConnectionMock();
 
   constructor() {
+    setInterval(() => this.updateShowAnswers(), 2000)
+    this.updateShowAnswers();
+  }
+
+  private async updateShowAnswers() {
+    this.showResults.next(await this.getShowAnswers());
   }
 
   async updateQuestion(secret: Buffer, question: number, result: ResultState) {

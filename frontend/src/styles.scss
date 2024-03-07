@@ -5,14 +5,24 @@ body {
     height: 100%;
 }
 
-body {
+.content {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
     width: 80%;
     margin: auto;
+    padding-bottom: 2em;
+}
+
+.footer {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 1.5em;
+    background-color: #f1f1f1;
+    padding: 0.5em;
 }
 
 .pre {
     font-family: monospace;
-    white-space: pre-wrap;       /* css-3 */
 }

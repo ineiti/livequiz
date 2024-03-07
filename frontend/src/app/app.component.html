@@ -1,5 +1,11 @@
-<a [routerLink] = "['/admin']">Admin</a> - 
-<a [routerLink] = "['/student']">Student</a>
-<h1>LiveQuiz</h1>
+<div class="content">
+    <a [routerLink]="['/admin']">Admin</a> -
+    <a [routerLink]="['/student']">Student</a>
+    <h1>LiveQuiz</h1>
 
-<router-outlet />
+    <router-outlet />
+</div>
+<footer class="footer">
+    &copy; <a href="mailto:ineiti@gasser.blue">Linus Gasser</a> |
+    <a href="https://github.com/HEIG-SRX-2024/livequiz">Live Quiz on GitHub</a>
+</footer>

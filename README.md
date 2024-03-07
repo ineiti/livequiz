@@ -6,26 +6,41 @@ The admin view shows all students, and what they answered already.
 
 # TODO
 
+- bugs:
+  - l'interface admin peut "perdre" des noms après le redémarrage du système
 - admin view:
   - add statistics to each column of how many answered correctly
   - automatically update view every few seconds
 - student view:
-  - add a switch so that students directly see if they answered correctly or not
-  - add a switch to stop students from changing their answers
+  - show green and red in numbers when showResults === true
+  - show number of answers needed
 - general
   - add a quiz-id, so that students only see their results
   - admin can upload quizzes
   - admin can choose which quizz is shown
   - add questions which are verified with regular expressions
+    - use `~` instead of `=` and `-`, followed by the regular expression
+    - remove double spaces, leading and trailing spaces
+    - more than one `~` is allowed, and any matching regex solves the question
+    - The preferred solution is given as string after the first `~`
   - modes
     - exam mode: only once the admin switch is flicked will the students see if they answered correctly
     - live mode: after every question, students see if they answered correctly
       - updatable: students can update their questions
+    - modes are a combination of switches:
+      - students directly see if they answered correctly or not
+      - stop students from changing their answers
 - backend
   - use rxjs to propagate state changes like quizState (showResult, frozen, ...) and studentAnswers (for admin)
   - store user data on disk
 
 # CHANGELOG
+
+2024-03-07:
+- admin: 0 a 12, students: 1 a 13
+- footer peut cacher les points
+- footer with copyright and link to github
+- student automatically updates with 'showView'
 
 2024-03-06:
 - added first real questionnaires

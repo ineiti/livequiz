@@ -22,21 +22,22 @@
     <p [innerHTML]="answers.description"></p>
 
     <div *ngIf="answers.maxChoices === 1; else multiQuestion">
-        <mat-selection-list #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)">
+        <mat-selection-list class="app-class" #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)">
             @for (choice of answers.choices; track $index) {
             <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]"
                 [class]="resultClasses[$index]">
-                <span [innerHTML]="choice"></span>
+                <span class="question" [innerHTML]="choice"></span>
             </mat-list-option>
             }
         </mat-selection-list>
     </div>
     <ng-template #multiQuestion>
-        <mat-selection-list #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)">
+        <p>Please select {{answers.maxChoices}} answers</p>
+        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)">
             @for (choice of answers.choices; track $index) {
             <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]"
-            [class]="resultClasses[$index]">
-                <span [innerHTML]="choice"></span>
+                [class]="resultClasses[$index]">
+                <span class="question" [innerHTML]="choice"></span>
             </mat-list-option>
             }
         </mat-selection-list>

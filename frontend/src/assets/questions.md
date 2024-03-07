@@ -36,5 +36,21 @@ How can you tell nmap to search only the network 10.0.0.0-10.0.0.255?
 - `10.0.0.0/24`
 - `10.0.0.0-10.0.0.255`
 
+## Very long question
+
+Here are some very long questions, both in pre, and in clear
+
+= 1
+- `some really long command that you should never enter in your terminal without really close verification`
+- the same but a really long text, which should in fact not really be used as an answer, because it is not readable
+
+## Very long multi-choice
+
+Here are some very long questions, both in pre, and in clear, but this time for a multi-choice question.
+
+= 2
+- `some really long command that you should never enter in your terminal without really close verification`
+- the same but a really long text, which should in fact not really be used as an answer, because it is not readable
+
 ## The end
 

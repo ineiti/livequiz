@@ -140,6 +140,7 @@ async fn set_show_answers(config: &State<Config>, secret: String, show: String) 
 async fn update_questionnaire(config: &State<Config>, secret: String) {
     if config.admin_secret == secret {
         config.update_questionnaire().await;
+        println!("New questionnaire: {}", *config.questionnaire.lock().await)
     } else {
         println!("Wrong secret");
     }
