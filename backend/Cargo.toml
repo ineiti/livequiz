@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rocket = {version="0.5.0", features=["serde_json", "json"]}
+sha2 = "0.10.8"

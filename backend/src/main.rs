@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::env;
 
 use rocket::fs::FileServer;
@@ -13,7 +13,7 @@ use rocket::{Build, Request, Response, Rocket};
 extern crate rocket;
 
 struct Users {
-    list: Mutex<HashMap<String, User>>,
+    list: Mutex<BTreeMap<String, User>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq)]
@@ -53,7 +53,6 @@ async fn update_name(users: &State<Users>, secret: String, name: String) -> &'st
             name: Some(name.clone()),
             answers: vec![],
         });
-    println!("List is {list:?}");
     "{}"
 }
 
@@ -68,14 +67,12 @@ async fn update_question(
     list.entry(secret.clone())
         .and_modify(|u| u.update_selected(question, selected.clone()))
         .or_insert_with(|| User::new_with_selected(secret, question, selected));
-    println!("List is {list:?}");
     "{}"
 }
 
 #[get("/v1/getResults")]
 async fn get_results(users: &State<Users>) -> Json<Vec<User>> {
     let list = users.list.lock().await;
-    println!("List is {list:?}");
     Json(list.values().cloned().collect())
 }
 
@@ -122,9 +119,9 @@ async fn get_questionnaire(config: &State<Config>) -> String {
     config.questionnaire.lock().await.clone()
 }
 
-#[get("/v1/getShowAnswers")]
-async fn get_show_answers(config: &State<Config>) -> String {
-    format!("{}", config.show_answers.lock().await)
+#[get("/v1/getIsAdmin?<secret>")]
+async fn get_is_admin(config: &State<Config>, secret: String) -> Json<bool> {
+    Json(config.admin_secret == secret)
 }
 
 #[get("/v1/setShowAnswers?<secret>&<show>")]
@@ -146,6 +143,46 @@ async fn update_questionnaire(config: &State<Config>, secret: String) {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+struct Stats {
+    #[serde(rename = "showResults")]
+    show_results: bool,
+    #[serde(rename = "quizHash")]
+    quiz_hash: String,
+    #[serde(rename = "answersHash")]
+    answers_hash: String,
+}
+
+impl Stats {
+    pub async fn new(config: &State<Config>, users: &State<Users>) -> Stats {
+        let mut quiz_hash = Sha256::new();
+        quiz_hash.update((config.questionnaire.lock().await).as_bytes());
+        let mut answers_hash = Sha256::new();
+        let users_m = users.list.lock().await;
+        for (_, user) in &*users_m {
+            answers_hash.update(&user.secret);
+            if let Some(u) = &user.name {
+                answers_hash.update(u);
+            }
+            for answer in &user.answers {
+                answers_hash.update(answer);
+            }
+        }
+        Stats {
+            show_results: *config.show_answers.lock().await,
+            quiz_hash: format!("{:x}", quiz_hash.finalize()),
+            answers_hash: format!("{:x}", answers_hash.finalize()),
+        }
+    }
+}
+
+#[get("/v1/getStats")]
+async fn get_stats(config: &State<Config>, users: &State<Users>) -> Json<Stats> {
+    let s = Stats::new(config, users).await;
+    Json(s)
+}
+
 #[launch]
 async fn rocket() -> Rocket<Build> {
     let rb = rocket::build()
@@ -158,12 +195,13 @@ async fn rocket() -> Rocket<Build> {
                 get_results,
                 get_questionnaire,
                 update_questionnaire,
-                get_show_answers,
-                set_show_answers
+                get_is_admin,
+                set_show_answers,
+                get_stats,
             ],
         )
         .manage(Users {
-            list: Mutex::new(HashMap::new()),
+            list: Mutex::new(BTreeMap::new()),
         })
         .manage(Config::new().await);
 
@@ -177,6 +215,7 @@ async fn rocket() -> Rocket<Build> {
 }
 
 use rocket::fairing::{Fairing, Info, Kind};
+use sha2::{Digest, Sha256};
 
 pub struct CORS;
 
@@ -212,11 +251,12 @@ mod test {
 
     const QUESTIONNAIRE_TEST: &str =
         "# Test Questions\n\n## Q1\nQuestion\n=1\n- choice1\n- choice2\n## End";
+        const ADMIN_SECRET: &str = "1234";
 
     impl TestClient {
         async fn new() -> Self {
             env::set_var(CONFIG_QUESTIONNAIRE_STRING, QUESTIONNAIRE_TEST);
-            env::set_var(CONFIG_ADMIN_SECRET, "1234");
+            env::set_var(CONFIG_ADMIN_SECRET, ADMIN_SECRET);
             Self {
                 c: Client::tracked(rocket().await)
                     .await
@@ -259,19 +299,19 @@ mod test {
                 .expect("Expected JSON")
         }
 
+        async fn get_stats(&self) -> Stats {
+            self.c
+                .get("/api/v1/getStats")
+                .dispatch()
+                .await
+                .into_json()
+                .await
+                .expect("Expected JSON")
+        }
+
         async fn get_questionnaire(&self) -> String {
             self.c
                 .get("/api/v1/getQuestionnaire")
-                .dispatch()
-                .await
-                .into_string()
-                .await
-                .expect("No questionnaire")
-        }
-
-        async fn get_show_answers(&self) -> String {
-            self.c
-                .get("/api/v1/getShowAnswers")
                 .dispatch()
                 .await
                 .into_string()
@@ -294,7 +334,7 @@ mod test {
     async fn test_add_name() {
         let client = TestClient::new().await;
         let mut user1 = User {
-            secret: "1234".to_string(),
+            secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
             answers: vec![],
         };
@@ -340,7 +380,7 @@ mod test {
     async fn test_update_question() {
         let client = TestClient::new().await;
         let mut user = User {
-            secret: "1234".to_string(),
+            secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
             answers: vec!["empty".to_string(), "correct".to_string()],
         };
@@ -367,14 +407,23 @@ mod test {
     #[async_test]
     async fn test_show_answers() {
         let client = TestClient::new().await;
-        assert_eq!("false", client.get_show_answers().await);
+        assert_eq!(false, client.get_stats().await.show_results);
         client
             .set_show_answers("12".to_string(), "true".to_string())
             .await;
-        assert_eq!("false", client.get_show_answers().await);
+        assert_eq!(false, client.get_stats().await.show_results);
         client
-            .set_show_answers("1234".to_string(), "true".to_string())
+            .set_show_answers(ADMIN_SECRET.to_string(), "true".to_string())
             .await;
-        assert_eq!("true", client.get_show_answers().await);
+        assert_eq!(true, client.get_stats().await.show_results);
+    }
+
+    #[async_test]
+    async fn test_get_stats(){
+        let client = TestClient::new().await;
+        let ah1 = client.get_stats().await.answers_hash;
+        client.update_question(ADMIN_SECRET.into(), 0, "answered").await;
+        let ah2 = client.get_stats().await.answers_hash;
+        assert_ne!(ah1, ah2);
     }
 }

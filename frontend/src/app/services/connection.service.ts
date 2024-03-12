@@ -1,24 +1,59 @@
 import { Injectable } from '@angular/core';
-import { Connection, ConnectionMock, Result, ResultState } from '../../lib/connection';
+import { Connection, ConnectionMock, JSONResult, JSONStats } from '../../lib/connection';
 import { Buffer } from 'buffer';
 import { BehaviorSubject } from 'rxjs';
+
+export type ResultState = ("correct" | "answered" | "empty")
+
+export class Result {
+  name: string = "undefined";
+  answers: ResultState[] = [];
+
+  constructor(json: JSONResult) {
+    this.name = json.name ?? "undefined";
+    this.answers = json.answers?.map((a) => a as ResultState) ?? [];
+  }
+}
+
+export class Stats {
+  showResults: boolean = false;
+  quizHash: string = "";
+  answersHash: string = "";
+
+  constructor(json: JSONStats) {
+    this.showResults = json.showResults ?? false;
+    this.quizHash = json.quizHash ?? "undefined";
+    this.answersHash = json.answersHash ?? "undefined";
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConnectionService {
   showResults = new BehaviorSubject(false);
+  quizHash = new BehaviorSubject("");
+  answersHash = new BehaviorSubject("");
   // private connection = new Connection("https://livequiz.fledg.re");
-  // private connection = new Connection("http://localhost:8000");
-  private connection = new ConnectionMock();
+  private connection = new Connection("http://localhost:8000");
+  // private connection = new ConnectionMock();
 
   constructor() {
-    setInterval(() => this.updateShowAnswers(), 2000)
-    this.updateShowAnswers();
+    setInterval(() => this.updateStats(), 2000)
+    this.updateStats();
   }
 
-  private async updateShowAnswers() {
-    this.showResults.next(await this.getShowAnswers());
+  private async updateStats() {
+    const stats = await this.getStats();
+    if (stats.answersHash !== this.answersHash.value) {
+      this.answersHash.next(stats.answersHash);
+    }
+    if (stats.quizHash !== this.quizHash.value) {
+      this.quizHash.next(stats.quizHash);
+    }
+    if (stats.showResults !== this.showResults.value) {
+      this.showResults.next(stats.showResults);
+    }
   }
 
   async updateQuestion(secret: Buffer, question: number, result: ResultState) {
@@ -30,7 +65,7 @@ export class ConnectionService {
   }
 
   async getResults(): Promise<Result[]> {
-    return await this.connection.getResults();
+    return (await this.connection.getResults()).map((r) => new Result(r));
   }
 
   async getQuestionnaire(): Promise<string> {
@@ -41,11 +76,11 @@ export class ConnectionService {
     this.connection.updateQuestionnaire(secret);
   }
 
-  async getShowAnswers(): Promise<boolean> {
-    return this.connection.getShowAnswers();
+  async setShowAnswers(secret: Buffer, show: boolean) {
+    return this.connection.setShowAnswers(secret, show);
   }
 
-  async setShowAnswers(secret: string, show: boolean) {
-    return this.connection.setShowAnswers(secret, show);
+  async getStats(): Promise<Stats> {
+    return new Stats(await this.connection.getStats());
   }
 }

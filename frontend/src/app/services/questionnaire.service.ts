@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ConnectionService } from './connection.service';
+import { ConnectionService, ResultState } from './connection.service';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { ResultState } from '../../lib/connection';
 
 export class Question {
   title: string = ""
@@ -20,20 +19,24 @@ export class Question {
     }
   }
 
-  result(selected: boolean[]): ResultState {
+  resultOrig(selected: boolean[]): ResultState {
     if (selected.length === 0) {
       return "empty";
     }
     return selected
-      .filter((s, i) => s && (this.original[i] < this.maxChoices))
+      .filter((s, i) => s && (i < this.maxChoices))
       .length === this.maxChoices ? "correct" : "answered";
   }
 
-  origToThis(selected: boolean[]): boolean[] {
+  resultShuffled(selected: boolean[]): ResultState {
+    return this.resultOrig(this.shuffledToOrig(selected));
+  }
+
+  origToShuffled(selected: boolean[]): boolean[] {
     return this.original.map((t) => selected[t]);
   }
 
-  thisToOrig(selected: boolean[]): boolean[] {
+  shuffledToOrig(selected: boolean[]): boolean[] {
     let ret: boolean[] = [];
     this.original.map((t, o) => ret[t] = selected[o]);
     return ret;
@@ -99,10 +102,14 @@ export class Questionnaire {
 })
 export class QuestionnaireService {
   public loaded = new BehaviorSubject<Questionnaire>(new Questionnaire(""));
+  hash = "";
 
   constructor(private connection: ConnectionService) {
-    connection.getQuestionnaire().then((q) => {
-      this.loaded.next(new Questionnaire(q));
+    connection.quizHash.subscribe((nh) => {
+      if (nh !== this.hash) {
+        this.hash = nh;
+        connection.getQuestionnaire().then((q) => this.loaded.next(new Questionnaire(q)))
+      }
     })
   }
 }

@@ -58,15 +58,17 @@ export class UserService {
   }
 
   updateSelections(question: number, selected: boolean[]) {
-    this.selectedStorage[question] = this.question(question).thisToOrig(selected);
+    this.selectedStorage[question] = this.question(question).shuffledToOrig(selected);
     localStorage.setItem(this.selectionStorageName, JSON.stringify(this.selectedStorage));
+    this.connection.updateQuestion(this.secret, question,
+      this.question(question).resultShuffled(selected));
   }
 
   getSelections(question: number): boolean[] {
     if (question > this.selectedStorage.length) {
       return [];
     }
-    return this.question(question).origToThis(this.selectedStorage[question]);
+    return this.question(question).origToShuffled(this.selectedStorage[question]);
   }
 
   secretHex(): string {

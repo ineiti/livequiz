@@ -1,9 +1,31 @@
 import { Injectable } from '@angular/core';
 import { MatSelectionList } from "@angular/material/list";
-import { ConnectionService } from './connection.service';
-import { Questionnaire, QuestionnaireService } from './questionnaire.service';
-import { ResultState } from '../../lib/connection';
+import { Question, Questionnaire, QuestionnaireService } from './questionnaire.service';
 import { UserService } from './user.service';
+import { ReplaySubject } from 'rxjs';
+import { ResultState } from './connection.service';
+
+export class Answer {
+  description = "undefined";
+  title = "undefined";
+  maxChoices = 0;
+  choices: string[] = [""];
+  selected: boolean[] = [];
+  hint = "";
+  result: ResultState = "empty";
+  correct: number[] = [];
+
+  constructor(cq: Question, selected: boolean[]) {
+    this.description = cq.description;
+    this.maxChoices = cq.maxChoices;
+    this.choices = cq.choices;
+    this.selected = selected;
+    this.result = cq.resultShuffled(this.selected);
+    this.hint = cq.hint;
+    this.title = cq.title;
+    this.correct = cq.correct();
+  }
+}
 
 @Injectable({
   providedIn: 'root'
@@ -17,15 +39,8 @@ export class AnswerService {
   last = false;
   currentQuestion = 0;
 
-  // This is for the current question
-  description = "undefined";
-  title = "undefined";
-  maxChoices = 0;
-  choices: string[] = [""];
-  selected: boolean[] = [];
-  hint = "";
-  result: ResultState = "empty";
-  correct: number[] = [];
+  private _answer?: Answer;
+  answer: ReplaySubject<Answer> = new ReplaySubject();
 
   constructor(private qservice: QuestionnaireService, private user: UserService) {
     qservice.loaded.subscribe((q) => {
@@ -45,7 +60,6 @@ export class AnswerService {
 
   goto(q: number) {
     if (q >= 0 && q < this.questionnaire.questions.length) {
-      this.user.updateSelections(this.currentQuestion, this.selected);
       this.currentQuestion = q;
       this.update();
     }
@@ -53,18 +67,17 @@ export class AnswerService {
 
   updateSelection(event: MatSelectionList) {
     const selected = event.selectedOptions.selected.length;
-    if (selected > this.maxChoices) {
+    const maxChoices = this._answer!.maxChoices;
+    if (selected > maxChoices) {
       event.selectedOptions.selected[0].toggle();
-    } else if (selected === this.maxChoices) {
-      this.done[this.currentQuestion] = true;
-    } else if (selected < this.maxChoices) {
-      this.done[this.currentQuestion] = false;
+    } else {
+      this.done[this.currentQuestion] = selected === maxChoices;
     }
     this.user.updateSelections(this.currentQuestion,
-      this.selected.map((_, i) => {
+      this._answer!.selected.map((_, i) => {
         return event.selectedOptions.selected.some((sel) => sel.value === i);
       }));
-    this.update();
+    this.updateAnswer();
   }
 
   update() {
@@ -73,15 +86,14 @@ export class AnswerService {
     if (!this.empty) {
       this.last = this.currentQuestion === this.questionnaire.questions.length - 1;
       this.percentage = 100 * (this.currentQuestion + 1) / this.questionnaire.questions.length;
-      const cq = this.questionnaire.questions[this.currentQuestion];
-      this.description = cq.description;
-      this.maxChoices = cq.maxChoices;
-      this.choices = cq.choices;
-      this.selected = this.user.getSelections(this.currentQuestion);
-      this.result = cq.result(this.selected);
-      this.hint = cq.hint;
-      this.title = cq.title;
-      this.correct = cq.correct();
+      this.updateAnswer();
     }
+  }
+
+  updateAnswer() {
+    const cq = this.questionnaire.questions[this.currentQuestion];
+    const selected = this.user.getSelections(this.currentQuestion);
+    this._answer = new Answer(cq, selected);
+    this.answer.next(this._answer);
   }
 }

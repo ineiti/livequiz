@@ -23,12 +23,12 @@ describe('Question', () => {
     q.shuffle();
     expect(q.original.length).toBe(q.choices.length);
     const orig = [true, false, false, false];
-    const qThis = q.origToThis(orig);
+    const qThis = q.origToShuffled(orig);
     const one = q.choices.find((_, i) => qThis[i]);
     expect(one).toBeDefined();
     expect(one).toBe("one");
 
-    const origConv = q.thisToOrig(qThis);
+    const origConv = q.shuffledToOrig(qThis);
     expect(origConv).toEqual([true, false, false, false]);
   });
 
@@ -38,7 +38,7 @@ describe('Question', () => {
     q.choices = ["one", "two", "three", "four"];
     q.shuffle();
 
-    expect(q.result(q.origToThis([true, false, false, false]))).toBe("correct");
-    expect(q.result(q.origToThis([false, true, false, false]))).toBe("answered");
+    expect(q.result(q.origToShuffled([true, false, false, false]))).toBe("correct");
+    expect(q.result(q.origToShuffled([false, true, false, false]))).toBe("answered");
   })
 })

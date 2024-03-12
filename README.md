@@ -10,12 +10,12 @@ The admin view shows all students, and what they answered already.
   - l'interface admin peut "perdre" des noms après le redémarrage du système
 - admin view:
   - add statistics to each column of how many answered correctly
-  - automatically update view every few seconds
+  - show if it's not an admin
+  - like student view, but show the answers with the least success first
 - student view:
   - show green and red in numbers when showResults === true
   - show number of answers needed
 - general
-  - add a quiz-id, so that students only see their results
   - admin can upload quizzes
   - admin can choose which quizz is shown
   - add questions which are verified with regular expressions
@@ -31,10 +31,14 @@ The admin view shows all students, and what they answered already.
       - students directly see if they answered correctly or not
       - stop students from changing their answers
 - backend
-  - use rxjs to propagate state changes like quizState (showResult, frozen, ...) and studentAnswers (for admin)
   - store user data on disk
 
 # CHANGELOG
+
+2024-03-12:
+- admin: automatically update view every few seconds
+- frontend: use rxjs to propagate state changes like quizState (showResult, frozen, ...) and studentAnswers (for admin)
+- add a quiz-id, so that students only see their results
 
 2024-03-07:
 - admin: 0 a 12, students: 1 a 13

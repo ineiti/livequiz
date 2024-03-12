@@ -7,8 +7,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { ConnectionService } from '../services/connection.service';
-import { AnswerService } from '../services/answer.service';
+import { Answer, AnswerService } from '../services/answer.service';
 import { UserService } from '../services/user.service';
+import { Subscription } from 'rxjs';
 
 const GRID_MAX_WIDTH = 13;
 
@@ -24,20 +25,33 @@ export class StudentComponent {
   showResults = true;
   tileClasses: string[] = [];
   resultClasses: string[] = [];
+  answer?: Answer;
+  private sShowResults?: Subscription;
+  private sAnswers?: Subscription;
 
   constructor(private connection: ConnectionService, public answers: AnswerService,
     public user: UserService) {
-    connection.showResults.subscribe((show) => {
+    this.sShowResults = connection.showResults.subscribe((show) => {
       this.showResults = show;
-      this.update();
-    })
+      this.updateChoice();
+    });
+    this.sAnswers = answers.answer.subscribe((a) => {
+      this.answer = a;
+      this.updateChoice();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.sShowResults !== undefined) {
+      this.sShowResults.unsubscribe();
+    }
+    if (this.sAnswers !== undefined) {
+      this.sAnswers.unsubscribe();
+    }
   }
 
   updateSelection(event: MatSelectionList) {
     this.answers.updateSelection(event);
-    this.connection.updateQuestion(this.user.secret, this.answers.currentQuestion,
-      this.answers.result);
-    this.update();
   }
 
   updateName() {
@@ -51,19 +65,29 @@ export class StudentComponent {
     return Math.min(GRID_MAX_WIDTH, Math.ceil(a / (Math.ceil(a / GRID_MAX_WIDTH))) | 1)
   }
 
-  update() {
+  updateTiles() {
     for (let question = 0; question < this.answers.questionnaire.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.answers.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         (this.answers.done[question] ? " questionTileDone" : "");
     }
-    for (let question = 0; question < this.answers.choices.length; question++) {
-      this.resultClasses[question] = "question " + this.showResults ?
-        (this.answers.selected[question] ? "questionSelectionWrong" : "") : "";
+  }
+
+  updateChoice() {
+    this.updateTiles();
+    const answer = this.answer!;
+    if (answer === undefined){
+      return;
+    }
+    
+    for (let question = 0; question < answer.choices.length; question++) {
+      this.resultClasses[question] = "question " +
+        (this.showResults ?
+          (answer.selected[question] ? "questionSelectionWrong" : "") : "");
     }
     if (this.showResults) {
-      for (let correct = 0; correct < this.answers.maxChoices; correct++) {
-        this.resultClasses[this.answers.correct[correct]] = "questionSelectionCorrect question";
+      for (let correct = 0; correct < answer.maxChoices; correct++) {
+        this.resultClasses[answer.correct[correct]] = "questionSelectionCorrect question";
       }
     }
   }
@@ -78,6 +102,6 @@ export class StudentComponent {
 
   goto(question: number) {
     this.answers.goto(question);
-    this.update();
+    this.updateTiles();
   }
 }

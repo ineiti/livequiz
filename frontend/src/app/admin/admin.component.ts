@@ -1,16 +1,13 @@
 import { Component } from '@angular/core';
-import { ConnectionService } from '../services/connection.service';
-import { Result, ResultState } from '../../lib/connection';
+import { ConnectionService, Result, ResultState } from '../services/connection.service';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AnswerService } from '../services/answer.service';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Buffer } from 'buffer';
-import { Question, Questionnaire, QuestionnaireService } from '../services/questionnaire.service';
-import { ReturnStatement } from '@angular/compiler';
+import { Questionnaire, QuestionnaireService } from '../services/questionnaire.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -38,6 +35,9 @@ export class AdminComponent {
     connection.showResults.subscribe((show) => {
       this.showResults = show;
       this.updateSelectedClass();
+    });
+    connection.answersHash.subscribe(() => {
+      this.update();
     })
   }
 
@@ -86,7 +86,7 @@ export class AdminComponent {
 
   showResultsUpdate(event: MatSlideToggleChange) {
     this.showResults = event.checked;
-    this.connection.setShowAnswers(this.user.secretHex(), this.showResults);
+    this.connection.setShowAnswers(this.user.secret, this.showResults);
     this.updateSelectedClass();
   }
 }

@@ -17,14 +17,14 @@
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
 
-    <h3 [innerHTML]="answers.title"></h3>
+    <h3 [innerHTML]="answer!.title"></h3>
 
-    <p [innerHTML]="answers.description"></p>
+    <p [innerHTML]="answer!.description"></p>
 
-    <div *ngIf="answers.maxChoices === 1; else multiQuestion">
+    <div *ngIf="answer!.maxChoices === 1; else multiQuestion">
         <mat-selection-list class="app-class" #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)">
-            @for (choice of answers.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]"
+            @for (choice of answer!.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
                 [class]="resultClasses[$index]">
                 <span class="question" [innerHTML]="choice"></span>
             </mat-list-option>
@@ -32,10 +32,10 @@
         </mat-selection-list>
     </div>
     <ng-template #multiQuestion>
-        <p>Please select {{answers.maxChoices}} answers</p>
+        <p>Please select {{answer!.maxChoices}} answers</p>
         <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)">
-            @for (choice of answers.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="answers.selected[$index]"
+            @for (choice of answer!.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
                 [class]="resultClasses[$index]">
                 <span class="question" [innerHTML]="choice"></span>
             </mat-list-option>
@@ -43,6 +43,6 @@
         </mat-selection-list>
     </ng-template>
 
-    <p *ngIf="showResults" [innerHTML]="answers.hint"></p>
+    <p *ngIf="showResults" [innerHTML]="answer!.hint"></p>
 
 </div>

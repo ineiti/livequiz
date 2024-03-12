@@ -1,12 +1,17 @@
 import { Buffer } from 'buffer';
-import { AnswerService } from '../app/services/answer.service';
 import { Questionnaire } from '../app/services/questionnaire.service';
+import { sha256 } from 'js-sha256';
+import { Result, ResultState, Stats } from '../app/services/connection.service';
 
-export type ResultState = ("correct" | "answered" | "empty")
+export interface JSONResult {
+    name?: string,
+    answers?: string[],
+}
 
-export interface Result {
-    name: string,
-    answers: ResultState[],
+export interface JSONStats {
+    showResults?: boolean,
+    quizHash?: string,
+    answersHash?: string,
 }
 
 export class Connection {
@@ -23,7 +28,7 @@ export class Connection {
             `name=${name}`);
     }
 
-    async getResults(): Promise<Result[]> {
+    async getResults(): Promise<JSONResult[]> {
         const result = await fetch(`${this.url}/api/v1/getResults`);
         let res = await result.json();
         if (res.array === undefined) {
@@ -41,15 +46,17 @@ export class Connection {
         await fetch(`${this.url}/api/v1/updateQuestionnaire?secret=${secret.toString('hex')}`);
     }
 
-    async getShowAnswers(): Promise<boolean> {
-        const response = await (await fetch(`${this.url}/api/v1/getShowAnswers`)).text();
-        return response === "true";
+    async setShowAnswers(secret: Buffer, show: boolean) {
+        await fetch(`${this.url}/api/v1/setShowAnswers?secret=${secret.toString('hex')}&show=${show}`)
     }
 
-    async setShowAnswers(secret: string, show: boolean) {
-        await fetch(`${this.url}/api/v1/setShowAnswers?secret=${secret}&show=${show}`)
+    async getStats(): Promise<JSONStats> {
+        return await (await fetch(`${this.url}/api/v1/getStats`)).json();
     }
 
+    async isAdmin(secret: Buffer): Promise<boolean> {
+        return await (await fetch(`${this.url}/api/v1/getIsAdmin?secret=${secret.toString('hex')}`)).json();
+    }
 }
 
 interface UserAnswers {
@@ -59,11 +66,15 @@ interface UserAnswers {
 
 export class ConnectionMock {
     users = new Map<string, UserAnswers>();
-    show_answers = false;
     questionnaire = new Questionnaire("");
+    stats = new Stats({});
 
     constructor() {
-        this.getQuestionnaire().then((text) => this.questionnaire = new Questionnaire(text));
+        this.getQuestionnaire().then((text) => {
+            this.stats.quizHash = sha256(text);
+            this.questionnaire = new Questionnaire(text);
+        });
+        (window as any).stats = this.stats;
     }
 
     getUser(secret: Buffer): UserAnswers {
@@ -87,6 +98,16 @@ export class ConnectionMock {
         const user = this.getUser(secret);
         user.result.answers[question] = result;
         this.users.set(secret.toString('hex'), user);
+        const hash = sha256.create();
+        for (const user of this.users) {
+            hash.update(user[0]);
+            hash.update(user[1].secret);
+            hash.update(user[1].result.name);
+            for (const answer in user[1].result.answers) {
+                hash.update(answer);
+            }
+        }
+        this.stats.answersHash = hash.hex();
     }
 
     async updateName(secret: Buffer, name: string) {
@@ -95,7 +116,7 @@ export class ConnectionMock {
         this.users.set(secret.toString('hex'), user);
     }
 
-    async getResults(): Promise<Result[]> {
+    async getResults(): Promise<JSONResult[]> {
         return [...this.users].map(([_, u]) => { return { name: u.result.name, answers: u.result.answers } });
     }
 
@@ -104,11 +125,15 @@ export class ConnectionMock {
         return await response.text();
     }
 
-    async getShowAnswers(): Promise<boolean> {
-        return this.show_answers;
+    async setShowAnswers(secret: string, show: boolean) {
+        this.stats.showResults = show;
     }
 
-    async setShowAnswers(secret: string, show: boolean) {
-        this.show_answers = show;
+    async getStats(): Promise<JSONStats> {
+        return this.stats;
+    }
+
+    async isAdmin(secret: string): Promise<boolean> {
+        return true;
     }
 }
