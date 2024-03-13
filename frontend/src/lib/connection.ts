@@ -6,6 +6,7 @@ import { Result, ResultState, Stats } from '../app/services/connection.service';
 export interface JSONResult {
     name?: string,
     answers?: string[],
+    choices?: number[][],
 }
 
 export interface JSONStats {
@@ -18,9 +19,9 @@ export class Connection {
     constructor(private url: string) {
     }
 
-    async updateQuestion(secret: Buffer, question: number, result: ResultState) {
+    async updateQuestion(secret: Buffer, question: number, result: ResultState, choices: number[]) {
         await fetch(`${this.url}/api/v1/updateQuestion?secret=${secret.toString('hex')}&` +
-            `question=${question}&selected=${result}`);
+            `question=${question}&selected=${result}&choices=${choices.join("&choices=")}`);
     }
 
     async updateName(secret: Buffer, name: string) {
@@ -84,7 +85,8 @@ export class ConnectionMock {
                 secret: secret,
                 result: {
                     name: "unknown",
-                    answers: Array(this.questionnaire.questions.length).map(() => "empty")
+                    answers: Array(this.questionnaire.questions.length).map(() => "empty"),
+                    choices: [],
                 },
             }
         }

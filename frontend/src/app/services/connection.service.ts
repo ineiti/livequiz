@@ -8,10 +8,12 @@ export type ResultState = ("correct" | "answered" | "empty")
 export class Result {
   name: string = "undefined";
   answers: ResultState[] = [];
+  choices: number[][] = [];
 
   constructor(json: JSONResult) {
     this.name = json.name ?? "undefined";
     this.answers = json.answers?.map((a) => a as ResultState) ?? [];
+    this.choices = json.choices ?? [];
   }
 }
 
@@ -34,8 +36,8 @@ export class ConnectionService {
   showResults = new BehaviorSubject(false);
   quizHash = new BehaviorSubject("");
   answersHash = new BehaviorSubject("");
-  private connection = new Connection("https://livequiz.fledg.re");
-  // private connection = new Connection("http://localhost:8000");
+  // private connection = new Connection("https://livequiz.fledg.re");
+  private connection = new Connection("http://localhost:8000");
   // private connection = new ConnectionMock();
 
   constructor() {
@@ -56,8 +58,8 @@ export class ConnectionService {
     }
   }
 
-  async updateQuestion(secret: Buffer, question: number, result: ResultState) {
-    await this.connection.updateQuestion(secret, question, result);
+  async updateQuestion(secret: Buffer, question: number, result: ResultState, choices: number[]) {
+    await this.connection.updateQuestion(secret, question, result, choices);
   }
 
   async updateName(secret: Buffer, name: string) {

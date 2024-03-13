@@ -21,24 +21,31 @@ struct Users {
 struct User {
     secret: String,
     name: Option<String>,
-    answers: Vec<String>,
+    results: Vec<String>,
+    choices: Vec<Vec<usize>>,
 }
 
 impl User {
-    fn update_selected(&mut self, pos: usize, sel: String) {
-        if self.answers.len() <= pos {
-            self.answers.resize(pos + 1, "empty".to_string())
+    fn update_selected(&mut self, pos: usize, res: String, choices: Vec<usize>) {
+        if self.results.len() <= pos {
+            self.results.resize(pos + 1, "empty".to_string())
         }
-        self.answers[pos] = sel;
+        if self.choices.len() <= pos {
+            self.choices.resize(pos + 1, vec![])
+        }
+        self.results[pos] = res;
+        self.choices[pos] = choices;
     }
 
-    fn new_with_selected(secret: String, pos: usize, sel: String) -> Self {
+    fn new_with_selected(secret: String, pos: usize, res: String, choices: Vec<usize>) -> Self {
         let mut u = Self {
             secret,
             name: None,
-            answers: vec!["empty".to_string(); pos + 1],
+            results: vec!["empty".to_string(); pos + 1],
+            choices: vec![vec![]; pos + 1],
         };
-        u.answers[pos] = sel;
+        u.results[pos] = res;
+        u.choices[pos] = choices;
         u
     }
 }
@@ -51,22 +58,24 @@ async fn update_name(users: &State<Users>, secret: String, name: String) -> &'st
         .or_insert_with(|| User {
             secret: secret.clone(),
             name: Some(name.clone()),
-            answers: vec![],
+            results: vec![],
+            choices: vec![],
         });
     "{}"
 }
 
-#[get("/v1/updateQuestion?<secret>&<question>&<selected>")]
+#[get("/v1/updateQuestion?<secret>&<question>&<selected>&<choices>")]
 async fn update_question(
     users: &State<Users>,
     secret: String,
     question: usize,
     selected: String,
+    choices: Vec<usize>,
 ) -> &'static str {
     let mut list = users.list.lock().await;
     list.entry(secret.clone())
-        .and_modify(|u| u.update_selected(question, selected.clone()))
-        .or_insert_with(|| User::new_with_selected(secret, question, selected));
+        .and_modify(|u| u.update_selected(question, selected.clone(), choices.clone()))
+        .or_insert_with(|| User::new_with_selected(secret, question, selected, choices));
     "{}"
 }
 
@@ -165,8 +174,15 @@ impl Stats {
             if let Some(u) = &user.name {
                 answers_hash.update(u);
             }
-            for answer in &user.answers {
+            for answer in &user.results {
                 answers_hash.update(answer);
+            }
+            for choice in &user.choices {
+                let mut choice_sort = choice.clone();
+                choice_sort.sort();
+                for c in choice_sort {
+                    answers_hash.update(c.to_ne_bytes());
+                }
             }
         }
         Stats {
@@ -251,7 +267,7 @@ mod test {
 
     const QUESTIONNAIRE_TEST: &str =
         "# Test Questions\n\n## Q1\nQuestion\n=1\n- choice1\n- choice2\n## End";
-        const ADMIN_SECRET: &str = "1234";
+    const ADMIN_SECRET: &str = "1234";
 
     impl TestClient {
         async fn new() -> Self {
@@ -336,7 +352,8 @@ mod test {
         let mut user1 = User {
             secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
-            answers: vec![],
+            results: vec![],
+            choices: vec![],
         };
         assert_eq!(
             200,
@@ -361,7 +378,8 @@ mod test {
         let user2 = User {
             secret: "1235".to_string(),
             name: Some("foobar".to_string()),
-            answers: vec![],
+            results: vec![],
+            choices: vec![],
         };
         assert_eq!(
             200,
@@ -382,18 +400,19 @@ mod test {
         let mut user = User {
             secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
-            answers: vec!["empty".to_string(), "correct".to_string()],
+            results: vec!["empty".to_string(), "correct".to_string()],
+            choices: vec![],
         };
         client
             .update_name(&user.secret, &user.name.as_ref().unwrap())
             .await;
         client
-            .update_question(&user.secret, 1, &user.answers[1])
+            .update_question(&user.secret, 1, &user.results[1])
             .await;
         assert_eq!(vec![user.clone()], client.get_results().await);
-        user.answers.insert(2, "correct".to_string());
+        user.results.insert(2, "correct".to_string());
         client
-            .update_question(&user.secret, 2, &user.answers[2])
+            .update_question(&user.secret, 2, &user.results[2])
             .await;
         assert_eq!(vec![user], client.get_results().await);
     }
@@ -419,10 +438,12 @@ mod test {
     }
 
     #[async_test]
-    async fn test_get_stats(){
+    async fn test_get_stats() {
         let client = TestClient::new().await;
         let ah1 = client.get_stats().await.answers_hash;
-        client.update_question(ADMIN_SECRET.into(), 0, "answered").await;
+        client
+            .update_question(ADMIN_SECRET.into(), 0, "answered")
+            .await;
         let ah2 = client.get_stats().await.answers_hash;
         assert_ne!(ah1, ah2);
     }
