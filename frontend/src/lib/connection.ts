@@ -11,6 +11,7 @@ export interface JSONResult {
 
 export interface JSONStats {
     showResults?: boolean,
+    editAllowed?: boolean,
     quizHash?: string,
     answersHash?: string,
 }
@@ -49,6 +50,10 @@ export class Connection {
 
     async setShowAnswers(secret: Buffer, show: boolean) {
         await fetch(`${this.url}/api/v1/setShowAnswers?secret=${secret.toString('hex')}&show=${show}`)
+    }
+
+    async setEditAllowed(secret: Buffer, edit: boolean) {
+        await fetch(`${this.url}/api/v1/setEditAllowed?secret=${secret.toString('hex')}&edit=${edit}`)
     }
 
     async getStats(): Promise<JSONStats> {
@@ -129,6 +134,10 @@ export class ConnectionMock {
 
     async setShowAnswers(secret: string, show: boolean) {
         this.stats.showResults = show;
+    }
+
+    async setEditAllowed(secret: string, edit: boolean) {
+        this.stats.editAllowed = edit;
     }
 
     async getStats(): Promise<JSONStats> {

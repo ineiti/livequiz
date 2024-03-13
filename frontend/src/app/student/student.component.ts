@@ -11,8 +11,7 @@ import { Answer, AnswerService } from '../services/answer.service';
 import { UserService } from '../services/user.service';
 import { Subscription } from 'rxjs';
 import { ExerciseComponent } from '../exercise/exercise.component';
-
-const GRID_MAX_WIDTH = 13;
+import { GRID_MAX_WIDTH } from '../app.config';
 
 @Component({
   selector: 'app-student',
@@ -23,10 +22,12 @@ const GRID_MAX_WIDTH = 13;
   styleUrl: './student.component.scss'
 })
 export class StudentComponent {
-  showResults = true;
+  showResults = false;
+  editAllowed = true;
   tileClasses: string[] = [];
   answer?: Answer;
   private sShowResults?: Subscription;
+  private sEditAllowed?: Subscription;
   private sAnswers?: Subscription;
 
   constructor(private connection: ConnectionService, public answers: AnswerService,
@@ -34,6 +35,9 @@ export class StudentComponent {
     this.sShowResults = connection.showResults.subscribe((show) => {
       this.showResults = show;
       this.updateTiles();
+    });
+    this.sShowResults = connection.editAllowed.subscribe((edit) => {
+      this.editAllowed = edit;
     });
     this.sAnswers = answers.answer.subscribe((a) => {
       this.answer = a;

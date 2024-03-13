@@ -9,12 +9,13 @@ import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Buffer } from 'buffer';
 import { Questionnaire, QuestionnaireService } from '../services/questionnaire.service';
 import { UserService } from '../services/user.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [MatListModule, MatSelectionList, MatGridListModule, CommonModule, MatTableModule,
-    MatSlideToggleModule],
+    MatSlideToggleModule, RouterLink],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss'
 })

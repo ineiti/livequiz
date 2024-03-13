@@ -19,11 +19,13 @@ export class Result {
 
 export class Stats {
   showResults: boolean = false;
+  editAllowed: boolean = true;
   quizHash: string = "";
   answersHash: string = "";
 
   constructor(json: JSONStats) {
     this.showResults = json.showResults ?? false;
+    this.editAllowed = json.editAllowed ?? false;
     this.quizHash = json.quizHash ?? "undefined";
     this.answersHash = json.answersHash ?? "undefined";
   }
@@ -34,6 +36,7 @@ export class Stats {
 })
 export class ConnectionService {
   showResults = new BehaviorSubject(false);
+  editAllowed = new BehaviorSubject(true);
   quizHash = new BehaviorSubject("");
   answersHash = new BehaviorSubject("");
   private base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
@@ -80,6 +83,10 @@ export class ConnectionService {
 
   async setShowAnswers(secret: Buffer, show: boolean) {
     return this.connection.setShowAnswers(secret, show);
+  }
+
+  async setEditAllowed(secret: Buffer, edit: boolean) {
+    return this.connection.setEditAllowed(secret, edit);
   }
 
   async getStats(): Promise<Stats> {

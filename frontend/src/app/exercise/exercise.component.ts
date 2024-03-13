@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, EventEmitter, Input, Output } from '@angular/core';
 import { Answer } from '../services/answer.service';
 import { Question } from '../services/questionnaire.service';
 import { CommonModule } from '@angular/common';
@@ -15,11 +15,13 @@ import { MatGridListModule } from '@angular/material/grid-list';
   imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatProgressBarModule, MatListModule, MatGridListModule],
   templateUrl: './exercise.component.html',
-  styleUrl: './exercise.component.scss'
+  styleUrl: './exercise.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ExerciseComponent {
   @Input() answer = new Answer(new Question(), []);
   @Input() showResults = false;
+  @Input() editAllowed = true;
   @Output() selectionChange = new EventEmitter<MatSelectionList>();
   resultClasses: string[] = [];
   

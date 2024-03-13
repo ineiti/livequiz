@@ -1,8 +1,4 @@
 <h2>{{answers.questionnaire.chapter}}</h2>
-<mat-form-field>
-    <mat-label>Your name:</mat-label>
-    <input matInput [(ngModel)]="user.name" (keyup)="updateName()">
-</mat-form-field>
 
 <div *ngIf="!answers.empty">
     <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
@@ -17,5 +13,5 @@
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
 
-    <app-exercise [answer]="answer!" [showResults]="showResults" [editAllowed]="editAllowed" (selectionChange)="updateSelection($event)"></app-exercise>
+    <app-exercise [answer]="answer!"></app-exercise>
 </div>

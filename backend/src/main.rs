@@ -90,6 +90,7 @@ struct Config {
     questionnaire: Mutex<String>,
     admin_secret: String,
     show_answers: Mutex<bool>,
+    edit_allowed: Mutex<bool>,
 }
 
 const CONFIG_QUESTIONNAIRE_STRING: &str = "QUESTIONNAIRE_STRING";
@@ -104,6 +105,7 @@ impl Config {
             admin_secret: env::var(CONFIG_ADMIN_SECRET)
                 .expect(&format!("Need '{CONFIG_ADMIN_SECRET}'")),
             show_answers: Mutex::new(false),
+            edit_allowed: Mutex::new(true),
         }
     }
 
@@ -142,6 +144,15 @@ async fn set_show_answers(config: &State<Config>, secret: String, show: String) 
     }
 }
 
+#[get("/v1/setEditAllowed?<secret>&<edit>")]
+async fn set_edit_allowed(config: &State<Config>, secret: String, edit: String) {
+    if config.admin_secret == secret {
+        *config.edit_allowed.lock().await = edit == "true";
+    } else {
+        println!("Wrong secret");
+    }
+}
+
 #[get("/v1/updateQuestionnaire?<secret>")]
 async fn update_questionnaire(config: &State<Config>, secret: String) {
     if config.admin_secret == secret {
@@ -157,6 +168,8 @@ async fn update_questionnaire(config: &State<Config>, secret: String) {
 struct Stats {
     #[serde(rename = "showResults")]
     show_results: bool,
+    #[serde(rename = "editAllowed")]
+    edit_allowed: bool,
     #[serde(rename = "quizHash")]
     quiz_hash: String,
     #[serde(rename = "answersHash")]
@@ -187,6 +200,7 @@ impl Stats {
         }
         Stats {
             show_results: *config.show_answers.lock().await,
+            edit_allowed: *config.edit_allowed.lock().await,
             quiz_hash: format!("{:x}", quiz_hash.finalize()),
             answers_hash: format!("{:x}", answers_hash.finalize()),
         }
@@ -213,6 +227,7 @@ async fn rocket() -> Rocket<Build> {
                 update_questionnaire,
                 get_is_admin,
                 set_show_answers,
+                set_edit_allowed,
                 get_stats,
             ],
         )
@@ -340,6 +355,16 @@ mod test {
                 .get(&format!(
                     "/api/v1/setShowAnswers?secret={}&show={}",
                     secret, show
+                ))
+                .dispatch()
+                .await;
+        }
+
+        async fn set_edit_allowed(&self, secret: String, edit: String) {
+            self.c
+                .get(&format!(
+                    "/api/v1/setEditAllowed?secret={}&edit={}",
+                    secret, edit
                 ))
                 .dispatch()
                 .await;
