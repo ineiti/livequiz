@@ -10,6 +10,7 @@ import { ConnectionService } from '../services/connection.service';
 import { Answer, AnswerService } from '../services/answer.service';
 import { UserService } from '../services/user.service';
 import { Subscription } from 'rxjs';
+import { ExerciseComponent } from '../exercise/exercise.component';
 
 const GRID_MAX_WIDTH = 13;
 
@@ -17,14 +18,13 @@ const GRID_MAX_WIDTH = 13;
   selector: 'app-student',
   standalone: true,
   imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatProgressBarModule,
-    MatListModule, MatGridListModule],
+    MatListModule, MatGridListModule, ExerciseComponent],
   templateUrl: './student.component.html',
   styleUrl: './student.component.scss'
 })
 export class StudentComponent {
   showResults = true;
   tileClasses: string[] = [];
-  resultClasses: string[] = [];
   answer?: Answer;
   private sShowResults?: Subscription;
   private sAnswers?: Subscription;
@@ -33,11 +33,11 @@ export class StudentComponent {
     public user: UserService) {
     this.sShowResults = connection.showResults.subscribe((show) => {
       this.showResults = show;
-      this.updateChoice();
+      this.updateTiles();
     });
     this.sAnswers = answers.answer.subscribe((a) => {
       this.answer = a;
-      this.updateChoice();
+      this.updateTiles();
     });
   }
 
@@ -70,25 +70,6 @@ export class StudentComponent {
       this.tileClasses[question] = "questionTile" + (this.answers.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         (this.answers.done[question] ? " questionTileDone" : "");
-    }
-  }
-
-  updateChoice() {
-    this.updateTiles();
-    const answer = this.answer!;
-    if (answer === undefined){
-      return;
-    }
-    
-    for (let question = 0; question < answer.choices.length; question++) {
-      this.resultClasses[question] = "question " +
-        (this.showResults ?
-          (answer.selected[question] ? "questionSelectionWrong" : "") : "");
-    }
-    if (this.showResults) {
-      for (let correct = 0; correct < answer.maxChoices; correct++) {
-        this.resultClasses[answer.correct[correct]] = "questionSelectionCorrect question";
-      }
     }
   }
 

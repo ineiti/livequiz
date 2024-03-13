@@ -1,12 +1,17 @@
 <h2>Overview of Users</h2>
 
+<!-- <button mat-button (click)="addUser()" style="margin-bottom: 1em;">Add test user</button> -->
 <button mat-button (click)="updateQuestionnaire()" style="margin-bottom: 1em;">Update Questionnaire</button>
+<a reouterLink="/corrections"><button mat-button>Corrections</button></a>
 
 <h3>Questionnaire title is {{title}}</h3>
 
 <div *ngIf="users.length > 0">
-  <mat-slide-toggle (change)="showResultsUpdate($event)" [checked]="showResults" style="margin-bottom: 1em;">
+  <mat-slide-toggle (change)="showResultsUpdate($event)" [checked]="showResults" style="margin: 0 1em 1em;">
     Show Results
+  </mat-slide-toggle>
+  <mat-slide-toggle (change)="editingAllowedUpdate($event)" [checked]="editingAllowed" style="margin: 0 1em 1em;">
+    Editing Allowed
   </mat-slide-toggle>
   <table style="width: 100%">
     <tr>

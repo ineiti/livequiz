@@ -26,24 +26,3 @@
 .questionTileChosen {
     background-color: aquamarine;
 }
-
-.questionSelectionCorrect {
-    background-color: #afa;
-}
-
-.questionSelectionWrong {
-    background-color: #faa;
-}
-
-.question {
-    white-space: pre-wrap;
-}
-
-mat-list-option:nth-child(n) {
-    height: auto;
-}
-
-.app-class .mat-list-item {
-    height: auto;
-  }
-  

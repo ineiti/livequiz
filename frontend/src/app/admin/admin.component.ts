@@ -22,6 +22,7 @@ export class AdminComponent {
   users: Result[] = [];
   displayedColumns: number[] = [];
   showResults = false;
+  editingAllowed = true;
   selectedClasses: string[][] = [];
   questionnaire = new Questionnaire("");
   title = "Not available";
@@ -84,6 +85,8 @@ export class AdminComponent {
     this.update();
   }
 
+  editingAllowedUpdate(event: MatSlideToggleChange) {
+  }
   showResultsUpdate(event: MatSlideToggleChange) {
     this.showResults = event.checked;
     this.connection.setShowAnswers(this.user.secret, this.showResults);
