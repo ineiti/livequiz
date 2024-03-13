@@ -34,8 +34,8 @@ export class ConnectionService {
   showResults = new BehaviorSubject(false);
   quizHash = new BehaviorSubject("");
   answersHash = new BehaviorSubject("");
-  // private connection = new Connection("https://livequiz.fledg.re");
-  private connection = new Connection("http://localhost:8000");
+  private connection = new Connection("https://livequiz.fledg.re");
+  // private connection = new Connection("http://localhost:8000");
   // private connection = new ConnectionMock();
 
   constructor() {
