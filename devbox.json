@@ -7,7 +7,8 @@
     "bun@latest",
     "rustup@latest",
     "libiconv@latest",
-    "openssh@latest"
+    "openssh@latest",
+    "less@latest"
   ],
   "shell": {
     "init_hook": [

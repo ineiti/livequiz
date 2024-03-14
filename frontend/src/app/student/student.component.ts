@@ -36,7 +36,7 @@ export class StudentComponent {
       this.showResults = show;
       this.updateTiles();
     });
-    this.sShowResults = connection.editAllowed.subscribe((edit) => {
+    this.sEditAllowed = connection.editAllowed.subscribe((edit) => {
       this.editAllowed = edit;
     });
     this.sAnswers = answers.answer.subscribe((a) => {
@@ -48,6 +48,9 @@ export class StudentComponent {
   ngOnDestroy() {
     if (this.sShowResults !== undefined) {
       this.sShowResults.unsubscribe();
+    }
+    if (this.sEditAllowed !== undefined) {
+      this.sEditAllowed.unsubscribe();
     }
     if (this.sAnswers !== undefined) {
       this.sAnswers.unsubscribe();

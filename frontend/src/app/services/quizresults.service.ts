@@ -19,7 +19,7 @@ export class QuizResult {
     this.description = cq.description;
     this.maxChoices = cq.maxChoices;
     this.choices = cq.choices;
-    this.selected = selected;
+    // this.selected = selected;
     this.result = cq.resultShuffled(this.selected);
     this.hint = cq.hint;
     this.title = cq.title;
@@ -80,7 +80,7 @@ export class QuizResultsService {
 
   updateAnswer() {
     const cq = this.questionnaire.questions[this.currentQuestion];
-    this._answer = new QuizResult(cq, this.results[this.currentQuestion]);
+    // this._answer = new QuizResult(cq, this.results[this.currentQuestion]);
     this.answer.next(this._answer!);
   }
 }

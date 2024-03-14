@@ -59,6 +59,9 @@ export class ConnectionService {
     if (stats.showResults !== this.showResults.value) {
       this.showResults.next(stats.showResults);
     }
+    if (stats.editAllowed !== this.editAllowed.value) {
+      this.editAllowed.next(stats.editAllowed);
+    }
   }
 
   async updateQuestion(secret: Buffer, question: number, result: ResultState, choices: number[]) {

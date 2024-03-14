@@ -23,7 +23,7 @@ export class AdminComponent {
   users: Result[] = [];
   displayedColumns: number[] = [];
   showResults = false;
-  editingAllowed = true;
+  editAllowed = true;
   selectedClasses: string[][] = [];
   questionnaire = new Questionnaire("");
   title = "Not available";
@@ -37,6 +37,9 @@ export class AdminComponent {
     connection.showResults.subscribe((show) => {
       this.showResults = show;
       this.updateSelectedClass();
+    });
+    connection.editAllowed.subscribe((edit) => {
+      this.editAllowed = edit;
     });
     connection.answersHash.subscribe(() => {
       this.update();
@@ -90,8 +93,11 @@ export class AdminComponent {
     this.update();
   }
 
-  editingAllowedUpdate(event: MatSlideToggleChange) {
+  editAllowedUpdate(event: MatSlideToggleChange) {
+    this.editAllowed = event.checked;
+    this.connection.setEditAllowed(this.user.secret, this.editAllowed);
   }
+
   showResultsUpdate(event: MatSlideToggleChange) {
     this.showResults = event.checked;
     this.connection.setShowAnswers(this.user.secret, this.showResults);
