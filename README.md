@@ -9,8 +9,8 @@ The admin view shows all students, and what they answered already.
 - bugs:
   - l'interface admin peut "perdre" des noms après le redémarrage du système
 - admin view:
+  - route to /student if it's not an admin
   - add statistics to each column of how many answered correctly
-  - show if it's not an admin
   - like student view, but show the answers with the least success first
 - student view:
   - show green and red in numbers when showResults === true

@@ -15,7 +15,10 @@
       "echo 'Welcome to devbox!' > /dev/null",
       "alias ls='ls --color'"
     ],
-    "scripts": {}
+    "scripts": {
+      "start": "cd frontend; bun start --port 4300",
+      "cargo": "cd backend; QUESTIONNAIRE=../${1:-questionnaire.md} ADMIN_SECRET=13b6bb1dcc21fa790e48a415f38b29642f7a0129fe31160b29a1a74641aac601 cargo run"
+    }
   },
   "env": {
     "BUN_INSTALL": "$PWD/.bun",

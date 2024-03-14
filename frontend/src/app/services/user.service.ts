@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Buffer } from 'buffer';
-import { Question, Questionnaire, QuestionnaireService } from './questionnaire.service';
+import { Question, QuestionnaireService } from './questionnaire.service';
 
 @Injectable({
   providedIn: 'root'
