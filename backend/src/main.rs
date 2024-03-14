@@ -21,19 +21,19 @@ struct Users {
 struct User {
     secret: String,
     name: Option<String>,
-    results: Vec<String>,
+    answers: Vec<String>,
     choices: Vec<Vec<usize>>,
 }
 
 impl User {
     fn update_selected(&mut self, pos: usize, res: String, choices: Vec<usize>) {
-        if self.results.len() <= pos {
-            self.results.resize(pos + 1, "empty".to_string())
+        if self.answers.len() <= pos {
+            self.answers.resize(pos + 1, "empty".to_string())
         }
         if self.choices.len() <= pos {
             self.choices.resize(pos + 1, vec![])
         }
-        self.results[pos] = res;
+        self.answers[pos] = res;
         self.choices[pos] = choices;
     }
 
@@ -41,10 +41,10 @@ impl User {
         let mut u = Self {
             secret,
             name: None,
-            results: vec!["empty".to_string(); pos + 1],
+            answers: vec!["empty".to_string(); pos + 1],
             choices: vec![vec![]; pos + 1],
         };
-        u.results[pos] = res;
+        u.answers[pos] = res;
         u.choices[pos] = choices;
         u
     }
@@ -58,7 +58,7 @@ async fn update_name(users: &State<Users>, secret: String, name: String) -> &'st
         .or_insert_with(|| User {
             secret: secret.clone(),
             name: Some(name.clone()),
-            results: vec![],
+            answers: vec![],
             choices: vec![],
         });
     "{}"
@@ -174,7 +174,7 @@ impl Stats {
             if let Some(u) = &user.name {
                 answers_hash.update(u);
             }
-            for answer in &user.results {
+            for answer in &user.answers {
                 answers_hash.update(answer);
             }
             for choice in &user.choices {
@@ -352,7 +352,7 @@ mod test {
         let mut user1 = User {
             secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
-            results: vec![],
+            answers: vec![],
             choices: vec![],
         };
         assert_eq!(
@@ -378,7 +378,7 @@ mod test {
         let user2 = User {
             secret: "1235".to_string(),
             name: Some("foobar".to_string()),
-            results: vec![],
+            answers: vec![],
             choices: vec![],
         };
         assert_eq!(
@@ -400,19 +400,19 @@ mod test {
         let mut user = User {
             secret: ADMIN_SECRET.to_string(),
             name: Some("foo".to_string()),
-            results: vec!["empty".to_string(), "correct".to_string()],
+            answers: vec!["empty".to_string(), "correct".to_string()],
             choices: vec![],
         };
         client
             .update_name(&user.secret, &user.name.as_ref().unwrap())
             .await;
         client
-            .update_question(&user.secret, 1, &user.results[1])
+            .update_question(&user.secret, 1, &user.answers[1])
             .await;
         assert_eq!(vec![user.clone()], client.get_results().await);
-        user.results.insert(2, "correct".to_string());
+        user.answers.insert(2, "correct".to_string());
         client
-            .update_question(&user.secret, 2, &user.results[2])
+            .update_question(&user.secret, 2, &user.answers[2])
             .await;
         assert_eq!(vec![user], client.get_results().await);
     }
