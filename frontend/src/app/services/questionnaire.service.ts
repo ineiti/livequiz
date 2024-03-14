@@ -10,8 +10,12 @@ export class Question {
   choices: string[] = []
   original: number[] = []
 
+  addChoice(choice: string) {
+    this.original.push(this.choices.length);
+    this.choices.push(choice);
+  }
+
   shuffle() {
-    this.original = this.choices.map((_, i) => i)
     for (let i = this.choices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [this.choices[i], this.choices[j]] = [this.choices[j], this.choices[i]];
@@ -45,13 +49,22 @@ export class Question {
   correct(): number[] {
     return this.original.map((o, i) => [o, i]).filter((o) => o[0] < this.maxChoices).map((o) => o[1])
   }
+
+  score(selected: number[]): number {
+    selected.sort();
+    const correct = this.correct();
+    return selected
+      .map<number>((s) => correct.includes(s) ? 1 : -1)
+      .reduce((prev, cur) => prev + cur, 0)
+      / correct.length;
+  }
 }
 
 export class Questionnaire {
   questions: Question[] = [];
   chapter = "";
 
-  constructor(text: string) {
+  constructor(private text: string) {
     let current = new Question();
     let hint = false;
     for (const line of text.split("\n")) {
@@ -71,7 +84,6 @@ export class Questionnaire {
           break;
         case '##':
           if (current.title !== "") {
-            current.shuffle();
             this.questions.push(current);
             current = new Question();
             hint = false;
@@ -79,7 +91,7 @@ export class Questionnaire {
           current.title = text;
           break;
         case '-':
-          current.choices.push(text);
+          current.addChoice(text);
           hint = true;
           break;
         case '=':
@@ -94,6 +106,16 @@ export class Questionnaire {
           break;
       }
     }
+  }
+
+  shuffle() {
+    for (const question of this.questions) {
+      question.shuffle();
+    }
+  }
+
+  clone(): Questionnaire {
+    return new Questionnaire(this.text);
   }
 }
 

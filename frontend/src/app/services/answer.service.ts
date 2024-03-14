@@ -44,7 +44,8 @@ export class AnswerService {
 
   constructor(private qservice: QuestionnaireService, private user: UserService) {
     qservice.loaded.subscribe((q) => {
-      this.questionnaire = q;
+      this.questionnaire = q.clone();
+      this.questionnaire.shuffle();
       this.done = q.questions.map((_) => false);
       this.update();
     });

@@ -86,7 +86,7 @@ export class AdminComponent {
       const result: ResultState = ["empty", "answered", "correct"][Math.floor(Math.random() * 3)] as ResultState;
       const question = this.questionnaire.questions[q];
       question.shuffle();
-      const choicesNbr = Math.floor(Math.random() * question.maxChoices);
+      const choicesNbr = Math.floor(Math.random() * (question.maxChoices + 1));
       const choices = question.original.slice(0, choicesNbr);
       await this.connection.updateQuestion(secret, q, result, choices);
     }

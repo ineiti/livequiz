@@ -21,8 +21,9 @@ export class Connection {
     }
 
     async updateQuestion(secret: Buffer, question: number, result: ResultState, choices: number[]) {
+        const choicesStr = choices.length > 0 ? `&choices=${choices.join("&choices=")}` : '';
         await fetch(`${this.url}/api/v1/updateQuestion?secret=${secret.toString('hex')}&` +
-            `question=${question}&selected=${result}&choices=${choices.join("&choices=")}`);
+            `question=${question}&selected=${result}${choicesStr}`);
     }
 
     async updateName(secret: Buffer, name: string) {

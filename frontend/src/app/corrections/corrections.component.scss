@@ -1,0 +1,76 @@
+.questionTile {
+    cursor: pointer;
+    border: solid 1px black;
+}
+
+.questionTile:hover {
+    background-color: aqua;
+}
+
+.questionTileOdd {
+    background-color: #eee;
+}
+
+.questionTileDone {
+    background-color: #ddf;
+}
+
+.questionTileDone.questionTileOdd {
+    background-color: #bbf;
+}
+
+.questionTileDone.questionTileChosen {
+    background-color: aquamarine;
+}
+
+.questionTileChosen {
+    background-color: aquamarine;
+}
+
+.resultCorrect {
+    background-color: #afa;
+}
+
+.resultWrong {
+    background-color: #faa;
+}
+
+.question {
+    white-space: pre-wrap;
+}
+
+mat-list-option:nth-child(n) {
+    height: auto;
+}
+
+.app-class .mat-list-item {
+    height: auto;
+  }
+
+.questionTileColor0 {
+    background-color: #8f8;
+}
+.questionTileColor1 {
+    background-color: #9e8;
+}
+.questionTileColor2 {
+    background-color: #ad8;
+}
+.questionTileColor3 {
+    background-color: #bc8;
+}
+.questionTileColor4 {
+    background-color: #bb8;
+}
+.questionTileColor5 {
+    background-color: #cb8;
+}
+.questionTileColor6 {
+    background-color: #da8;
+}
+.questionTileColor7 {
+    background-color: #e98;
+}
+.questionTileColor8 {
+    background-color: #f88;
+}

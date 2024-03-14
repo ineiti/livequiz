@@ -15,11 +15,17 @@ import { Question, QuestionnaireService } from './questionnaire.service';
 //   });
 // });
 
+function newQuestion(): Question {
+  let q = new Question();
+  q.maxChoices = 2;
+  q.choices = ["one", "two", "three", "four"];
+  q.original = [0, 1, 2, 3];
+  return q;
+}
+
 describe('Question', () => {
   it('should translate to/from shuffled', () => {
-    let q = new Question();
-    q.maxChoices = 2;
-    q.choices = ["one", "two", "three", "four"];
+    let q = newQuestion();
     q.shuffle();
     expect(q.original.length).toBe(q.choices.length);
     const orig = [true, false, false, false];
@@ -33,12 +39,19 @@ describe('Question', () => {
   });
 
   it('should calculate the correct results', () => {
-    let q = new Question();
-    q.maxChoices = 1;
-    q.choices = ["one", "two", "three", "four"];
+    let q = newQuestion();
     q.shuffle();
 
-    expect(q.result(q.origToShuffled([true, false, false, false]))).toBe("correct");
-    expect(q.result(q.origToShuffled([false, true, false, false]))).toBe("answered");
+    expect(q.resultShuffled(q.origToShuffled([true, false, false, false]))).toBe("correct");
+    expect(q.resultShuffled(q.origToShuffled([false, true, false, false]))).toBe("answered");
+  });
+
+  it('calculates the score correctly', () => {
+    let q = newQuestion();
+    expect(q.score([0, 1])).toBe(1);
+    expect(q.score([0])).toBe(0.5);
+    expect(q.score([0, 2])).toBe(0);
+    expect(q.score([2])).toBe(-0.5);
+    expect(q.score([2, 3])).toBe(-1);
   })
 })

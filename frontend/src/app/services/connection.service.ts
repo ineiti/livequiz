@@ -52,6 +52,8 @@ export class ConnectionService {
     const stats = await this.getStats();
     if (stats.answersHash !== this.answersHash.value) {
       this.answersHash.next(stats.answersHash);
+      this.getResults().then((res) => {
+      })
     }
     if (stats.quizHash !== this.quizHash.value) {
       this.quizHash.next(stats.quizHash);

@@ -62,7 +62,7 @@ export class UserService {
     localStorage.setItem(this.selectionStorageName, JSON.stringify(this.selectedStorage));
     this.connection.updateQuestion(this.secret, question,
       this.question(question).resultShuffled(selected),
-      this.question(question).shuffledToOrig(selected).map((s, i) => s ? i : -i).filter((i) => i >= 0));
+      this.question(question).shuffledToOrig(selected).map((s, i) => s ? i : -1).filter((i) => i >= 0));
   }
 
   getSelections(question: number): boolean[] {
