@@ -2,17 +2,34 @@ import { Injectable } from '@angular/core';
 import { ConnectionService, ResultState } from './connection.service';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 
+export enum QuestionType {
+  Single = 0,
+  Multi = 1,
+  Regexp = 2,
+}
+
 export class Question {
   title: string = ""
   description: string = ""
   hint: string = ""
   maxChoices: number = 0
+  replace: string[] = []
   choices: string[] = []
   original: number[] = []
+  qType: QuestionType = QuestionType.Single;
 
   addChoice(choice: string) {
     this.original.push(this.choices.length);
-    this.choices.push(choice);
+    if (this.qType !== QuestionType.Regexp) {
+      this.choices.push(choice);
+    } else {
+      const r = choice.match(/\/(.*)\//);
+      if (r?.length === 2) {
+        this.choices.push(r[1]);
+      } else {
+        this.choices.push(choice);
+      }
+    }
   }
 
   shuffle() {
@@ -34,6 +51,21 @@ export class Question {
 
   resultShuffled(selected: boolean[]): ResultState {
     return this.resultOrig(this.shuffledToOrig(selected));
+  }
+
+  resultRegexp(reg: string): ResultState {
+    if (this.qType !== QuestionType.Regexp) {
+      throw new Error("Not a regexp question");
+    }
+    if (reg === "") {
+      return "empty";
+    }
+    for (const r of this.choices) {
+      if (new RegExp(r).test(reg)) {
+        return "correct";
+      }
+    }
+    return "answered";
   }
 
   origToShuffled(selected: boolean[]): boolean[] {
@@ -72,7 +104,7 @@ export class Questionnaire {
         continue;
       }
       const linePre = line.replace(/`(.*?)`/g, "<span class='pre'>$1</span>");
-      const interpret = linePre.match(/([#=-]*) *(.*)/);
+      const interpret = linePre.match(/([#=~-]*) *(.*)/);
       if (interpret?.length != 3) {
         console.error(`Cannot parse line ${line}`);
         continue;
@@ -94,8 +126,19 @@ export class Questionnaire {
           current.addChoice(text);
           hint = true;
           break;
+        case '~':
+          current.qType = QuestionType.Regexp;
+          current.maxChoices = 1;
+          const res = text.match(/s\/(.*[^\\])\/(.*)\//);
+          if (res === null || res?.length !== 3) {
+            console.warn(`Couldn't parse -${text}- as s/search/replace/`);
+            continue;
+          }
+          current.replace = res!.slice(1, 3);
+          break;
         case '=':
           current.maxChoices = parseInt(text);
+          current.qType = current.maxChoices > 1 ? QuestionType.Multi : QuestionType.Single;
           break;
         default:
           if (hint) {
@@ -115,7 +158,12 @@ export class Questionnaire {
   }
 
   clone(): Questionnaire {
-    return new Questionnaire(this.text);
+    const quest = new Questionnaire(this.text);
+    for (let i = 0; i < this.questions.length; i++) {
+      quest.questions[i].choices = this.questions[i].choices;
+      quest.questions[i].original = this.questions[i].original;
+    }
+    return quest;
   }
 }
 
@@ -130,7 +178,11 @@ export class QuestionnaireService {
     connection.quizHash.subscribe((nh) => {
       if (nh !== this.hash) {
         this.hash = nh;
-        connection.getQuestionnaire().then((q) => this.loaded.next(new Questionnaire(q)))
+        connection.getQuestionnaire().then((q) => {
+          const quest = new Questionnaire(q);
+          quest.shuffle();
+          this.loaded.next(quest);
+        })
       }
     })
   }

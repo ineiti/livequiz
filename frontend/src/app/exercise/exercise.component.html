@@ -2,7 +2,7 @@
 
 <p [innerHTML]="answer!.description"></p>
 
-<div *ngIf="answer!.maxChoices === 1; else multiQuestion">
+<div *ngIf="answer!.qType === 0">
     <mat-selection-list class="app-class" #choicesList multiple="false" (selectionChange)="updateSelection(choicesList)"
         [disabled]="!editAllowed">
         @for (choice of answer!.choices; track $index) {
@@ -13,8 +13,8 @@
         }
     </mat-selection-list>
 </div>
-<ng-template #multiQuestion>
-    <p>Please select {{answer!.maxChoices}} answers</p>
+<div *ngIf="answer!.qType === 1">
+    <p>Please select one or more answers</p>
     <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="updateSelection(choicesList)"
         [disabled]="!editAllowed">
         @for (choice of answer!.choices; track $index) {
@@ -24,6 +24,13 @@
         </mat-list-option>
         }
     </mat-selection-list>
-</ng-template>
+</div>
+<div *ngIf="answer!.qType === 2">
+    <p>Please enter the answer in the box</p>
+    <mat-form-field style="width: 100%;">
+        <mat-label>Answer</mat-label>
+        <input matInput [(ngModel)]="answer!.regexp" (input)="regexpAnswer()" [class]="resultClasses[0]">
+    </mat-form-field>
+</div>
 
 <p *ngIf="showResults" [innerHTML]="answer!.hint"></p>

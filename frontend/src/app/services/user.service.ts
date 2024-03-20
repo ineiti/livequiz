@@ -11,12 +11,15 @@ export class UserService {
   secret = Buffer.alloc(32);
   name = "undefined";
   selectedStorage: boolean[][] = [];
+  regexpStorage: string[] = [];
   selectionStorageName = "user-selection";
+  regexpStorageName = "user-regexp";
 
   constructor(private connection: ConnectionService, private questionnaire: QuestionnaireService) {
     questionnaire.loaded.subscribe((qst) => {
       this.selectedStorage = qst.questions.map((q) => q.choices.map(() => false));
       this.selectionStorageName = `user-selection-${qst.chapter}`;
+      this.regexpStorageName = `user-regexp-${qst.chapter}`;
       this.init();
     })
   }
@@ -45,6 +48,11 @@ export class UserService {
       this.selectedStorage = JSON.parse(selStorage);
     }
 
+    const regStorage = localStorage.getItem(this.regexpStorageName);
+    if (regStorage !== null) {
+      this.regexpStorage = JSON.parse(regStorage);
+    }
+
     this.updateName();
   }
 
@@ -70,6 +78,20 @@ export class UserService {
       return [];
     }
     return this.question(question).origToShuffled(this.selectedStorage[question]);
+  }
+
+  updateRegexp(question: number, reg: string) {
+    this.regexpStorage[question] = reg;
+    localStorage.setItem(this.regexpStorageName, JSON.stringify(this.regexpStorage));
+    const result = this.question(question).resultRegexp(reg);
+    this.connection.updateQuestion(this.secret, question, result, result === "correct" ? [0] : []);
+  }
+
+  getRegexp(question: number): string {
+    if (question > this.regexpStorage.length) {
+      return "";
+    }
+    return this.regexpStorage[question] ?? "";
   }
 
   secretHex(): string {

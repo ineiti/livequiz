@@ -57,8 +57,12 @@ export class StudentComponent {
     }
   }
 
-  updateSelection(event: MatSelectionList) {
-    this.answers.updateSelection(event);
+  updateSelection(event: MatSelectionList | string) {
+    if (typeof event === "string") {
+      this.answers.updateRegexp(event);
+    } else {
+      this.answers.updateSelection(event);
+    }
   }
 
   updateName() {

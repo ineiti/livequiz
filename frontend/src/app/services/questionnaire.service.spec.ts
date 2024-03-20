@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Question, QuestionnaireService } from './questionnaire.service';
+import { Question, QuestionType, Questionnaire, QuestionnaireService } from './questionnaire.service';
 
 // describe('QuestionnaireService', () => {
 //   let service: QuestionnaireService;
@@ -42,8 +42,8 @@ describe('Question', () => {
     let q = newQuestion();
     q.shuffle();
 
-    expect(q.resultShuffled(q.origToShuffled([true, false, false, false]))).toBe("correct");
-    expect(q.resultShuffled(q.origToShuffled([false, true, false, false]))).toBe("answered");
+    expect(q.resultOrig([true, true, false, false])).toBe("correct");
+    expect(q.resultOrig([false, true, false, false])).toBe("answered");
   });
 
   it('calculates the score correctly', () => {
@@ -53,5 +53,25 @@ describe('Question', () => {
     expect(q.score([0, 2])).toBe(0);
     expect(q.score([2])).toBe(-0.5);
     expect(q.score([2, 3])).toBe(-1);
-  })
+  });
+
+  it('gets regexp question', () => {
+    const q = new Questionnaire(`# Test
+## Regexp
+Question
+~ s/ *//
+- /(a|b)v/
+- (c|b)n
+## End`);
+    expect(q.questions.length).toBe(1);
+    expect(q.questions[0].qType).toBe(QuestionType.Regexp);
+    expect(q.questions[0].replace).toEqual([" *", ""]);
+    expect(q.questions[0].choices.length).toBe(2);
+    expect(q.questions[0].choices[0]).toEqual("(a|b)v");
+    expect(q.questions[0].choices[1]).toEqual("(c|b)n");
+    expect(q.questions[0].resultRegexp("av")).toBe("correct");
+    expect(q.questions[0].resultRegexp("bn")).toBe("correct");
+    expect(q.questions[0].resultRegexp("aa")).toBe("answered");
+    expect(q.questions[0].resultRegexp("")).toBe("empty");
+  });
 })

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSelectionList } from "@angular/material/list";
-import { Question, Questionnaire, QuestionnaireService } from './questionnaire.service';
+import { Question, QuestionType, Questionnaire, QuestionnaireService } from './questionnaire.service';
 import { UserService } from './user.service';
 import { ReplaySubject } from 'rxjs';
 import { ResultState } from './connection.service';
@@ -9,17 +9,24 @@ export class Answer {
   description = "undefined";
   title = "undefined";
   maxChoices = 0;
+  qType = QuestionType.Single;
   choices: string[] = [""];
   selected: boolean[] = [];
+  regexp: string = "";
   hint = "";
   result: ResultState = "empty";
   correct: number[] = [];
 
-  constructor(cq: Question, selected: boolean[]) {
+  constructor(cq: Question, selReg: boolean[] | string) {
     this.description = cq.description;
     this.maxChoices = cq.maxChoices;
+    this.qType = cq.qType;
     this.choices = cq.choices;
-    this.selected = selected;
+    if (this.qType === QuestionType.Regexp && typeof selReg === "string") {
+      this.regexp = selReg;
+    } else if (this.qType !== QuestionType.Regexp && typeof selReg !== "string") {
+      this.selected = selReg;
+    }
     this.result = cq.resultShuffled(this.selected);
     this.hint = cq.hint;
     this.title = cq.title;
@@ -45,7 +52,6 @@ export class AnswerService {
   constructor(private qservice: QuestionnaireService, private user: UserService) {
     qservice.loaded.subscribe((q) => {
       this.questionnaire = q.clone();
-      this.questionnaire.shuffle();
       this.done = q.questions.map((_) => false);
       this.update();
     });
@@ -81,6 +87,11 @@ export class AnswerService {
     this.updateAnswer();
   }
 
+  updateRegexp(re: string) {
+    this.user.updateRegexp(this.currentQuestion, re);
+    this.updateAnswer();
+  }
+
   update() {
     this.first = this.currentQuestion === 0;
     this.empty = this.questionnaire.questions.length === 0;
@@ -93,8 +104,13 @@ export class AnswerService {
 
   updateAnswer() {
     const cq = this.questionnaire.questions[this.currentQuestion];
-    const selected = this.user.getSelections(this.currentQuestion);
-    this._answer = new Answer(cq, selected);
+    if (this.questionnaire.questions[this.currentQuestion].qType === QuestionType.Regexp) {
+      const selected = this.user.getRegexp(this.currentQuestion);
+      this._answer = new Answer(cq, selected);
+    } else {
+      const selected = this.user.getSelections(this.currentQuestion);
+      this._answer = new Answer(cq, selected);
+    }
     this.answer.next(this._answer);
   }
 }

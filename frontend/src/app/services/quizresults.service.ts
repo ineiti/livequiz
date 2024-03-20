@@ -30,7 +30,7 @@ export class QuizResult {
       .map((choice) => choice.choices[index]);
     this.score = choicesFiltered
       .map((s) => cq.score(s))
-      .reduce((prev, cur) => prev + cur, 1)
+      .reduce((prev, cur) => prev + cur, 0)
       / choicesFiltered.length;
     const allChoices = cq.choices.map((c, i) => {
       const stats = choicesFiltered

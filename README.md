@@ -10,18 +10,17 @@ The admin view shows all students, and what they answered already.
   - l'interface admin peut "perdre" des noms après le redémarrage du système
     - probably due to clients only sending updates to questions
     - -> on startup, should send "sendAllStats" in "getStats"
+  - when changing quiz, /admin still shows the attempts
+    - backend stores answers globally, instead of per-quiz
 - admin view:
   - route to /student if it's not an admin
 - student view:
   - show green and red in numbers when showResults === true
+- correction view:
+  - add number of answers for choices
 - general
   - admin can upload quizzes
   - admin can choose which quizz is shown
-  - add questions which are verified with regular expressions
-    - use `~` instead of `=` and `-`, followed by the regular expression
-    - remove double spaces, leading and trailing spaces
-    - more than one `~` is allowed, and any matching regex solves the question
-    - The preferred solution is given as string after the first `~`
   - modes
     - exam mode: only once the admin switch is flicked will the students see if they answered correctly
     - live mode: after every question, students see if they answered correctly
@@ -30,9 +29,17 @@ The admin view shows all students, and what they answered already.
       - students directly see if they answered correctly or not
       - stop students from changing their answers
 - backend
+  - accept directory for quizzes, and offer all .md files as quizzes
+    - store answers per quiz
   - store user data on disk
 
 # CHANGELOG
+
+2024-03-20:
+- add questions which are verified with regular expressions
+  - use `~` instead of `=`, followed by the regular expression for search and replace
+  - more than one `-` is allowed, and any matching regex solves the question
+- fix small bugs in `/corrections`
 
 2024-03-14:
 - add statistics to each column of how many answered correctly
