@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSelectionList } from "@angular/material/list";
-import { Question, Questionnaire, QuestionnaireService } from './questionnaire.service';
+import { Question, QuestionType, Questionnaire, QuestionnaireService } from './questionnaire.service';
 import { UserService } from './user.service';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { ConnectionService, Result, ResultState } from './connection.service';
@@ -8,12 +8,14 @@ import { ConnectionService, Result, ResultState } from './connection.service';
 export interface ChoicesStats {
   field: string;
   stats: number;
+  count: number;
 }
 
 export class QuizResult {
   description = "undefined";
   title = "undefined";
   maxChoices = 0;
+  qType = QuestionType.Single;
   choices: ChoicesStats[] = [];
   hint = "";
   score = 0;
@@ -25,18 +27,18 @@ export class QuizResult {
     this.maxChoices = cq.maxChoices;
     this.hint = cq.hint;
     this.title = cq.title;
+    this.qType = cq.qType;
     const choicesFiltered = choices
       .filter((choice) => choice.choices.length > index)
       .map((choice) => choice.choices[index]);
     this.score = choicesFiltered
-      .map((s) => cq.score(s))
+      .map((s) => cq.scoreOrig(s))
       .reduce((prev, cur) => prev + cur, 0)
       / choicesFiltered.length;
-    const allChoices = cq.choices.map((c, i) => {
-      const stats = choicesFiltered
-        .filter((choice) => choice.includes(i)).length
-        / choicesFiltered.length
-      return { field: c, stats: stats };
+    const allChoices = cq.choicesOrig().map((c, i) => {
+      const count = choicesFiltered
+        .filter((choice) => choice.includes(i)).length;
+      return { field: c, stats: count / choicesFiltered.length, count: count};
     });
     const correctChoices = allChoices.slice(0, this.maxChoices);
     const wrongChoices = allChoices.slice(this.maxChoices);
@@ -63,7 +65,7 @@ export class QuizResultsService {
 
   private _answer?: QuizResult;
   answer: ReplaySubject<QuizResult> = new ReplaySubject();
-  done: ReplaySubject<boolean> = new ReplaySubject();
+  newResults: ReplaySubject<boolean> = new ReplaySubject();
 
   constructor(private qservice: QuestionnaireService,
     private connection: ConnectionService) {
@@ -73,7 +75,7 @@ export class QuizResultsService {
       this.connection.getResults().then((res) => {
         this.updateResults(res);
         this.update();
-        this.done.next(true);
+        this.newResults.next(true);
       });
     });
   }

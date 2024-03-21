@@ -78,17 +78,22 @@ export class Question {
     return ret;
   }
 
-  correct(): number[] {
-    return this.original.map((o, i) => [o, i]).filter((o) => o[0] < this.maxChoices).map((o) => o[1])
+  choicesOrig(): string[] {
+    let ret: string[] = [];
+    this.original.map((t, o) => ret[t] = this.choices[o]);
+    return ret;
   }
 
-  score(selected: number[]): number {
+  correct(): number[] {
+    return this.original.map((o, i) => [o, i]).filter((oi) => oi[0] < this.maxChoices).map((oi) => oi[1])
+  }
+
+  scoreOrig(selected: number[]): number {
     selected.sort();
-    const correct = this.correct();
     return selected
-      .map<number>((s) => correct.includes(s) ? 1 : -1)
+      .map<number>((s) => s < this.maxChoices ? 1 : -1)
       .reduce((prev, cur) => prev + cur, 0)
-      / correct.length;
+      / this.maxChoices;
   }
 }
 

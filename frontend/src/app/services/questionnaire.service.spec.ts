@@ -48,11 +48,12 @@ describe('Question', () => {
 
   it('calculates the score correctly', () => {
     let q = newQuestion();
-    expect(q.score([0, 1])).toBe(1);
-    expect(q.score([0])).toBe(0.5);
-    expect(q.score([0, 2])).toBe(0);
-    expect(q.score([2])).toBe(-0.5);
-    expect(q.score([2, 3])).toBe(-1);
+    q.shuffle();
+    expect(q.scoreOrig([0, 1])).toBe(1);
+    expect(q.scoreOrig([0])).toBe(0.5);
+    expect(q.scoreOrig([0, 2])).toBe(0);
+    expect(q.scoreOrig([2])).toBe(-0.5);
+    expect(q.scoreOrig([2, 3])).toBe(-1);
   });
 
   it('gets regexp question', () => {

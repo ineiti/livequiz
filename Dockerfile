@@ -14,5 +14,7 @@ FROM debian:buster
 WORKDIR /root
 COPY --from=www /root/dist/livequiz/browser frontend
 COPY --from=server /root/target/release/backend .
+ENV ROCKET_ADDRESS=0.0.0.0
+ENV STATIC_PAGE=./frontend
 
 CMD ./backend

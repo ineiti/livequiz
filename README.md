@@ -15,9 +15,7 @@ The admin view shows all students, and what they answered already.
 - admin view:
   - route to /student if it's not an admin
 - student view:
-  - show green and red in numbers when showResults === true
 - correction view:
-  - add number of answers for choices
 - general
   - admin can upload quizzes
   - admin can choose which quizz is shown
@@ -34,6 +32,11 @@ The admin view shows all students, and what they answered already.
   - store user data on disk
 
 # CHANGELOG
+
+2024-03-21:
+- don't reset choices in multi
+- correction: add number of answers for choices
+- correction: fix several wrong calculations of choices
 
 2024-03-20:
 - add questions which are verified with regular expressions

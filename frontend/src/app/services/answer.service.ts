@@ -75,11 +75,7 @@ export class AnswerService {
   updateSelection(event: MatSelectionList) {
     const selected = event.selectedOptions.selected.length;
     const maxChoices = this._answer!.maxChoices;
-    if (selected > maxChoices) {
-      event.selectedOptions.selected[0].toggle();
-    } else {
-      this.done[this.currentQuestion] = selected === maxChoices;
-    }
+    this.done[this.currentQuestion] = selected >= maxChoices;
     this.user.updateSelections(this.currentQuestion,
       this._answer!.selected.map((_, i) => {
         return event.selectedOptions.selected.some((sel) => sel.value === i);

@@ -23,7 +23,7 @@ export class CorrectionsComponent {
   tileClasses: string[] = [];
   result = QuizResult.empty();
   sResults?: Subscription;
-  sDone?: Subscription;
+  sNewResults?: Subscription;
   resultClasses = ['resultCorrect', 'resultCorrect', 'resultWrong', 'resultWrong'];
   resultWidth = ["100%", "50%", "50%", "80%"];
 
@@ -34,25 +34,35 @@ export class CorrectionsComponent {
   async ngOnInit() {
     await this.connection.setEditAllowed(this.user.secret, false);
     await this.connection.setShowAnswers(this.user.secret, true);
-    this.sDone = this.results.done.subscribe(() => {
-      if (this.results.results.length < this.results.questionnaire.questions.length) {
-        return;
-      }
-      for (let question = 0; question < this.results.questionnaire.questions.length; question++) {
-        const score = Math.round(this.results.results[question].score * 4) + 4;
-        this.tileClasses[question] = "questionTile" + (this.results.currentQuestion === question ? " questionTileChosen" : "") +
-          (question % 2 === 1 ? " questionTileOdd" : "") + ` questionTileColor${score}`;
-      }
-      this.sResults = this.results.answer.subscribe((a) => {
-        this.result = a;
-        this.update();
-      });
+    this.sNewResults = this.results.newResults.subscribe(() => {
+      this.updateResults();
+    });
+    this.sResults = this.results.answer.subscribe((a) => {
+      this.result = a;
+      this.updateResults();
+      this.update();
     });
   }
 
   async ngOnDestroy() {
+    if (this.sNewResults !== undefined) {
+      this.sNewResults!.unsubscribe();
+    }
     if (this.sResults !== undefined) {
       this.sResults!.unsubscribe();
+    }
+  }
+
+  updateResults() {
+    if (this.results.results.length < this.results.questionnaire.questions.length) {
+      return;
+    }
+    for (let question = 0; question < this.results.questionnaire.questions.length; question++) {
+      const score = Math.round(this.results.results[question].score * 4) + 4;
+      this.tileClasses[question] = "questionTile" +
+        (this.results.currentQuestion === question ? " questionTileChosen" : "") +
+        (question % 2 === 1 ? " questionTileOdd" : "") +
+        ` questionTileColor${score}`;
     }
   }
 

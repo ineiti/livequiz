@@ -10,6 +10,7 @@ import { Buffer } from 'buffer';
 import { Questionnaire, QuestionnaireService } from '../services/questionnaire.service';
 import { UserService } from '../services/user.service';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-admin',
@@ -27,6 +28,7 @@ export class AdminComponent {
   selectedClasses: string[][] = [];
   questionnaire = new Questionnaire("");
   title = "Not available";
+  addTestUsers = environment.addTestUsers;
 
   constructor(private connection: ConnectionService, private qservice: QuestionnaireService,
     private user: UserService) {

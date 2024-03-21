@@ -21,27 +21,43 @@
 
     <p [innerHTML]="result.description"></p>
 
-    <div *ngIf="result.maxChoices === 1; else multiQuestion">
+    <div *ngIf="result.qType === 0">
         <mat-selection-list class="app-class" #choicesList multiple="false" (selectionChange)="clearSelection($event)">
             @for (choice of result.choices; track $index) {
+            <div style="display: flex;">
+                <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
+                    [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
+                    <span class="question" [innerHTML]="choice.field"></span>
+                </mat-list-option>
+                <span class="question" style="margin: auto 0 auto 1em; font-size: 120%;">{{choice.count}}</span>
+            </div>
+            }
+        </mat-selection-list>
+    </div>
+    <div *ngIf="result.qType === 1">
+        <p>Please select {{result.maxChoices}} answers</p>
+        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
+            @for (choice of result.choices; track $index) {
+            <div style="display: flex;">
+                <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
+                    [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
+                    <span class="question" [innerHTML]="choice.field"></span>
+                </mat-list-option>
+                <span class="question" style="margin: auto 0 auto 1em; font-size: 120%;">{{choice.count}}</span>
+            </div>
+            }
+        </mat-selection-list>
+    </div>
+    <div *ngIf="result.qType === 2">
+        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
+            @for (choice of result.choices; track $index) {
             <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
+                [style.width]="resultWidth[$index]" [selected]="true">
                 <span class="question" [innerHTML]="choice.field"></span>
             </mat-list-option>
             }
         </mat-selection-list>
     </div>
-    <ng-template #multiQuestion>
-        <p>Please select {{result.maxChoices}} answers</p>
-        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
-            @for (choice of result.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
-                <span class="question" [innerHTML]="choice.field"></span>
-            </mat-list-option>
-            }
-        </mat-selection-list>
-    </ng-template>
 
     <p [innerHTML]="result.hint"></p>
 </div>
