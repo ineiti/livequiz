@@ -155,13 +155,13 @@
       }
     },
     "vscode@latest": {
-      "last_modified": "2024-02-24T23:06:34Z",
-      "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#vscode",
+      "last_modified": "2024-04-02T02:53:36Z",
+      "resolved": "github:NixOS/nixpkgs/080a4a27f206d07724b88da096e27ef63401a504#vscode",
       "source": "devbox-search",
-      "version": "1.86.2",
+      "version": "1.87.2",
       "systems": {
         "x86_64-linux": {
-          "store_path": "/nix/store/zgy8a5y2asybvzvpyb84p67blfzwgmg9-vscode-1.86.2"
+          "store_path": "/nix/store/2yf2slmb9b87yx98pmvh30xgdzqmz42w-vscode-1.87.2"
         }
       }
     }

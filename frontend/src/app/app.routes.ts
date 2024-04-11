@@ -1,11 +1,24 @@
 import { Routes } from '@angular/router';
-import { StudentComponent } from './student/student.component';
-import { AdminComponent } from './admin/admin.component';
-import { CorrectionsComponent } from './corrections/corrections.component';
+import { LandingComponent } from './landing/landing.component';
+import { CourseComponent } from './course/course.component';
+import { DojoComponent } from './course/dojo/dojo.component';
+import { CourseManageComponent } from './course/course-manage/course-manage.component';
 
 export const routes: Routes = [
-    { path: 'corrections', component: CorrectionsComponent },
-    { path: 'student', component: StudentComponent },
-    { path: 'admin', component: AdminComponent },
-    { path: '**', redirectTo: '/student'}
+    {
+        path: 'course/:course_id',
+        component: CourseComponent,
+        children: [
+            {
+                path: '', pathMatch: 'full',
+                component: CourseManageComponent,
+            },
+            {
+                path: 'dojo',
+                component: DojoComponent,
+            }
+        ]
+    },
+    { path: '', component: LandingComponent, pathMatch: 'full' },
+    { path: '**', redirectTo: '/' }
 ];

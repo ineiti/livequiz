@@ -1,0 +1,35 @@
+<h2>Welcome</h2>
+
+<p>LiveQuiz is a minimalistic tool to offer live quizzes to your students.
+    It offers the following functionalities:
+</p>
+<ul>
+    <li>Managing quizzes by courses</li>
+    <li>Adding / modifying / removing quizzes to / from courses</li>
+    <li>Activating a quiz for your students</li>
+    <li>Showing progress of the students in the quiz</li>
+    <li>Correcting the quiz, showing worst answers first</li>
+</ul>
+
+<p>And of course it should one day join the <a href="https://web.fledg.re">Fledger network</a>,
+    so that all of the storage is decentralized...</p>
+
+<div *ngIf="( courses.list | async )!.length > 0; else noCourses">
+    <p>Your courses:</p>
+    <ul>
+        <li *ngFor="let course of courses.list | async">
+            <a [routerLink]="['/course', course.id.to_hex()]">{{course.name}}</a> -
+            {{course.students.length}} students
+        </li>
+    </ul>
+</div>
+<ng-template #noCourses>
+    <div>No courses yet</div>
+</ng-template>
+<div>
+    <mat-form-field>
+        <mat-label>New course name:</mat-label>
+        <input matInput [(ngModel)]="course_name">
+    </mat-form-field>
+    <button [disabled]="course_name.length == 0" mat-stroked-button (click)="addCourse()">Add a course</button>
+</div>

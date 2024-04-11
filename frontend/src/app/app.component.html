@@ -1,8 +1,10 @@
 <div class="content">
-    <!-- <a [routerLink]="['/admin']">Admin</a> -
-    <a [routerLink]="['/student']">Student</a> -->
-    <h1>LiveQuiz</h1>
-
+    <h1>LiveQuiz - [<a routerLink="/">Home</a>]</h1>
+    <mat-form-field>
+        <mat-label>Your name:</mat-label>
+        <input matInput [(ngModel)]="user.name">
+    </mat-form-field>
+    
     <router-outlet />
 </div>
 <footer class="footer">

@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Connection, ConnectionMock, JSONResult, JSONStats } from '../../lib/connection';
-import { Buffer } from 'buffer';
+import { JSONResult, JSONStats } from '../../lib/connection';
+import { ConnectionMock } from '../../lib/connection_mock';
 import { BehaviorSubject } from 'rxjs';
+import { CourseID, DojoID, DojoResultID, QuizID, Secret } from '../../lib/ids';
+import { UserService } from './user.service';
+import { environment } from '../../environments/environment';
+import { Course, Dojo, DojoChoice, DojoResult, Quiz } from '../../lib/structs';
+import { BlobID, JSONBlob, JSONBlobUpdateRequest, JSONBlobUpdateReply } from './storage.service';
 
 export type ResultState = ("correct" | "answered" | "empty")
 
@@ -35,66 +40,18 @@ export class Stats {
   providedIn: 'root'
 })
 export class ConnectionService {
-  showResults = new BehaviorSubject(false);
-  editAllowed = new BehaviorSubject(true);
-  quizHash = new BehaviorSubject("");
-  answersHash = new BehaviorSubject("");
-  private base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
-  private connection = new Connection(this.base);
-  // private connection = new ConnectionMock();
+  private connection = new ConnectionMock();
 
-  constructor() {
-    setInterval(() => this.updateStats(), 2000)
-    this.updateStats();
-  }
-
-  private async updateStats() {
-    const stats = await this.getStats();
-    if (stats.answersHash !== this.answersHash.value) {
-      this.answersHash.next(stats.answersHash);
-      this.getResults().then((res) => {
-      })
-    }
-    if (stats.quizHash !== this.quizHash.value) {
-      this.quizHash.next(stats.quizHash);
-    }
-    if (stats.showResults !== this.showResults.value) {
-      this.showResults.next(stats.showResults);
-    }
-    if (stats.editAllowed !== this.editAllowed.value) {
-      this.editAllowed.next(stats.editAllowed);
+  constructor(private user: UserService) {
+    if (environment.realBackend) {
+      //   const base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
+      //   this.connection = new Connection(base);
+    } else {
+      this.connection.initBasic(this.user.secret);
     }
   }
 
-  async updateQuestion(secret: Buffer, question: number, result: ResultState, choices: number[]) {
-    await this.connection.updateQuestion(secret, question, result, choices);
-  }
-
-  async updateName(secret: Buffer, name: string) {
-    await this.connection.updateName(secret, name);
-  }
-
-  async getResults(): Promise<Result[]> {
-    return (await this.connection.getResults()).map((r) => new Result(r));
-  }
-
-  async getQuestionnaire(): Promise<string> {
-    return this.connection.getQuestionnaire();
-  }
-
-  async updateQuestionnaire(secret: Buffer) {
-    this.connection.updateQuestionnaire(secret);
-  }
-
-  async setShowAnswers(secret: Buffer, show: boolean) {
-    return this.connection.setShowAnswers(secret, show);
-  }
-
-  async setEditAllowed(secret: Buffer, edit: boolean) {
-    return this.connection.setEditAllowed(secret, edit);
-  }
-
-  async getStats(): Promise<Stats> {
-    return new Stats(await this.connection.getStats());
+  async getBlobUpdates(updates: JSONBlobUpdateRequest): Promise<JSONBlobUpdateReply> {
+    return this.connection.getBlobUpdates(updates);
   }
 }

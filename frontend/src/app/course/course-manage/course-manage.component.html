@@ -1,0 +1,30 @@
+<div *ngIf="!course.state.is_idle()">
+    <h3>Quiz in Dojo: {{currentQuiz()?.title ?? "unknown"}}</h3>
+    <div *ngIf="isAdmin()">
+        <button mat-stroked-button (click)="dojoIdle()">
+            Stop Dojo
+        </button>
+        <button *ngIf="course.state.is_corrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
+            Restart Dojo
+        </button>
+        <button *ngIf="course.state.is_quiz()" mat-stroked-button (click)="dojoCorrections()">
+            Show Corrections
+        </button>
+    </div>
+    <div *ngIf="isStudent()">
+        <button *ngIf="course.state.is_quiz()" mat-stroked-button routerLink="dojo">Enter Dojo</button>
+        <button *ngIf="course.state.is_corrections()" mat-stroked-button routerLink="dojo/corrections">See
+            Corrections</button>
+    </div>
+</div>
+
+<div *ngIf="quizzes.length > 0">
+    <h3>Available Quizzes</h3>
+    <ul>
+        <li *ngFor="let quiz of quizzes">
+            {{quiz.title}}
+            <button *ngIf="isAdmin()" (click)="dojoQuiz(quiz.id)">Start Quiz</button>
+            <button *ngIf="isStudent()" routerLink="['./kata', quiz.id.to_hex()]">Train Yourself</button>
+        </li>
+    </ul>
+</div>

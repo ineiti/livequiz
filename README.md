@@ -12,10 +12,17 @@ The admin view shows all students, and what they answered already.
     - -> on startup, should send "sendAllStats" in "getStats"
   - when changing quiz, /admin still shows the attempts
     - backend stores answers globally, instead of per-quiz
+  - on mobile devices, long answers are hidden partially
 - admin view:
   - route to /student if it's not an admin
+  - add "delete" button to clean students
 - student view:
+  - loss of "answered" in the upper table of questions if questionnaire is reloaded
+  - color is missing in upper table of questions
 - correction view:
+  - route to /student if it's not an admin
+- quizzes:
+  - add possibility for a `~ /something/i` and `s/ *//g` to ignore case and delete all spaces
 - general
   - admin can upload quizzes
   - admin can choose which quizz is shown
@@ -32,6 +39,10 @@ The admin view shows all students, and what they answered already.
   - store user data on disk
 
 # CHANGELOG
+
+2024-04-xx:
+- rewrite of backend
+- more general frontend, with possibility for other admins
 
 2024-03-21:
 - don't reset choices in multi

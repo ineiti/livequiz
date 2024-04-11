@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSelectionList } from "@angular/material/list";
 import { Question, QuestionType, Questionnaire, QuestionnaireService } from './questionnaire.service';
-import { UserService } from './user.service';
+import { UserOldService } from './user.old.service';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { ConnectionService, Result, ResultState } from './connection.service';
 
@@ -72,11 +72,11 @@ export class QuizResultsService {
     this.qservice.loaded.subscribe((q) => {
       this.questionnaire = q.clone();
       this.results = [];
-      this.connection.getResults().then((res) => {
-        this.updateResults(res);
-        this.update();
-        this.newResults.next(true);
-      });
+      // this.connection.getResults().then((res) => {
+      //   this.updateResults(res);
+      //   this.update();
+      //   this.newResults.next(true);
+      // });
     });
   }
 

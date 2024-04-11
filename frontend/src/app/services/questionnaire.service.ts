@@ -183,11 +183,11 @@ export class QuestionnaireService {
     connection.quizHash.subscribe((nh) => {
       if (nh !== this.hash) {
         this.hash = nh;
-        connection.getQuestionnaire().then((q) => {
-          const quest = new Questionnaire(q);
-          quest.shuffle();
-          this.loaded.next(quest);
-        })
+        // connection.getQuestionnaire().then((q) => {
+        //   const quest = new Questionnaire(q);
+        //   quest.shuffle();
+        //   this.loaded.next(quest);
+        // })
       }
     })
   }

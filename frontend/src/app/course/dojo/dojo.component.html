@@ -1,0 +1,9 @@
+<h3>Dojo - get trained!</h3>
+
+<div *ngIf="is_idle()">
+    <h4>Currently there is no ongoing dojo training.</h4>
+</div>
+
+<div *ngIf="is_quiz()">
+    <app-quiz></app-quiz>
+</div>

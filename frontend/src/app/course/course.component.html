@@ -1,0 +1,4 @@
+<h2>Course {{ course.name }}
+[<a routerLink="/course/{{course.id.to_hex()}}">Manage</a>]</h2>
+
+<router-outlet (activate)="onOutletLoaded($event)" />

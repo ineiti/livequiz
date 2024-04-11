@@ -1,0 +1,52 @@
+<h2>{{questionnaire.chapter}}</h2>
+
+<div *ngIf="!empty">
+    <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
+        <button mat-button [disabled]="first" (click)="previous()"
+            style="margin: auto 1em auto; height: 2em;">Previous</button>
+        <mat-grid-list [cols]="gridWidth(questionnaire.questions.length)" rowHeight="2em">
+            @for (q of questionnaire.questions; track $index) {
+            <mat-grid-tile (click)="goto($index)" [class]="tileClasses[$index]">{{$index+1}}</mat-grid-tile>
+            }
+        </mat-grid-list>
+        <button mat-button [disabled]="last" (click)="next()"
+            style="margin: auto 0 auto 1em; height: 2em;">Next</button>
+    </div>
+
+    <h3 [innerHTML]="answer!.title"></h3>
+
+    <p [innerHTML]="answer!.description"></p>
+
+    <div *ngIf="answer!.qType === 0">
+        <mat-selection-list class="app-class" #choicesList multiple="false"
+            (selectionChange)="updateSelection(choicesList)" [disabled]="!editAllowed">
+            @for (choice of answer!.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
+                [class]="resultClasses[$index]">
+                <span class="question" [innerHTML]="choice"></span>
+            </mat-list-option>
+            }
+        </mat-selection-list>
+    </div>
+    <div *ngIf="answer!.qType === 1">
+        <p>Please select one or more answers</p>
+        <mat-selection-list class="app-class" #choicesList multiple="true"
+            (selectionChange)="updateSelection(choicesList)" [disabled]="!editAllowed">
+            @for (choice of answer!.choices; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
+                [class]="resultClasses[$index]">
+                <span class="question" [innerHTML]="choice"></span>
+            </mat-list-option>
+            }
+        </mat-selection-list>
+    </div>
+    <div *ngIf="answer!.qType === 2">
+        <p>Please enter the answer in the box</p>
+        <mat-form-field style="width: 100%;">
+            <mat-label>Answer</mat-label>
+            <input matInput [(ngModel)]="answer!.regexp" (input)="updateRegexp()" [class]="resultClasses[0]">
+        </mat-form-field>
+    </div>
+
+    <p *ngIf="showResults" [innerHTML]="answer!.hint"></p>
+</div>

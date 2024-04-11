@@ -1,21 +1,18 @@
 import { Component } from '@angular/core';
-import { ConnectionService } from '../services/connection.service';
-import { Question, QuestionnaireService } from '../services/questionnaire.service';
-import { UserService } from '../services/user.service';
-import { Answer, AnswerService } from '../services/answer.service';
+import { ConnectionService } from '../../../services/connection.service';
+import { UserOldService } from '../../../services/user.old.service';
 import { CommonModule } from '@angular/common';
-import { ExerciseComponent } from '../exercise/exercise.component';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { MatListModule, MatListOption, MatSelectionListChange } from '@angular/material/list';
-import { GRID_MAX_WIDTH } from '../app.config';
-import { QuizResult, QuizResultsService } from '../services/quizresults.service';
+import { MatListModule, MatSelectionListChange } from '@angular/material/list';
+import { GRID_MAX_WIDTH } from '../../../app.config';
+import { QuizResult, QuizResultsService } from '../../../services/quizresults.service';
 import { Subscription } from 'rxjs';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-corrections',
   standalone: true,
-  imports: [CommonModule, ExerciseComponent, MatListModule, MatGridListModule, RouterLink],
+  imports: [CommonModule, MatListModule, MatGridListModule, RouterLink],
   templateUrl: './corrections.component.html',
   styleUrl: './corrections.component.scss'
 })
@@ -28,12 +25,12 @@ export class CorrectionsComponent {
   resultWidth = ["100%", "50%", "50%", "80%"];
 
   constructor(private connection: ConnectionService, public results: QuizResultsService,
-    private user: UserService) {
+    private user: UserOldService) {
   }
 
   async ngOnInit() {
-    await this.connection.setEditAllowed(this.user.secret, false);
-    await this.connection.setShowAnswers(this.user.secret, true);
+    // await this.connection.setEditAllowed(this.user.secret, false);
+    // await this.connection.setShowAnswers(this.user.secret, true);
     this.sNewResults = this.results.newResults.subscribe(() => {
       this.updateResults();
     });
