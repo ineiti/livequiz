@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { Course, Quiz } from '../../../lib/structs';
+import { Course, CourseState, CourseStateEnum, Quiz } from '../../../lib/structs';
 import { RouterLink } from '@angular/router';
 import { QuizID } from '../../../lib/ids';
 import { CommonModule } from '@angular/common';
 import { ConnectionService } from '../../services/connection.service';
-import { ObserveService } from '../../services/observe.service';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
+import { StorageService } from '../../services/storage.service';
+import { LivequizStorageService } from '../../services/livequiz-storage.service';
 
 @Component({
   selector: 'app-course-manage',
@@ -18,26 +19,20 @@ import { UserService } from '../../services/user.service';
 export class CourseManageComponent {
   @Input() course!: Course;
   quizzes: Quiz[] = [];
-  courseUpdate?: Subscription;
 
-  constructor(private connection: ConnectionService, private observe: ObserveService,
-    private user: UserService) { }
+  constructor(private storage: StorageService, private user: UserService,
+    private livequiz: LivequizStorageService) { }
 
   async ngOnInit() {
-    for (const id of this.course.quiz_ids) {
-      this.quizzes.push(await this.connection.getQuiz(id));
+    for (const id of this.course.quizIds) {
+      this.quizzes.push(await this.storage.getBlob(id, new Quiz()));
     }
-    this.courseUpdate = (await this.observe.observeCourse(this.course.id)).subscribe((c) => this.course = c);
-  }
-
-  async ngOnDestroy() {
-    this.courseUpdate?.unsubscribe();
   }
 
   currentQuiz(): Quiz | undefined {
-    const id = this.course.state.dojo_id();
-    for (const q of this.quizzes){
-      if (q.id.equals(id)){
+    const id = this.course.state.getDojoID();
+    for (const q of this.quizzes) {
+      if (q.id.equals(id)) {
         return q;
       }
     }
@@ -45,22 +40,22 @@ export class CourseManageComponent {
   }
 
   isAdmin(): boolean {
-    return this.user.secret.hash().is_in(this.course.admins);
+    return this.user.isIn(this.course.admins);
   }
 
   isStudent(): boolean {
-    return this.user.secret.hash().is_in(this.course.students);
+    return this.user.isIn(this.course.students);
   }
 
   async dojoQuiz(id: QuizID) {
-    await this.connection.dojoQuiz(this.course.id, id);
+    await this.livequiz.setDojoQuiz(this.course.id, id);
   }
 
   async dojoCorrections() {
-    await this.connection.dojoCorrections(this.course.id, this.course.state.id!);
+    await this.livequiz.setDojoCorrection(this.course.id);
   }
 
   async dojoIdle() {
-    await this.connection.dojoIdle(this.course.id);
+    await this.livequiz.setDojoIdle(this.course.id);
   }
 }

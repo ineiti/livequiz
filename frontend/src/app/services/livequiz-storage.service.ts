@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Blob, BlobID, StorageService } from './storage.service';
-import { Course } from '../../lib/structs';
+import { Course, CourseStateEnum, Dojo } from '../../lib/structs';
+import { DojoID, QuizID } from '../../lib/ids';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,48 @@ export class LivequizStorageService {
 
   constructor(private storage: StorageService) {
     this.storage.addBlob(this.courses);
+  }
+
+  async getCourse(courseId: BlobID): Promise<Course> {
+    let course = this.courses.list.get(courseId.toHex());
+    if (course === undefined) {
+      course = await this.storage.getBlob(courseId, new Course());
+    }
+    return course;
+  }
+
+  async setDojoIdle(courseId: BlobID) {
+    const course = await this.getCourse(courseId);
+    course.state.state = CourseStateEnum.Idle;
+  }
+
+  async setDojoQuiz(courseId: BlobID, quizId: QuizID, dojoId?: DojoID) {
+    const course = await this.getCourse(courseId);
+
+    if (dojoId === undefined) {
+      const dojo = new Dojo();
+      dojo.quizId = quizId;
+      this.storage.addBlob(dojo);
+      dojoId = dojo.id;
+      course.dojoIds.push(dojoId);
+    }
+
+    course.state.state = CourseStateEnum.Quiz;
+    course.state.dojoId = dojoId;
+  }
+
+  async setDojoCorrection(courseId: BlobID, dojoId?: DojoID) {
+    const course = await this.getCourse(courseId);
+
+    if (dojoId === undefined) {
+      if (course.state.state === CourseStateEnum.Idle) {
+        throw new Error("Couldn't get dojoID");
+      }
+      dojoId = course.state.dojoId!;
+    }
+
+    course.state.dojoId = dojoId;
+    course.state.state = CourseStateEnum.Corrections;
   }
 }
 

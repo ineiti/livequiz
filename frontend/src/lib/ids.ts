@@ -1,4 +1,4 @@
-import { H256 } from "../app/services/storage.service";
+import { BlobID, H256 } from "../app/services/storage.service";
 
 export class Secret {
     data: H256;
@@ -12,113 +12,38 @@ export class Secret {
     }
 
     static from_hex(hex: string): Secret {
-        return new Secret(H256.from_hex(hex).data);
+        return new Secret(H256.fromHex(hex).data);
     }
 
     to_hex(): string {
-        return this.data.to_hex();
+        return this.data.toHex();
     }
 }
 
-export class UserID {
-    data: H256;
-
+export class UserID extends BlobID {
     constructor(init?: ArrayBuffer) {
-        this.data = new H256(init);
-    }
-
-    static from_hex(hex: string): UserID {
-        return new UserID(H256.from_hex(hex).data);
-    }
-
-    to_hex(): string {
-        return this.data.to_hex();
-    }
-
-    is_in(other: UserID[]): boolean {
-        return this.data.is_in(other.map((o) => o.data));
-    }
-
-    equals(other: UserID): boolean {
-        return other.data.equals(this.data);
+        super(init);
+        this.idStr = "UserID";
     }
 }
 
-export class CourseID {
-    data: H256;
-
+export class QuizID extends BlobID {
     constructor(init?: ArrayBuffer) {
-        this.data = new H256(init);
-    }
-
-    static from_hex(hex: string): CourseID {
-        return new CourseID(H256.from_hex(hex).data);
-    }
-
-    to_hex(): string {
-        return this.data.to_hex();
-    }
-
-    equals(other: CourseID): boolean {
-        return other.data.equals(this.data);
-    }}
-
-export class QuizID {
-    data: H256;
-
-    constructor(init?: ArrayBuffer) {
-        this.data = new H256(init);
-    }
-
-    static from_hex(hex: string): CourseID {
-        return new QuizID(H256.from_hex(hex).data);
-    }
-
-    to_hex(): string {
-        return this.data.to_hex();
-    }
-
-    equals(other: QuizID): boolean {
-        return other.data.equals(this.data);
+        super(init);
+        this.idStr = "QuizID";
     }
 }
 
-export class DojoID {
-    data: H256;
-
+export class DojoID extends BlobID {
     constructor(init?: ArrayBuffer) {
-        this.data = new H256(init);
-    }
-
-    static from_hex(hex: string): CourseID {
-        return new DojoID(H256.from_hex(hex).data);
-    }
-
-    to_hex(): string {
-        return this.data.to_hex();
-    }
-
-    equals(other: DojoID): boolean {
-        return other.data.equals(this.data);
+        super(init);
+        this.idStr = "DojoID";
     }
 }
 
-export class DojoResultID {
-    data: H256;
-
+export class DojoResultID extends BlobID {
     constructor(init?: ArrayBuffer) {
-        this.data = new H256(init);
-    }
-
-    static from_hex(hex: string): CourseID {
-        return new DojoResultID(H256.from_hex(hex).data);
-    }
-
-    to_hex(): string {
-        return this.data.to_hex();
-    }
-
-    equals(other: DojoResultID): boolean {
-        return other.data.equals(this.data);
+        super(init);
+        this.idStr = "DojoResultID";
     }
 }

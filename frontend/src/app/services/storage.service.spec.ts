@@ -24,7 +24,7 @@ class Test {
   addReply(simul: number, blob?: Blob) {
     const reply = blob !== undefined ? {
       blobData: {
-        [blob.id.to_hex()]:
+        [blob.id.toHex()]:
           { version: blob.version, json: blob.toJson() }
       }
     } : { blobData: {} };
@@ -53,11 +53,11 @@ describe('StorageHandler', () => {
     test.storage0.addBlob(mine);
     test.storage0.syncBlobs();
     expect(test.simul0.requests.length).toBe(1);
-    expect(test.simul0.requests[0].blobVersions[mine.id.to_hex()]!.version).toBe(1);
-    expect(test.simul0.requests[0].blobVersions[mine.id.to_hex()]!.json).toBe(mine.toJson());
+    expect(test.simul0.requests[0].blobVersions[mine.id.toHex()]!.version).toBe(1);
+    expect(test.simul0.requests[0].blobVersions[mine.id.toHex()]!.json).toBe(mine.toJson());
 
     test.simul1.replies.push({
-      blobData: { [mine.id.to_hex()]: { version: 1, json: mine.toJson() } }
+      blobData: { [mine.id.toHex()]: { version: 1, json: mine.toJson() } }
     })
     const mine2 = await test.storage1.getBlob(mine.id, new MyBlob());
     expect(mine.toJson() === mine2.toJson())

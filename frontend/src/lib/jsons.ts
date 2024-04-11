@@ -4,9 +4,9 @@ export interface JSONCourse {
     id?: string;
     admins?: string[];
     students?: string[];
-    quiz_ids?: string[];
+    quizIds?: string[];
     state?: JSONCourseState;
-    dojo_ids?: string[];
+    dojoIds?: string[];
 }
 
 export interface JSONQuiz {
@@ -45,13 +45,13 @@ export interface JSONCourseState {
 
 export interface JSONDojo {
     id?: string,
-    quiz_id?: string,
+    quizId?: string,
     results?: { [key: string]: string },
 }
 
 export interface JSONDojoResult {
     id?: string;
-    dojo_id?: string;
+    dojoId?: string;
     results?: JSONDojoChoice[];
 }
 

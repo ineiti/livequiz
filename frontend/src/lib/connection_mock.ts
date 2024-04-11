@@ -21,7 +21,7 @@ export class ConnectionMock {
 
     initBasic(secret: Secret) {
         const quiz_id = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
-        const quiz = new Quiz(BlobID.from_hex(quiz_id));
+        const quiz = new Quiz(BlobID.fromHex(quiz_id));
         quiz.json = JSON.stringify({
             title: "Quizzy the quiz",
             questions: [
@@ -53,7 +53,7 @@ export class ConnectionMock {
 
         const dojo_id = "0000000000000000111111111111111122222222222222223333333333333333";
         const dojo_result_id = "3333333333333333222222222222222211111111111111110000000000000000";
-        const dojoResult = new DojoResult(BlobID.from_hex(dojo_result_id));
+        const dojoResult = new DojoResult(BlobID.fromHex(dojo_result_id));
         dojoResult.json = JSON.stringify({
             dojo_id,
             results: [{ Multi: [0, 2] },
@@ -62,21 +62,21 @@ export class ConnectionMock {
         dojoResult.update();
         this.blobs.set(dojo_result_id, dojoResult);
 
-        const dojo = new Dojo(BlobID.from_hex(dojo_id));
+        const dojo = new Dojo(BlobID.fromHex(dojo_id));
         dojo.json = JSON.stringify({
-            quiz_id: quiz.id.to_hex(),
-            results: Object.fromEntries([[secret.hash().to_hex(), dojoResult.id.to_hex()]]),
+            quiz_id: quiz.id.toHex(),
+            results: Object.fromEntries([[secret.hash().toHex(), dojoResult.id.toHex()]]),
         });
         dojo.update();
         this.blobs.set(dojo_id, dojo);
 
         const course_id1 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-        const course1 = new Course(BlobID.from_hex(course_id1));
+        const course1 = new Course(BlobID.fromHex(course_id1));
         course1.json = JSON.stringify({
             name: 'Test',
-            admins: [secret.hash().to_hex()],
+            admins: [secret.hash().toHex()],
             students: [],
-            quiz_ids: [quiz.id.to_hex()],
+            quiz_ids: [quiz.id.toHex()],
             state: { Idle: {} },
             dojo_ids: [dojo_id],
         });
@@ -84,13 +84,13 @@ export class ConnectionMock {
         this.blobs.set(course_id1, course1);
 
         const course_id2 = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-        const course2 = new Course(BlobID.from_hex(course_id2));
+        const course2 = new Course(BlobID.fromHex(course_id2));
         course2.json = JSON.stringify({
             name: 'Test Student',
             admins: [],
-            students: [secret.hash().to_hex()],
-            quiz_ids: [quiz.id.to_hex()],
-            state: { Quiz: quiz.id.to_hex() },
+            students: [secret.hash().toHex()],
+            quiz_ids: [quiz.id.toHex()],
+            state: { Quiz: quiz.id.toHex() },
             dojo_ids: [dojo_id],
         });
         course2.update();

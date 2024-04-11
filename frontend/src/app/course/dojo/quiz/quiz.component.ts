@@ -41,11 +41,11 @@ export class QuizComponent {
   constructor(private connection: ConnectionService, private user: UserService) { }
 
   async ngOnInit() {
-    this.quiz = await this.connection.getQuiz(this.dojo.quiz_id);
+    this.quiz = await this.connection.getQuiz(this.dojo.quizId);
     const userID = this.user.secret.hash();
-    if (!this.dojo.results.has(userID.to_hex())) {
+    if (!this.dojo.results.has(userID.toHex())) {
       const resID = await this.connection.createDojoResult(this.dojo.id);
-      this.dojo.results.set(userID.to_hex(), resID);
+      this.dojo.results.set(userID.toHex(), resID);
     }
     this.results = await this.connection.getResult(userID);
   }

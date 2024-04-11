@@ -9,30 +9,30 @@ import {
 export class Course extends Blob {
     name: string = "";
     admins: UserID[] = [];
+    // TODO: make a map of students, to allow for concurrent updates.
     students: UserID[] = [];
-    quiz_ids: QuizID[] = [];
+    quizIds: QuizID[] = [];
     state: CourseState = new CourseState({});
-    dojo_ids: DojoID[] = [];
+    dojoIds: DojoID[] = [];
 
     override update() {
         const json: JSONCourse = JSON.parse(this.json);
         this.name = json.name!;
-        this.admins = json.admins?.map((a) => UserID.from_hex(a)) ?? [];
-        this.students = json.students?.map((a) => UserID.from_hex(a)) ?? [];
-        this.quiz_ids = json.quiz_ids?.map((q) => QuizID.from_hex(q)) ?? [];
+        this.admins = json.admins?.map((a) => UserID.fromHex(a)) ?? [];
+        this.students = json.students?.map((a) => UserID.fromHex(a)) ?? [];
+        this.quizIds = json.quizIds?.map((q) => QuizID.fromHex(q)) ?? [];
         this.state = new CourseState(json.state ?? { Idle: {} });
-        this.dojo_ids = json.dojo_ids?.map((r) => DojoID.from_hex(r)) ?? [];
+        this.dojoIds = json.dojoIds?.map((r) => DojoID.fromHex(r)) ?? [];
     }
 
     override toJson(): string {
         return JSON.stringify({
             name: this.name,
-            id: this.id.to_hex(),
-            admins: this.admins.map((a) => a.to_hex()),
-            students: this.students.map((s) => s.to_hex()),
-            quiz_ids: this.quiz_ids.map((q) => q.to_hex()),
-            state: this.state.to_json(),
-            dojo_ids: this.dojo_ids.map((d) => d.to_hex()),
+            admins: this.admins.map((a) => a.toHex()),
+            students: this.students.map((s) => s.toHex()),
+            quizIds: this.quizIds.map((q) => q.toHex()),
+            state: this.state.toJson(),
+            dojoIds: this.dojoIds.map((d) => d.toHex()),
         });
     }
 }
@@ -49,9 +49,8 @@ export class Quiz extends Blob {
 
     override toJson(): string {
         return JSON.stringify({
-            id: this.id.to_hex(),
             title: this.title,
-            questions: this.questions.map((q) => q.to_json()),
+            questions: this.questions.map((q) => q.toJson()),
         });
     }
 }
@@ -69,11 +68,11 @@ export class Question {
         this.explanation = q.explanation!;
     }
 
-    to_json(): JSONQuestion {
+    toJson(): JSONQuestion {
         return {
             title: this.title,
             intro: this.intro,
-            choice: this.choice.to_json(),
+            choice: this.choice.toJson(),
             explanation: this.explanation
         }
     }
@@ -91,14 +90,14 @@ export class Choice {
         }
     }
 
-    to_json(): JSONChoice {
+    toJson(): JSONChoice {
         if (this.multi !== undefined) {
             return {
-                Multi: this.multi!.to_json()
+                Multi: this.multi!.toJson()
             }
         } else {
             return {
-                Regexp: this.regexp!.to_json(),
+                Regexp: this.regexp!.toJson(),
             }
         }
     }
@@ -113,7 +112,7 @@ export class ChoiceMulti {
         this.wrong = cm.wrong!;
     }
 
-    to_json(): JSONChoiceMulti {
+    toJson(): JSONChoiceMulti {
         return {
             correct: this.correct,
             wrong: this.wrong,
@@ -130,7 +129,7 @@ export class ChoiceRegexp {
         this.matches = cr.matches!.map((m) => new RegExp(m));
     }
 
-    to_json(): JSONChoiceRegexp {
+    toJson(): JSONChoiceRegexp {
         return {
             replace: this.replace.map((r) => r.toString()),
             matches: this.matches.map((m) => m.toString()),
@@ -146,40 +145,40 @@ export enum CourseStateEnum {
 
 export class CourseState {
     state: CourseStateEnum;
-    id?: DojoID;
+    dojoId?: DojoID;
 
     constructor(cs: JSONCourseState) {
         if (cs.Quiz !== undefined) {
             this.state = CourseStateEnum.Quiz;
-            this.id = DojoID.from_hex(cs.Quiz!);
+            this.dojoId = DojoID.fromHex(cs.Quiz!);
         } else if (cs.Corrections !== undefined) {
             this.state = CourseStateEnum.Corrections;
-            this.id = DojoID.from_hex(cs.Corrections);
+            this.dojoId = DojoID.fromHex(cs.Corrections);
         } else {
             this.state = CourseStateEnum.Idle;
         }
     }
 
-    is_idle(): boolean {
+    isIdle(): boolean {
         return this.state === CourseStateEnum.Idle;
     }
 
-    is_quiz(): boolean {
+    isQuiz(): boolean {
         return this.state === CourseStateEnum.Quiz;
     }
 
-    is_corrections(): boolean {
+    isCorrections(): boolean {
         return this.state === CourseStateEnum.Corrections;
     }
 
-    dojo_id(): DojoID {
+    getDojoID(): DojoID {
         if (this.state === CourseStateEnum.Idle) {
             throw new Error("Not a Quiz");
         }
-        return this.id!;
+        return this.dojoId!;
     }
 
-    to_json(): JSONCourseState {
+    toJson(): JSONCourseState {
         switch (this.state) {
             case CourseStateEnum.Idle:
                 return {
@@ -187,55 +186,54 @@ export class CourseState {
                 }
             case CourseStateEnum.Corrections:
                 return {
-                    Corrections: this.id?.to_hex(),
+                    Corrections: this.dojoId?.toHex(),
                 }
             case CourseStateEnum.Quiz:
                 return {
-                    Quiz: this.id?.to_hex(),
+                    Quiz: this.dojoId?.toHex(),
                 }
         }
     }
 }
 
 export class Dojo extends Blob {
-    quiz_id: QuizID = new QuizID();
+    quizId: QuizID = new QuizID();
     results: Map<string, DojoResultID> = new Map();
 
     override update() {
         const d: JSONDojo = JSON.parse(this.json);
-        this.quiz_id = QuizID.from_hex(d.quiz_id!);
+        this.quizId = QuizID.fromHex(d.quizId!);
         this.results = new Map(Object.entries(d.results!)
-            .map(([user, result]) => [user, DojoResultID.from_hex(result)]));
+            .map(([user, result]) => [user, DojoResultID.fromHex(result)]));
     }
 
     override toJson(): string {
         const results: { [key: string]: string } = {};
         for (const [key, value] of this.results.entries()) {
-            results[key] = value.to_hex();
+            results[key] = value.toHex();
         }
 
         return JSON.stringify({
-            quiz_id: this.quiz_id.to_hex(),
+            quizId: this.quizId.toHex(),
             results,
         });
     }
 }
 
 export class DojoResult extends Blob {
-    dojo_id: DojoID = new DojoID();
+    dojoId: DojoID = new DojoID();
     results: DojoChoice[] = [];
 
     override update() {
         const dr: JSONDojoResult = JSON.parse(this.json);
-        this.dojo_id = QuizID.from_hex(dr.dojo_id!);
+        this.dojoId = QuizID.fromHex(dr.dojoId!);
         this.results = dr.results?.map((r) => new DojoChoice(r)) ?? [];
     }
 
     override toJson(): string {
         return JSON.stringify({
-            id: this.id.to_hex(),
-            dojo_id: this.dojo_id.to_hex(),
-            results: this.results.map((r) => r.to_json()),
+            dojoId: this.dojoId.toHex(),
+            results: this.results.map((r) => r.toJson()),
         });
     }
 }
@@ -252,7 +250,7 @@ export class DojoChoice {
         }
     }
 
-    to_json(): JSONDojoChoice {
+    toJson(): JSONDojoChoice {
         if (this.multi !== undefined) {
             return {
                 Multi: this.multi!

@@ -18,7 +18,7 @@ export class StorageHandler {
   // Adds a new blob to the local cache and sends it in the next
   // updateLoop to the server.
   addBlob(blob: Blob) {
-    this.cache.set(blob.id.to_hex(), blob);
+    this.cache.set(blob.id.toHex(), blob);
   }
 
   startUpdate() {
@@ -49,14 +49,14 @@ export class StorageHandler {
 
   // Returns a blob - either from the cache, or from the server.
   async getBlob<T extends Blob>(id: BlobID, blob: T): Promise<T> {
-    if (this.cache.has(id.to_hex())) {
-      return this.cache.get(id.to_hex())! as T;
+    if (this.cache.has(id.toHex())) {
+      return this.cache.get(id.toHex())! as T;
     }
 
     const reply = await this.connection.getBlobUpdates({
-      blobVersions: { [id.to_hex()]: { version: 0 } }
+      blobVersions: { [id.toHex()]: { version: 0 } }
     });
-    const blobData = reply.blobData[id.to_hex()];
+    const blobData = reply.blobData[id.toHex()];
     if (blobData === undefined) {
       throw new Error("Unknown blob on server");
     }
@@ -64,7 +64,7 @@ export class StorageHandler {
     blob.version = blobData.version;
     blob.json = blobData.json;
     blob.update();
-    this.cache.set(id.to_hex(), blob);
+    this.cache.set(id.toHex(), blob);
     return blob;
   }
 
@@ -194,11 +194,11 @@ export class H256 {
     return hash.arrayBuffer();
   }
 
-  static from_hex(hex: string): H256 {
+  static fromHex(hex: string): H256 {
     return new H256(Buffer.from(hex, "hex"));
   }
 
-  to_hex(): string {
+  toHex(): string {
     return Buffer.from(this.data).toString('hex');
   }
 
@@ -206,12 +206,12 @@ export class H256 {
     return Buffer.from(other.data).equals(Buffer.from(this.data));
   }
 
-  is_in(other: H256[]): boolean {
+  isIn(other: H256[]): boolean {
     return other.findIndex((o) => o.equals(this)) >= 0;
   }
 
   toString(): string {
-    return `${this.idStr}:${this.to_hex()}`;
+    return `${this.idStr}:${this.toHex()}`;
   }
 }
 

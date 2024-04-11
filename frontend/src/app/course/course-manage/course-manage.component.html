@@ -1,19 +1,19 @@
-<div *ngIf="!course.state.is_idle()">
+<div *ngIf="!course.state.isIdle()">
     <h3>Quiz in Dojo: {{currentQuiz()?.title ?? "unknown"}}</h3>
     <div *ngIf="isAdmin()">
         <button mat-stroked-button (click)="dojoIdle()">
             Stop Dojo
         </button>
-        <button *ngIf="course.state.is_corrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
+        <button *ngIf="course.state.isCorrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
             Restart Dojo
         </button>
-        <button *ngIf="course.state.is_quiz()" mat-stroked-button (click)="dojoCorrections()">
+        <button *ngIf="course.state.isQuiz()" mat-stroked-button (click)="dojoCorrections()">
             Show Corrections
         </button>
     </div>
     <div *ngIf="isStudent()">
-        <button *ngIf="course.state.is_quiz()" mat-stroked-button routerLink="dojo">Enter Dojo</button>
-        <button *ngIf="course.state.is_corrections()" mat-stroked-button routerLink="dojo/corrections">See
+        <button *ngIf="course.state.isQuiz()" mat-stroked-button routerLink="dojo">Enter Dojo</button>
+        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="dojo/corrections">See
             Corrections</button>
     </div>
 </div>
