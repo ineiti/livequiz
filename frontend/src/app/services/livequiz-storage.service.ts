@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Blob, BlobID, StorageService } from './storage.service';
-import { Course, CourseStateEnum, Dojo } from '../../lib/structs';
-import { DojoID, QuizID } from '../../lib/ids';
+import { Course, CourseStateEnum, Dojo, DojoAttempt, Quiz } from '../../lib/structs';
+import { DojoID, QuizID, UserID } from '../../lib/ids';
 
 @Injectable({
   providedIn: 'root'
@@ -53,6 +53,32 @@ export class LivequizStorageService {
 
     course.state.dojoId = dojoId;
     course.state.state = CourseStateEnum.Corrections;
+  }
+
+  async getQuiz(id: QuizID): Promise<Quiz> {
+    return await this.storage.getBlob(id, new Quiz());
+  }
+
+  createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
+    const dr = new DojoAttempt();
+    dr.dojoId = dojo.id;
+    this.storage.addBlob(dr);
+    return dr;
+  }
+
+  async getDojoAttempt(dojo: Dojo, user: UserID): Promise<DojoAttempt> {
+    if (!dojo.results.has(user.toHex())) {
+      const dr = this.createDojoAttempt(dojo, user);
+      dojo.results.set(user.toHex(), dr.id);
+    }
+    return await this.storage.getBlob(dojo.results.get(user.toHex())!, new DojoAttempt());
+  }
+
+  async createCourse(name: string): Promise<Course> {
+    const course = new Course();
+    course.name = name;
+    this.storage.addBlob(course);
+    return course;
   }
 }
 

@@ -1,9 +1,9 @@
 import { Blob } from "../app/services/storage.service";
-import { DojoID, DojoResultID, QuizID, UserID } from "./ids";
+import { DojoID, DojoAttemptID, QuizID, UserID } from "./ids";
 import {
     JSONChoice, JSONChoiceMulti, JSONChoiceRegexp, JSONCourse, JSONCourseState,
     JSONDojo,
-    JSONDojoChoice, JSONDojoResult, JSONQuestion, JSONQuiz
+    JSONDojoChoice, JSONDojoAttempt, JSONQuestion, JSONQuiz
 } from "./jsons";
 
 export class Course extends Blob {
@@ -58,13 +58,13 @@ export class Quiz extends Blob {
 export class Question {
     title: string;
     intro: string;
-    choice: Choice;
+    options: Options;
     explanation: string;
 
     constructor(q: JSONQuestion) {
         this.title = q.title!;
         this.intro = q.intro!;
-        this.choice = new Choice(q.choice!);
+        this.options = new Options(q.options!);
         this.explanation = q.explanation!;
     }
 
@@ -72,21 +72,21 @@ export class Question {
         return {
             title: this.title,
             intro: this.intro,
-            choice: this.choice.toJson(),
+            options: this.options.toJson(),
             explanation: this.explanation
         }
     }
 }
 
-export class Choice {
-    multi?: ChoiceMulti;
-    regexp?: ChoiceRegexp;
+export class Options {
+    multi?: OptionsMulti;
+    regexp?: OptionRegexp;
 
     constructor(c: JSONChoice) {
         if (c.Multi !== undefined) {
-            this.multi = new ChoiceMulti(c.Multi!);
+            this.multi = new OptionsMulti(c.Multi!);
         } else {
-            this.regexp = new ChoiceRegexp(c.Regexp!);
+            this.regexp = new OptionRegexp(c.Regexp!);
         }
     }
 
@@ -103,7 +103,7 @@ export class Choice {
     }
 }
 
-export class ChoiceMulti {
+export class OptionsMulti {
     correct: string[];
     wrong: string[];
 
@@ -120,7 +120,7 @@ export class ChoiceMulti {
     }
 }
 
-export class ChoiceRegexp {
+export class OptionRegexp {
     replace: RegExp[];
     matches: RegExp[];
 
@@ -198,13 +198,13 @@ export class CourseState {
 
 export class Dojo extends Blob {
     quizId: QuizID = new QuizID();
-    results: Map<string, DojoResultID> = new Map();
+    results: Map<string, DojoAttemptID> = new Map();
 
     override update() {
         const d: JSONDojo = JSON.parse(this.json);
         this.quizId = QuizID.fromHex(d.quizId!);
         this.results = new Map(Object.entries(d.results!)
-            .map(([user, result]) => [user, DojoResultID.fromHex(result)]));
+            .map(([user, result]) => [user, DojoAttemptID.fromHex(result)]));
     }
 
     override toJson(): string {
@@ -220,12 +220,12 @@ export class Dojo extends Blob {
     }
 }
 
-export class DojoResult extends Blob {
+export class DojoAttempt extends Blob {
     dojoId: DojoID = new DojoID();
     results: DojoChoice[] = [];
 
     override update() {
-        const dr: JSONDojoResult = JSON.parse(this.json);
+        const dr: JSONDojoAttempt = JSON.parse(this.json);
         this.dojoId = QuizID.fromHex(dr.dojoId!);
         this.results = dr.results?.map((r) => new DojoChoice(r)) ?? [];
     }

@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Course } from '../../lib/structs';
-import { CourseID } from '../../lib/ids';
-import { CoursesService } from '../services/courses.service';
 import { CommonModule } from '@angular/common';
+import { LivequizStorageService } from '../services/livequiz-storage.service';
 
 @Component({
   selector: 'app-course',
@@ -16,11 +15,11 @@ export class CourseComponent {
   @Input() course_id!: string;
   course!: Course;
 
-  constructor(private courses: CoursesService) {
+  constructor(private livequiz: LivequizStorageService) {
   }
 
   ngOnInit() {
-    this.course = this.courses.list.value.find((c) => c.id.equals(CourseID.from_hex(this.course_id)))!;
+    this.course = this.livequiz.courses.list.get(this.course_id)!;
   }
 
   onOutletLoaded(component: any) {

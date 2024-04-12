@@ -15,7 +15,7 @@ export class Secret {
         return new Secret(H256.fromHex(hex).data);
     }
 
-    to_hex(): string {
+    toHex(): string {
         return this.data.toHex();
     }
 }
@@ -41,9 +41,9 @@ export class DojoID extends BlobID {
     }
 }
 
-export class DojoResultID extends BlobID {
+export class DojoAttemptID extends BlobID {
     constructor(init?: ArrayBuffer) {
         super(init);
-        this.idStr = "DojoResultID";
+        this.idStr = "DojoAttemptID";
     }
 }

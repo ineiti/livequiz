@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UserOldService } from '../services/user.old.service';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { CoursesService } from '../services/courses.service';
-import { ConnectionService } from '../services/connection.service';
+import { UserService } from '../services/user.service';
+import { LivequizStorageService } from '../services/livequiz-storage.service';
+import { Course } from '../../lib/structs';
 
 @Component({
   selector: 'app-landing',
@@ -17,16 +17,14 @@ import { ConnectionService } from '../services/connection.service';
 })
 export class LandingComponent {
   course_name = "";
+  courses: Map<string, Course>;
 
-  constructor(public user: UserOldService, public courses: CoursesService,
-    private connection: ConnectionService) {
+  constructor(public user: UserService, private livequiz: LivequizStorageService) {
+    this.courses = livequiz.courses.list;
   }
 
-  addCourse() {
-    this.connection.createCourse(this.course_name);
-  }
-
-  updateName() {
-    this.user.updateName();
+  async addCourse() {
+    const course = await this.livequiz.createCourse(this.course_name);
+    course.admins = [this.user.secret.hash()];
   }
 }

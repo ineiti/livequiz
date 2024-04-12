@@ -1,5 +1,5 @@
 import { Secret } from './ids';
-import { Course, Dojo, DojoResult, Quiz } from './structs';
+import { Course, Dojo, DojoAttempt, Quiz } from './structs';
 import { Blob, BlobID, JSONBlobUpdateReply, JSONBlobUpdateRequest } from '../app/services/storage.service';
 
 export class ConnectionMock {
@@ -53,19 +53,19 @@ export class ConnectionMock {
 
         const dojo_id = "0000000000000000111111111111111122222222222222223333333333333333";
         const dojo_result_id = "3333333333333333222222222222222211111111111111110000000000000000";
-        const dojoResult = new DojoResult(BlobID.fromHex(dojo_result_id));
-        dojoResult.json = JSON.stringify({
+        const dojoAttempt = new DojoAttempt(BlobID.fromHex(dojo_result_id));
+        dojoAttempt.json = JSON.stringify({
             dojo_id,
             results: [{ Multi: [0, 2] },
             { Regexp: "one" }],
         });
-        dojoResult.update();
-        this.blobs.set(dojo_result_id, dojoResult);
+        dojoAttempt.update();
+        this.blobs.set(dojo_result_id, dojoAttempt);
 
         const dojo = new Dojo(BlobID.fromHex(dojo_id));
         dojo.json = JSON.stringify({
             quiz_id: quiz.id.toHex(),
-            results: Object.fromEntries([[secret.hash().toHex(), dojoResult.id.toHex()]]),
+            results: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
         });
         dojo.update();
         this.blobs.set(dojo_id, dojo);

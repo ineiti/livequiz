@@ -1,11 +1,11 @@
-<h2>{{questionnaire.chapter}}</h2>
+<h2>{{quiz.title}}</h2>
 
 <div *ngIf="!empty">
     <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
         <button mat-button [disabled]="first" (click)="previous()"
             style="margin: auto 1em auto; height: 2em;">Previous</button>
-        <mat-grid-list [cols]="gridWidth(questionnaire.questions.length)" rowHeight="2em">
-            @for (q of questionnaire.questions; track $index) {
+        <mat-grid-list [cols]="gridWidth(quiz.questions.length)" rowHeight="2em">
+            @for (q of quiz.questions; track $index) {
             <mat-grid-tile (click)="goto($index)" [class]="tileClasses[$index]">{{$index+1}}</mat-grid-tile>
             }
         </mat-grid-list>
@@ -13,40 +13,40 @@
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
 
-    <h3 [innerHTML]="answer!.title"></h3>
+    <h3 [innerHTML]="answer.question.title"></h3>
 
-    <p [innerHTML]="answer!.description"></p>
+    <p [innerHTML]="answer.question.intro"></p>
 
-    <div *ngIf="answer!.qType === 0">
-        <mat-selection-list class="app-class" #choicesList multiple="false"
-            (selectionChange)="updateSelection(choicesList)" [disabled]="!editAllowed">
-            @for (choice of answer!.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
+    <div *ngIf="answer.isMulti()">
+        <mat-selection-list class="app-class" multiple="false" #optionsList
+            (selectionChange)="updateSelection(optionsList)" [disabled]="!editAllowed">
+            @for (option of answer.options; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer.selected[$index]"
                 [class]="resultClasses[$index]">
-                <span class="question" [innerHTML]="choice"></span>
+                <span class="question" [innerHTML]="option"></span>
             </mat-list-option>
             }
         </mat-selection-list>
     </div>
-    <div *ngIf="answer!.qType === 1">
+    <div *ngIf="answer.isSingle()">
         <p>Please select one or more answers</p>
-        <mat-selection-list class="app-class" #choicesList multiple="true"
-            (selectionChange)="updateSelection(choicesList)" [disabled]="!editAllowed">
-            @for (choice of answer!.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer!.selected[$index]"
+        <mat-selection-list class="app-class" multiple="true" #optionsList
+            (selectionChange)="updateSelection(optionsList)" [disabled]="!editAllowed">
+            @for (option of answer.options; track $index) {
+            <mat-list-option [value]="$index" togglePosition="before" [selected]="answer.selected[$index]"
                 [class]="resultClasses[$index]">
-                <span class="question" [innerHTML]="choice"></span>
+                <span class="question" [innerHTML]="option"></span>
             </mat-list-option>
             }
         </mat-selection-list>
     </div>
-    <div *ngIf="answer!.qType === 2">
+    <div *ngIf="answer.isRegexp()">
         <p>Please enter the answer in the box</p>
         <mat-form-field style="width: 100%;">
             <mat-label>Answer</mat-label>
-            <input matInput [(ngModel)]="answer!.regexp" (input)="updateRegexp()" [class]="resultClasses[0]">
+            <input matInput [(ngModel)]="answer.choice.regexp" (input)="updateRegexp()" [class]="resultClasses[0]">
         </mat-form-field>
     </div>
 
-    <p *ngIf="showResults" [innerHTML]="answer!.hint"></p>
+    <p *ngIf="showResults" [innerHTML]="answer.question.explanation"></p>
 </div>

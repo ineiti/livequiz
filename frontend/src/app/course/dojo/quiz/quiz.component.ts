@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatListModule, MatSelectionList } from '@angular/material/list';
+import { MatListModule, MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GRID_MAX_WIDTH } from '../../../app.config';
-import { Question, QuestionType, Questionnaire } from '../../../services/questionnaire.service';
-import { ConnectionService, ResultState } from '../../../services/connection.service';
-import { Choice, Dojo, DojoChoice, DojoResult, Quiz } from '../../../../lib/structs';
+import { ResultState } from '../../../services/connection.service';
+import { Options, Dojo, DojoChoice, DojoAttempt as DojoAttempt, Question, Quiz } from '../../../../lib/structs';
 import { UserService } from '../../../services/user.service';
+import { LivequizStorageService } from '../../../services/livequiz-storage.service';
 
 @Component({
   selector: 'app-quiz',
@@ -22,15 +22,14 @@ import { UserService } from '../../../services/user.service';
 })
 export class QuizComponent {
   @Input() dojo!: Dojo;
-  quiz?: Quiz;
-  results?: DojoResult;
+  quiz!: Quiz;
+  attempt!: DojoAttempt;
+  answer!: Answer;
 
   showResults = false;
   editAllowed = true;
   tileClasses: string[] = [];
-  answer?: Answer;
   resultClasses: string[] = [];
-  questionnaire = new Questionnaire("");
   done: boolean[] = [];
   empty = true;
   percentage = 100;
@@ -38,21 +37,16 @@ export class QuizComponent {
   last = false;
   currentQuestion = 0;
 
-  constructor(private connection: ConnectionService, private user: UserService) { }
+  constructor(private livequiz: LivequizStorageService, private user: UserService) { }
 
   async ngOnInit() {
-    this.quiz = await this.connection.getQuiz(this.dojo.quizId);
-    const userID = this.user.secret.hash();
-    if (!this.dojo.results.has(userID.toHex())) {
-      const resID = await this.connection.createDojoResult(this.dojo.id);
-      this.dojo.results.set(userID.toHex(), resID);
-    }
-    this.results = await this.connection.getResult(userID);
+    this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
+    this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.secret.hash());
   }
 
   ngOnChanges() {
     this.resultClasses = [];
-    for (let question = 0; question < this.answer!.choices.length; question++) {
+    for (let question = 0; question < this.quiz!.questions.length; question++) {
       this.resultClasses[question] = "question ";
       if (this.showResults && this.answer!.needsCorrection(question)) {
         this.resultClasses[question] = this.answer!.isCorrect(question) ?
@@ -62,15 +56,12 @@ export class QuizComponent {
   }
 
   updateSelection(event: MatSelectionList) {
-    const selected = event.selectedOptions.selected.length;
-    this.done[this.currentQuestion] = selected > 0;
-    this.answer!.choice = new DojoChoice({ Multi: event.selectedOptions.selected.map((s) => s.value) });
-    this.connection.putDojoChoice(this.results!.id, this.currentQuestion, this.answer!.choice);
+    this.done[this.currentQuestion] = event.selectedOptions.selected.length > 0;
+    this.answer.updateSelection(event.selectedOptions.selected);
     this.updateAnswer();
   }
 
   updateRegexp() {
-    this.connection.putDojoChoice(this.results!.id, this.currentQuestion, this.answer!.choice);
     this.updateAnswer();
   }
 
@@ -83,16 +74,16 @@ export class QuizComponent {
 
   update() {
     this.first = this.currentQuestion === 0;
-    this.empty = this.questionnaire.questions.length === 0;
+    this.empty = this.quiz!.questions.length === 0;
     if (!this.empty) {
-      this.last = this.currentQuestion === this.questionnaire.questions.length - 1;
-      this.percentage = 100 * (this.currentQuestion + 1) / this.questionnaire.questions.length;
+      this.last = this.currentQuestion === this.quiz!.questions.length - 1;
+      this.percentage = 100 * (this.currentQuestion + 1) / this.quiz!.questions.length;
       this.updateAnswer();
     }
   }
 
   updateAnswer() {
-    for (let question = 0; question < this.questionnaire.questions.length; question++) {
+    for (let question = 0; question < this.quiz!.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         (this.done[question] ? " questionTileDone" : "");
@@ -108,7 +99,7 @@ export class QuizComponent {
   }
 
   goto(question: number) {
-    if (question >= 0 && question < this.questionnaire.questions.length) {
+    if (question >= 0 && question < this.quiz!.questions.length) {
       this.currentQuestion = question;
       this.update();
     }
@@ -117,29 +108,32 @@ export class QuizComponent {
 }
 
 export class Answer {
-  description: string;
-  title: string;
-  maxChoices: number;
-  qType: QuestionType;
-  choices: string[];
-  hint: string;
-  result: ResultState;
-  correct: number[];
+  maxChoices: number = 1;
+  options: string[] = [];
+  original: number[] = [];
+  selected: boolean[] = [];
 
-  constructor(cq: Question, public choice: DojoChoice) {
-    this.description = cq.description;
-    this.maxChoices = cq.maxChoices;
-    this.qType = cq.qType;
-    this.choices = cq.choices;
-    if (this.qType === QuestionType.Regexp) {
-      this.result = cq.resultRegexp(this.choice.regexp!)
-    } else {
-      const bools = cq.choices.map((_, i) => this.choice.multi!.includes(i));
-      this.result = cq.resultShuffled(bools);
+  constructor(public question: Question, public choice: DojoChoice) {
+    if (question.options.multi !== undefined) {
+      this.maxChoices = question.options.multi!.correct.length +
+        question.options.multi!.wrong.length;
     }
-    this.hint = cq.hint;
-    this.title = cq.title;
-    this.correct = cq.correct();
+
+    if (!this.isRegexp()) {
+      this.options = question.options.multi!.correct.concat(question.options.multi!.wrong);
+      this.original = this.options.map((_, i) => i);
+      this.selected = this.options.map((_, i) => i in choice.multi!);
+      for (let i = this.options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        this.swap(this.options, i, j);
+        this.swap(this.original, i, j);
+        this.swap(this.selected, i, j);
+      }
+    }
+  }
+
+  private swap<T>(arr: T[], i: number, j: number){
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 
   isCorrect(question: number): boolean {
@@ -149,5 +143,21 @@ export class Answer {
   // Either it chosen by the user, or it must be chosen by them.
   needsCorrection(question: number): boolean {
     throw new Error("Not implemented");
+  }
+
+  isRegexp(): boolean {
+    return this.question.options.regexp !== undefined;
+  }
+
+  isMulti(): boolean {
+    return !this.isRegexp() && this.question.options.multi!.correct.length > 1;
+  }
+
+  isSingle(): boolean {
+    return !this.isRegexp() && this.question.options.multi!.correct.length === 1;
+  }
+
+  updateSelection(selected: MatListOption[]) {
+    this.choice = new DojoChoice({ Multi: selected.map((s) => this.original[s.value]) });
   }
 }

@@ -24,7 +24,7 @@
         <li *ngFor="let quiz of quizzes">
             {{quiz.title}}
             <button *ngIf="isAdmin()" (click)="dojoQuiz(quiz.id)">Start Quiz</button>
-            <button *ngIf="isStudent()" routerLink="['./kata', quiz.id.to_hex()]">Train Yourself</button>
+            <button *ngIf="isStudent()" routerLink="['./kata', quiz.id.toHex()]">Train Yourself</button>
         </li>
     </ul>
 </div>

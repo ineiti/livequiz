@@ -1,7 +1,5 @@
 import { Buffer } from 'buffer';
-import { Questionnaire } from '../app/services/questionnaire.service';
-import { sha256 } from 'js-sha256';
-import { Result, ResultState, Stats } from '../app/services/connection.service';
+import { ResultState } from '../app/services/connection.service';
 
 export interface JSONResult {
     name?: string,

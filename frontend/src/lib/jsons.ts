@@ -18,7 +18,7 @@ export interface JSONQuiz {
 export interface JSONQuestion {
     title?: string;
     intro?: string;
-    choice?: JSONChoice;
+    options?: JSONChoice;
     explanation?: string;
 }
 
@@ -49,7 +49,7 @@ export interface JSONDojo {
     results?: { [key: string]: string },
 }
 
-export interface JSONDojoResult {
+export interface JSONDojoAttempt {
     id?: string;
     dojoId?: string;
     results?: JSONDojoChoice[];

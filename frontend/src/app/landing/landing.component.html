@@ -14,12 +14,12 @@
 <p>And of course it should one day join the <a href="https://web.fledg.re">Fledger network</a>,
     so that all of the storage is decentralized...</p>
 
-<div *ngIf="( courses.list | async )!.length > 0; else noCourses">
+<div *ngIf="courses.size > 0; else noCourses">
     <p>Your courses:</p>
     <ul>
-        <li *ngFor="let course of courses.list | async">
-            <a [routerLink]="['/course', course.id.to_hex()]">{{course.name}}</a> -
-            {{course.students.length}} students
+        <li *ngFor="let course of courses | keyvalue">
+            <a [routerLink]="['/course', course.key]">{{course.value.name}}</a> -
+            {{course.value.students.length}} students
         </li>
     </ul>
 </div>

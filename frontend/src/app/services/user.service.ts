@@ -51,7 +51,7 @@ class User extends Blob {
     this.name = json.name;
     localStorage.setItem('user-json', JSON.stringify({
       name: this.name,
-      secret: this.secret.to_hex(),
+      secret: this.secret.toHex(),
     }));
   }
 

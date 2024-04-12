@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
 import { JSONResult, JSONStats } from '../../lib/connection';
 import { ConnectionMock } from '../../lib/connection_mock';
-import { BehaviorSubject } from 'rxjs';
-import { CourseID, DojoID, DojoResultID, QuizID, Secret } from '../../lib/ids';
 import { UserService } from './user.service';
 import { environment } from '../../environments/environment';
-import { Course, Dojo, DojoChoice, DojoResult, Quiz } from '../../lib/structs';
-import { BlobID, JSONBlob, JSONBlobUpdateRequest, JSONBlobUpdateReply } from './storage.service';
+import { JSONBlobUpdateRequest, JSONBlobUpdateReply } from './storage.service';
 
 export type ResultState = ("correct" | "answered" | "empty")
 
