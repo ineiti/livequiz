@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { ConnectionService, Result } from '../../../services/connection.service';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
@@ -7,11 +6,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Buffer } from 'buffer';
-import { Questionnaire, QuestionnaireService } from '../../../services/questionnaire.service';
-import { UserOldService } from '../../../services/user.old.service';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { Course } from '../../../../lib/structs';
+import { Course } from "../../../../lib/structs";
 
 @Component({
   selector: 'app-stats',
@@ -23,28 +20,28 @@ import { Course } from '../../../../lib/structs';
 })
 export class StatsComponent {
   @Input() course!: Course;
-  users: Result[] = [];
+  // users: Result[] = [];
   displayedColumns: number[] = [];
   selectedClasses: string[][] = [];
-  questionnaire = new Questionnaire("");
+  // questionnaire = new Questionnaire("");
   title = "Not available";
   addTestUsers = environment.addTestUsers;
 
-  constructor(private connection: ConnectionService, private qservice: QuestionnaireService,
-    private user: UserOldService, private router: Router) {
-    qservice.loaded.subscribe((q) => {
-      this.questionnaire = q;
-      this.update();
-    });
-    connection.answersHash.subscribe(() => {
-      this.update();
-    })
-  }
+  // constructor(private connection: ConnectionService, private qservice: QuestionnaireService,
+  //   private user: UserOldService, private router: Router) {
+  //   qservice.loaded.subscribe((q) => {
+  //     this.questionnaire = q;
+  //     this.update();
+  //   });
+  //   connection.answersHash.subscribe(() => {
+  //     this.update();
+  //   })
+  // }
 
   ngOnInit() {
-    if (this.course.admins.includes(this.user.secret.hash())) {
-      this.router.navigate(['..']);
-    }
+    // if (this.course.admins.includes(this.user.secret.hash())) {
+    //   this.router.navigate(['..']);
+    // }
   }
 
   async update() {
@@ -59,15 +56,15 @@ export class StatsComponent {
   }
 
   async updateSelectedClass() {
-    this.selectedClasses = this.users.map((user) =>
-      user.answers ? user.answers.map((c) => {
-        let cl = c;
-        if (c === "correct") {
-          cl = "answered";
-        }
-        return `userAnswer_${cl}`;
-      }) : [""]
-    )
+    // this.selectedClasses = this.users.map((user) =>
+    //   user.answers ? user.answers.map((c) => {
+    //     let cl = c;
+    //     if (c === "correct") {
+    //       cl = "answered";
+    //     }
+    //     return `userAnswer_${cl}`;
+    //   }) : [""]
+    // )
   }
 
   async addUser() {

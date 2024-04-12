@@ -1,10 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { Course, CourseState, CourseStateEnum, Quiz } from '../../../lib/structs';
+import { Quiz } from "../../../lib/structs";
+import { Course } from "../../../lib/structs";
 import { RouterLink } from '@angular/router';
 import { QuizID } from '../../../lib/ids';
 import { CommonModule } from '@angular/common';
-import { ConnectionService } from '../../services/connection.service';
-import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { StorageService } from '../../services/storage.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
@@ -25,7 +24,7 @@ export class CourseManageComponent {
 
   async ngOnInit() {
     for (const id of this.course.quizIds) {
-      this.quizzes.push(await this.storage.getBlob(id, new Quiz()));
+      this.quizzes.push(await this.storage.getNomad(id, new Quiz()));
     }
   }
 

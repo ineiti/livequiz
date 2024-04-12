@@ -18,8 +18,7 @@
     <p>Your courses:</p>
     <ul>
         <li *ngFor="let course of courses | keyvalue">
-            <a [routerLink]="['/course', course.key]">{{course.value.name}}</a> -
-            {{course.value.students.length}} students
+            <a [routerLink]="['/course', course.key]">{{course.value}}</a>
         </li>
     </ul>
 </div>

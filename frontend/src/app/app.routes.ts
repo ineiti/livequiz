@@ -6,7 +6,7 @@ import { CourseManageComponent } from './course/course-manage/course-manage.comp
 
 export const routes: Routes = [
     {
-        path: 'course/:course_id',
+        path: 'course/:courseId',
         component: CourseComponent,
         children: [
             {

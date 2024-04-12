@@ -1,15 +1,17 @@
-import { JSONBlobUpdateReply, JSONBlobUpdateRequest, StorageHandler, Blob } from './storage.service';
+import { StorageHandler } from './storage.service';
+import { JSONNomadUpdateReply, JSONNomadUpdateRequest } from '../../lib/storage';
+import { Nomad } from "../../lib/storage";
 
 class NetworkSimul {
-  requests: JSONBlobUpdateRequest[] = [];
-  replies: JSONBlobUpdateReply[] = [];
-  constructor(messages?: JSONBlobUpdateReply[]) {
+  requests: JSONNomadUpdateRequest[] = [];
+  replies: JSONNomadUpdateReply[] = [];
+  constructor(messages?: JSONNomadUpdateReply[]) {
     if (messages !== undefined) {
       this.replies = messages;
     }
   }
 
-  async getBlobUpdates(request: JSONBlobUpdateRequest): Promise<JSONBlobUpdateReply> {
+  async getBlobUpdates(request: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
     this.requests.push(request);
     return Promise.resolve(this.replies.shift() || { blobData: {} });
   }
@@ -21,7 +23,7 @@ class Test {
   simul1 = new NetworkSimul()
   storage1 = new StorageHandler(this.simul1);
 
-  addReply(simul: number, blob?: Blob) {
+  addReply(simul: number, blob?: Nomad) {
     const reply = blob !== undefined ? {
       blobData: {
         [blob.id.toHex()]:
@@ -96,7 +98,7 @@ describe('StorageHandler', () => {
   });
 });
 
-class MyBlob extends Blob {
+class MyBlob extends Nomad {
   name: string = "";
   maps: Map<number, string> = new Map();
 

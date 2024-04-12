@@ -1,38 +1,41 @@
 import { Injectable } from '@angular/core';
-import { Blob, BlobID, StorageService } from './storage.service';
-import { Course, CourseStateEnum, Dojo, DojoAttempt, Quiz } from '../../lib/structs';
+import { StorageService } from './storage.service';
+import { Nomad } from "../../lib/storage";
+import { NomadID } from "../../lib/ids";
+import { CourseStateEnum, Dojo, DojoAttempt, Quiz } from "../../lib/structs";
+import { Course } from "../../lib/structs";
 import { DojoID, QuizID, UserID } from '../../lib/ids';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LivequizStorageService {
-  courses = new Courses();
+  private courses: Courses = new Courses();
 
   constructor(private storage: StorageService) {
-    this.storage.addBlob(this.courses);
+    this.storage.addNomad(this.courses);
   }
 
-  async getCourse(courseId: BlobID): Promise<Course> {
-    let course = this.courses.list.get(courseId.toHex());
-    if (course === undefined) {
-      course = await this.storage.getBlob(courseId, new Course());
-    }
-    return course;
+  async getCourse(courseId: NomadID): Promise<Course> {
+    return await this.storage.getNomad(courseId, new Course());
   }
 
-  async setDojoIdle(courseId: BlobID) {
+  getCourseNames(): Map<string, string> {
+    return this.courses.list;
+  }
+
+  async setDojoIdle(courseId: NomadID) {
     const course = await this.getCourse(courseId);
     course.state.state = CourseStateEnum.Idle;
   }
 
-  async setDojoQuiz(courseId: BlobID, quizId: QuizID, dojoId?: DojoID) {
+  async setDojoQuiz(courseId: NomadID, quizId: QuizID, dojoId?: DojoID) {
     const course = await this.getCourse(courseId);
 
     if (dojoId === undefined) {
       const dojo = new Dojo();
       dojo.quizId = quizId;
-      this.storage.addBlob(dojo);
+      this.storage.addNomad(dojo);
       dojoId = dojo.id;
       course.dojoIds.push(dojoId);
     }
@@ -41,7 +44,7 @@ export class LivequizStorageService {
     course.state.dojoId = dojoId;
   }
 
-  async setDojoCorrection(courseId: BlobID, dojoId?: DojoID) {
+  async setDojoCorrection(courseId: NomadID, dojoId?: DojoID) {
     const course = await this.getCourse(courseId);
 
     if (dojoId === undefined) {
@@ -56,13 +59,13 @@ export class LivequizStorageService {
   }
 
   async getQuiz(id: QuizID): Promise<Quiz> {
-    return await this.storage.getBlob(id, new Quiz());
+    return await this.storage.getNomad(id, new Quiz());
   }
 
   createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
     const dr = new DojoAttempt();
     dr.dojoId = dojo.id;
-    this.storage.addBlob(dr);
+    this.storage.addNomad(dr);
     return dr;
   }
 
@@ -71,23 +74,25 @@ export class LivequizStorageService {
       const dr = this.createDojoAttempt(dojo, user);
       dojo.results.set(user.toHex(), dr.id);
     }
-    return await this.storage.getBlob(dojo.results.get(user.toHex())!, new DojoAttempt());
+    return await this.storage.getNomad(dojo.results.get(user.toHex())!, new DojoAttempt());
   }
 
   async createCourse(name: string): Promise<Course> {
     const course = new Course();
     course.name = name;
-    this.storage.addBlob(course);
+    this.storage.addNomad(course);
+    this.courses.list.set(course.id.toHex(), course.name);
     return course;
   }
 }
 
-class Courses extends Blob {
-  list: Map<string, Course> = new Map();
+export class Courses extends Nomad {
+  static CoursesID = NomadID.fromGlobalID("re.fledg.livequiz.courses");
+  list: Map<string, string> = new Map();
 
   constructor() {
     super();
-    this.id = BlobID.fromGlobalID("re.fledg.livequiz.courses");
+    this.id = Courses.CoursesID;
   }
 
   override toJson(): string {

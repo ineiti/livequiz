@@ -1,26 +1,13 @@
 import { Injectable } from '@angular/core';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { Secret } from '../../lib/ids';
-import { Blob, BlobID, H256, StorageService } from './storage.service';
+import { Nomad } from "../../lib/storage";
+import { NomadID, H256 } from "../../lib/ids";
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
-  secret = new Secret();
-  name = "undefined";
-  user = new User();
-
-  constructor(storage: StorageService) {
-    storage.addBlob(this.user);
-  }
-
-  isIn(other: H256[]): boolean {
-    return this.secret.hash().isIn(other);
-  }
-}
-
-class User extends Blob {
+export class UserService extends Nomad {
   secret = new Secret();
   name = "undefined";
 
@@ -42,7 +29,7 @@ class User extends Blob {
       const json = JSON.parse(jsonStr);
       this.name = json.name;
       this.secret = Secret.from_hex(json.secret);
-      this.id = BlobID.fromHex(this.secret.hash().toHex());
+      this.id = NomadID.fromHex(this.secret.hash().toHex());
     }
   }
 
@@ -57,5 +44,9 @@ class User extends Blob {
 
   override toJson(): string {
     return JSON.stringify({ name: this.name });
+  }
+
+  isIn(other: H256[]): boolean {
+    return this.secret.hash().isIn(other);
   }
 }

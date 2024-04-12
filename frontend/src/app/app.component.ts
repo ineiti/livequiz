@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { UserService } from './services/user.service';
-import { ConnectionService } from './services/connection.service';
 
 @Component({
   selector: 'app-root',

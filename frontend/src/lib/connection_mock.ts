@@ -1,34 +1,39 @@
 import { Secret } from './ids';
-import { Course, Dojo, DojoAttempt, Quiz } from './structs';
-import { Blob, BlobID, JSONBlobUpdateReply, JSONBlobUpdateRequest } from '../app/services/storage.service';
+import { Dojo, DojoAttempt, Quiz } from "./structs";
+import { Course } from "./structs";
+import { JSONNomadUpdateReply, JSONNomadUpdateRequest } from './storage';
+import { Nomad } from "./storage";
+import { NomadID } from "./ids";
+import { Courses } from '../app/services/livequiz-storage.service';
 
 export class ConnectionMock {
-    blobs: Map<string, Blob> = new Map();
+    nomads: Map<string, Nomad> = new Map();
 
     constructor() {
     }
 
-    async getBlobUpdates(updates: JSONBlobUpdateRequest): Promise<JSONBlobUpdateReply> {
-        console.log(updates);
-        const reply: JSONBlobUpdateReply = { blobData: {} };
-        for (const [k, v] of [...Object.entries(updates.blobVersions)]) {
-            if (v.version === 1 && this.blobs.has(k)) {
-                reply.blobData[k] = this.blobs.get(k)!;
+    async getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
+        console.log('Mock connection:', [...Object.entries(updates.nomadVersions)].map(([k, v]) =>
+            `${k.slice(0, 8)}: ${v.version}`).join(" ; "));
+        const reply: JSONNomadUpdateReply = { nomadData: {} };
+        for (const [k, v] of [...Object.entries(updates.nomadVersions)]) {
+            if (v.version <= 1 && this.nomads.has(k)) {
+                reply.nomadData[k] = this.nomads.get(k)!.getReply();
             }
         }
         return Promise.resolve(reply);
     }
 
     initBasic(secret: Secret) {
-        const quiz_id = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
-        const quiz = new Quiz(BlobID.fromHex(quiz_id));
+        const quizId = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
+        const quiz = new Quiz(NomadID.fromHex(quizId));
         quiz.json = JSON.stringify({
             title: "Quizzy the quiz",
             questions: [
                 {
                     title: "1st",
                     intro: "what is your first choice?",
-                    choice: {
+                    options: {
                         Multi: {
                             correct: ["one", "two"],
                             wrong: ["three", "four"],
@@ -39,7 +44,7 @@ export class ConnectionMock {
                 {
                     title: "2nd",
                     intro: "what is your second choice?",
-                    choice: {
+                    options: {
                         Regexp: {
                             replace: ["s/ +/ /"],
                             matches: ["/one/i", "/two/i"],
@@ -49,51 +54,62 @@ export class ConnectionMock {
                 },
             ]
         });
-        this.blobs.set(quiz_id, quiz);
+        quiz.update();
+        this.nomads.set(quizId, quiz);
 
-        const dojo_id = "0000000000000000111111111111111122222222222222223333333333333333";
-        const dojo_result_id = "3333333333333333222222222222222211111111111111110000000000000000";
-        const dojoAttempt = new DojoAttempt(BlobID.fromHex(dojo_result_id));
+        const dojoId = "0000000000000000111111111111111122222222222222223333333333333333";
+        const dojoResultId = "3333333333333333222222222222222211111111111111110000000000000000";
+        const dojoAttempt = new DojoAttempt(NomadID.fromHex(dojoResultId));
         dojoAttempt.json = JSON.stringify({
-            dojo_id,
+            dojoId,
             results: [{ Multi: [0, 2] },
             { Regexp: "one" }],
         });
         dojoAttempt.update();
-        this.blobs.set(dojo_result_id, dojoAttempt);
+        this.nomads.set(dojoResultId, dojoAttempt);
 
-        const dojo = new Dojo(BlobID.fromHex(dojo_id));
+        const dojo = new Dojo(NomadID.fromHex(dojoId));
         dojo.json = JSON.stringify({
-            quiz_id: quiz.id.toHex(),
+            quizId: quiz.id.toHex(),
             results: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
         });
         dojo.update();
-        this.blobs.set(dojo_id, dojo);
+        this.nomads.set(dojoId, dojo);
 
-        const course_id1 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-        const course1 = new Course(BlobID.fromHex(course_id1));
+        const courseId1 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        const course1 = new Course(NomadID.fromHex(courseId1));
         course1.json = JSON.stringify({
             name: 'Test',
             admins: [secret.hash().toHex()],
             students: [],
-            quiz_ids: [quiz.id.toHex()],
+            quizIds: [quiz.id.toHex()],
             state: { Idle: {} },
-            dojo_ids: [dojo_id],
+            dojoIds: [dojoId],
         });
         course1.update();
-        this.blobs.set(course_id1, course1);
+        this.nomads.set(courseId1, course1);
 
-        const course_id2 = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-        const course2 = new Course(BlobID.fromHex(course_id2));
+        const courseId2 = "1123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        const course2 = new Course(NomadID.fromHex(courseId2));
         course2.json = JSON.stringify({
             name: 'Test Student',
             admins: [],
             students: [secret.hash().toHex()],
-            quiz_ids: [quiz.id.toHex()],
+            quizIds: [quiz.id.toHex()],
             state: { Quiz: quiz.id.toHex() },
-            dojo_ids: [dojo_id],
+            dojoIds: [dojoId],
         });
         course2.update();
-        this.blobs.set(course_id2, course2);
+        this.nomads.set(courseId2, course2);
+
+        for (const [_, v] of [...this.nomads.entries()]) {
+            v.version = 1;
+        }
+
+        const courses = new Courses();
+        courses.list.set(course1.id.toHex(), course1.name);
+        courses.list.set(course2.id.toHex(), course2.name);
+        courses.version = 2;
+        this.nomads.set(courses.id.toHex(), courses);
     }
 }

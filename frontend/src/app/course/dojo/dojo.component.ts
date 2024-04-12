@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Course, CourseStateEnum } from '../../../lib/structs';
-import { ConnectionService } from '../../services/connection.service';
+import { CourseStateEnum } from "../../../lib/structs";
+import { Course } from "../../../lib/structs";
 import { QuizComponent } from './quiz/quiz.component';
 import { CommonModule } from '@angular/common';
 
@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 export class DojoComponent {
   @Input() course!: Course;
 
-  constructor(private connection: ConnectionService) { }
+  constructor() { }
 
   ngOnChanges() {
     console.log(`dojo: ${this.course.name}`);

@@ -7,8 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatListModule, MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { GRID_MAX_WIDTH } from '../../../app.config';
-import { ResultState } from '../../../services/connection.service';
-import { Options, Dojo, DojoChoice, DojoAttempt as DojoAttempt, Question, Quiz } from '../../../../lib/structs';
+import { Dojo, DojoChoice, DojoAttempt as DojoAttempt, Question, Quiz } from "../../../../lib/structs";
 import { UserService } from '../../../services/user.service';
 import { LivequizStorageService } from '../../../services/livequiz-storage.service';
 
