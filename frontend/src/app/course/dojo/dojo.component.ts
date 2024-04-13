@@ -1,9 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CourseStateEnum } from "../../../lib/structs";
+import { CourseStateEnum, Dojo } from "../../../lib/structs";
 import { Course } from "../../../lib/structs";
 import { QuizComponent } from './quiz/quiz.component';
 import { CommonModule } from '@angular/common';
+// import { CorrectionsComponent } from './corrections/corrections.component';
+import { UserService } from '../../services/user.service';
+import { LivequizStorageService } from '../../services/livequiz-storage.service';
 
 @Component({
   selector: 'app-dojo',
@@ -15,19 +18,17 @@ import { CommonModule } from '@angular/common';
 export class DojoComponent {
   @Input() course!: Course;
 
-  constructor() { }
+  constructor(private user: UserService, private livequiz: LivequizStorageService) { }
 
-  ngOnChanges() {
-    console.log(`dojo: ${this.course.name}`);
+  isIdle(): boolean{
+    return this.course.state.state === CourseStateEnum.Idle;
   }
 
-  is_idle(): boolean{
-    return this.course.state.state === CourseStateEnum.Idle;
+  showQuiz(): boolean{
+    return !this.isIdle() && this.user.secret.hash().isIn(this.course.students);
   }
-  is_quiz(): boolean{
-    return this.course.state.state === CourseStateEnum.Idle;
-  }
-  is_corrections(): boolean{
-    return this.course.state.state === CourseStateEnum.Idle;
+  
+  showCorrections(): boolean{
+    return this.course.state.state === CourseStateEnum.Corrections;
   }
 }

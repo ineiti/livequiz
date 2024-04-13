@@ -1,9 +1,14 @@
 <h3>Dojo - get trained!</h3>
 
-<div *ngIf="is_idle()">
+<div *ngIf="isIdle()">
     <h4>Currently there is no ongoing dojo training.</h4>
 </div>
 
-<div *ngIf="is_quiz()">
-    <app-quiz></app-quiz>
+<div *ngIf="showQuiz()">
+    <app-quiz [dojoId]="course.state.dojoId"></app-quiz>
+</div>
+
+<div *ngIf="showCorrections()">
+    <h4>Show corrections</h4>
+    <!-- <app-corrections [course]="course"></app-corrections> -->
 </div>

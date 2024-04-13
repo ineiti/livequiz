@@ -13,14 +13,16 @@ export class ConnectionMock {
     }
 
     async getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
-        console.log('Mock connection:', [...Object.entries(updates.nomadVersions)].map(([k, v]) =>
-            `${k.slice(0, 8)}: ${v.version}`).join(" ; "));
+        // console.log('Mock connection:', [...Object.entries(updates.nomadVersions)].map(([k, v]) =>
+        //     `${k.slice(0, 8)}: ${v.version}`).join(" ; "));
         const reply: JSONNomadUpdateReply = { nomadData: {} };
         for (const [k, v] of [...Object.entries(updates.nomadVersions)]) {
-            if (v.version <= 1 && this.nomads.has(k)) {
+            if (v.version < 1 && this.nomads.has(k)) {
                 reply.nomadData[k] = this.nomads.get(k)!.getReply();
             }
         }
+        // console.log('Mock reply:', [...Object.entries(reply.nomadData)].map(([k, v]) =>
+        //     `${k.slice(0, 8)}: ${v.version}`).join(" ; "));
         return Promise.resolve(reply);
     }
 
@@ -45,6 +47,28 @@ export class ConnectionMock {
                     title: "2nd",
                     intro: "what is your second choice?",
                     options: {
+                        Multi: {
+                            correct: ["eins", "zwei"],
+                            wrong: ["drei", "vier"],
+                        }
+                    },
+                    explanation: "sounds great",
+                },
+                {
+                    title: "3rd",
+                    intro: "what is your third choice?",
+                    options: {
+                        Multi: {
+                            correct: ["1"],
+                            wrong: ["2", "3", "4"],
+                        }
+                    },
+                    explanation: "sounds great",
+                },
+                {
+                    title: "4th",
+                    intro: "what is your fourth choice?",
+                    options: {
                         Regexp: {
                             replace: ["s/ +/ /"],
                             matches: ["/one/i", "/two/i"],
@@ -62,15 +86,19 @@ export class ConnectionMock {
         const dojoAttempt = new DojoAttempt(NomadID.fromHex(dojoResultId));
         dojoAttempt.json = JSON.stringify({
             dojoId,
-            results: [{ Multi: [0, 2] },
-            { Regexp: "one" }],
+            results: [
+                { Multi: [0, 2] },
+                { Multi: [1, 3] },
+                { Multi: [1] },
+                { Regexp: "one" }
+            ],
         });
         dojoAttempt.update();
         this.nomads.set(dojoResultId, dojoAttempt);
 
         const dojo = new Dojo(NomadID.fromHex(dojoId));
         dojo.json = JSON.stringify({
-            quizId: quiz.id.toHex(),
+            quizId: quizId,
             results: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
         });
         dojo.update();
@@ -96,7 +124,7 @@ export class ConnectionMock {
             admins: [],
             students: [secret.hash().toHex()],
             quizIds: [quiz.id.toHex()],
-            state: { Quiz: quiz.id.toHex() },
+            state: { Quiz: dojo.id.toHex() },
             dojoIds: [dojoId],
         });
         course2.update();

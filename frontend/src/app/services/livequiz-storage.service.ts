@@ -62,6 +62,10 @@ export class LivequizStorageService {
     return await this.storage.getNomad(id, new Quiz());
   }
 
+  async getDojo(id: DojoID): Promise<Dojo> {
+    return await this.storage.getNomad(id, new Dojo());
+  }
+
   createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
     const dr = new DojoAttempt();
     dr.dojoId = dojo.id;

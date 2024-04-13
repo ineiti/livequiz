@@ -44,7 +44,7 @@ export class StorageHandler {
       if (duration > 100) {
         alert("Serializing all this stuff takes more than 100ms!");
       } else {
-        console.log(`${this.cache.size} nomads: ${duration}ms`);
+        // console.log(`${this.cache.size} nomads: ${duration}ms`);
       }
       this.timeout = setTimeout(() => this.updateLoop(), 2000);
     });
