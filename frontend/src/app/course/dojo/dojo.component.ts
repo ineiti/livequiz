@@ -4,7 +4,6 @@ import { CourseStateEnum, Dojo } from "../../../lib/structs";
 import { Course } from "../../../lib/structs";
 import { QuizComponent } from './quiz/quiz.component';
 import { CommonModule } from '@angular/common';
-// import { CorrectionsComponent } from './corrections/corrections.component';
 import { UserService } from '../../services/user.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 

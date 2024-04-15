@@ -1,5 +1,5 @@
 import { UserID, QuizID, DojoID, DojoAttemptID } from "./ids";
-import { JSONCourse, JSONQuiz, JSONQuestion, JSONChoice, JSONChoiceMulti, JSONChoiceRegexp, JSONCourseState, JSONDojo, JSONDojoAttempt, JSONDojoChoice } from "./jsons";
+import { JSONCourse, JSONQuiz, JSONQuestion, JSONChoice, JSONChoiceMulti as JSONOptionMulti, JSONChoiceRegexp as JSONOptionRegexp, JSONCourseState, JSONDojo, JSONDojoAttempt, JSONDojoChoice } from "./jsons";
 import { Nomad } from "./storage";
 
 export class Course extends Nomad {
@@ -86,6 +86,15 @@ export class Options {
     }
   }
 
+  isCorrect(choice: DojoChoice): boolean[] {
+    if (this.multi !== undefined) {
+      return this.multi!.correct.concat(this.multi!.wrong).map((_, i) =>
+        choice.multi!.includes(i) && i < this.multi!.correct.length
+      );
+    }
+    return [this.regexp!.isCorrect(choice.regexp!)];
+  }
+
   toJson(): JSONChoice {
     if (this.multi !== undefined) {
       return {
@@ -103,12 +112,16 @@ export class OptionsMulti {
   correct: string[];
   wrong: string[];
 
-  constructor(cm: JSONChoiceMulti) {
+  constructor(cm: JSONOptionMulti) {
     this.correct = cm.correct!;
     this.wrong = cm.wrong!;
   }
 
-  toJson(): JSONChoiceMulti {
+  total(): number {
+    return this.correct.length + this.wrong.length;
+  }
+
+  toJson(): JSONOptionMulti {
     return {
       correct: this.correct,
       wrong: this.wrong,
@@ -116,18 +129,50 @@ export class OptionsMulti {
   }
 }
 
+interface ReplaceRegexp {
+  find: RegExp,
+  replace: string,
+  flags?: string,
+}
+
 export class OptionRegexp {
-  replace: RegExp[];
+  replace: ReplaceRegexp[];
   matches: RegExp[];
 
-  constructor(cr: JSONChoiceRegexp) {
-    this.replace = cr.replace!.map((r) => new RegExp(r));
-    this.matches = cr.matches!.map((m) => new RegExp(m));
+  constructor(cr: JSONOptionRegexp) {
+    this.replace = cr.replace!.map((r) => {
+      const match = r.match(/^s\/(.*)\/(.*)\/(.*)$/);
+      if (!match) {
+        throw new Error("Invalid search and replace format");
+      }
+      const flags = match.length > 3 ? match[3] : '';
+      return { find: new RegExp(match[1], flags), replace: match[2] };
+    });
+    this.matches = cr.matches!.map((m) => {
+      const match = m.match(/^\/?(.*)\/(.*)\/?/);
+      if (!match) {
+        throw new Error("Invalid match regexp");
+      }
+      return new RegExp(match[1], match.length > 2 ? match[2] : '');
+    });
   }
 
-  toJson(): JSONChoiceRegexp {
+  isCorrect(s: string): boolean {
+    let search = s;
+    for (const r of this.replace) {
+      search = search.replace(r.find, r.replace);
+    }
+    for (const m of this.matches) {
+      if (search.search(m) >= 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  toJson(): JSONOptionRegexp {
     return {
-      replace: this.replace.map((r) => r.toString()),
+      replace: this.replace.map((r) => `s${r.find}${r.replace}/${r.flags ?? ''}`),
       matches: this.matches.map((m) => m.toString()),
     };
   }
@@ -244,6 +289,11 @@ export class DojoChoice {
     } else {
       this.regexp = dc.Regexp!;
     }
+  }
+
+  isAnswered(): boolean {
+    return (this.regexp !== undefined && this.regexp! !== "") ||
+      (this.multi != undefined && this.multi!.length > 0);
   }
 
   toJson(): JSONDojoChoice {

@@ -5,10 +5,9 @@
 </div>
 
 <div *ngIf="showQuiz()">
-    <app-quiz [dojoId]="course.state.dojoId"></app-quiz>
+    <app-quiz [dojoId]="course.state.dojoId" [corrections]="showCorrections()"></app-quiz>
 </div>
 
-<div *ngIf="showCorrections()">
-    <h4>Show corrections</h4>
-    <!-- <app-corrections [course]="course"></app-corrections> -->
+<div *ngIf="!isIdle() && !showQuiz()">
+    Nothing to see here for an admin.
 </div>

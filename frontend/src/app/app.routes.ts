@@ -3,6 +3,7 @@ import { LandingComponent } from './landing/landing.component';
 import { CourseComponent } from './course/course.component';
 import { DojoComponent } from './course/dojo/dojo.component';
 import { CourseManageComponent } from './course/course-manage/course-manage.component';
+// import { CorrectionsComponent } from './course/corrections/corrections.component';
 
 export const routes: Routes = [
     {
@@ -17,6 +18,10 @@ export const routes: Routes = [
                 path: 'dojo',
                 component: DojoComponent,
             }
+            // {
+            //     path: 'corrections',
+            //     component: CorrectionsComponent,
+            // }
         ]
     },
     { path: '', component: LandingComponent, pathMatch: 'full' },

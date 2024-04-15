@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,20 +23,15 @@ import { sha256 } from 'js-sha256';
 })
 export class QuizComponent {
   @Input() dojoId?: DojoID;
-  @ViewChild('optionsList') optionsList!: MatSelectionList;
+  @Input() corrections!: boolean;
   dojo!: Dojo;
   quiz!: Quiz;
   attempt!: DojoAttempt;
   answer!: Answer;
-  show = true;
+  showOptions = true;
 
-  showResults = false;
-  editAllowed = true;
   tileClasses: string[] = [];
   resultClasses: string[] = [];
-  done: boolean[] = [];
-  empty = true;
-  percentage = 100;
   first = false;
   last = false;
   currentQuestion = 0;
@@ -51,7 +46,6 @@ export class QuizComponent {
   }
 
   updateSelection(event: MatSelectionList) {
-    this.done[this.currentQuestion] = event.selectedOptions.selected.length > 0;
     this.answer.updateSelection(event.selectedOptions.selected);
     this.updateAnswer();
   }
@@ -68,30 +62,39 @@ export class QuizComponent {
   }
 
   update() {
-    this.first = this.currentQuestion === 0;
-    this.empty = this.quiz!.questions.length === 0;
-    if (!this.empty) {
+    this.showOptions = false;
+    // This makes the display flicker a bit between every change, but else the MatSelectionList
+    // gets confused if a user clicks a field, and then switches to another question,
+    // which should have the clicked field non-selected. The confusion arises by the fact that the
+    // previously clicked field also shows activated in the new question. Going back and forth
+    // again without clicking the field resets to the correct state.
+    // TODO: to solve this, one should probably use the 'selected' of the 'mat-selection-list'
+    // instead of the 'mat-list-option'.
+    setTimeout(() => {
+      this.first = this.currentQuestion === 0;
       this.last = this.currentQuestion === this.quiz!.questions.length - 1;
-      this.percentage = 100 * (this.currentQuestion + 1) / this.quiz!.questions.length;
+      this.answer = new Answer(this.quiz.questions[this.currentQuestion],
+        this.attempt.results[this.currentQuestion], this.user.secret.hash());
       this.updateAnswer();
-    }
-    this.answer = new Answer(this.quiz.questions[this.currentQuestion],
-      this.attempt.results[this.currentQuestion], this.user.secret.hash());
+      this.showOptions = true;
+    });
   }
 
   updateAnswer() {
     for (let question = 0; question < this.quiz!.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.currentQuestion === question ? " questionTileChosen" : "") +
-        (question % 2 === 1 ? " questionTileOdd" : "") +
-        (this.done[question] ? " questionTileDone" : "");
+        (question % 2 === 1 ? " questionTileOdd" : "");
+      if (this.attempt.results[question]?.isAnswered()) {
+        this.tileClasses[question] += " questionTileDone";
+      }
     }
 
     this.resultClasses = [];
-    for (let question = 0; question < this.quiz!.questions.length; question++) {
-      this.resultClasses[question] = "question ";
-      if (this.showResults && this.answer!.needsCorrection(question)) {
-        this.resultClasses[question] = this.answer!.isCorrect(question) ?
-          "questionSelectionCorrect" : "questionSelectionWrong";
+    for (let option = 0; option < this.answer!.maxChoices; option++) {
+      this.resultClasses[option] = "option ";
+      if (this.corrections && this.answer.needsCorrection(option)) {
+        this.resultClasses[option] = this.answer.correctAnswer(option) ?
+          "optionCorrect" : "optionWrong";
       }
     }
   }
@@ -126,20 +129,14 @@ export class Answer {
 
     if (!this.isRegexp()) {
       this.options = question.options.multi!.correct.concat(question.options.multi!.wrong);
-      // If the selected field is calculated without a timeout, the mat-selection-list
-      // merges changes between 'next' or 'previous'.
-      // TODO: to solve this, one should probably use the 'selected' of the 'mat-selection-list'
-      // instead of the 'mat-list-option'.
-      setTimeout(() => {
-        this.original = this.options.map((_, i) => i);
-        this.selected = this.options.map((_, i) => choice.multi!.includes(i));
-        this.shuffle(user);
-      }, 0);
+      this.original = this.options.map((_, i) => i);
+      this.selected = this.options.map((_, i) => choice.multi!.includes(i));
+      this.shuffle(user);
     }
   }
 
   // Shuffle the answers, seeding using the question and the userID.
-  // This allows to have an individual but constant shuffling of each question for tone user,
+  // This allows to have an individual but constant shuffling of each question for one user,
   // but different for each user.
   shuffle(user: UserID) {
     const multiplier = 1103515245;
@@ -159,13 +156,24 @@ export class Answer {
     }
   }
 
-  isCorrect(question: number): boolean {
-    throw new Error("Not implemented");
+  // Returns whether the given option would be correct (for multiple choice),
+  // or if the entered regexp is correct. 
+  correctAnswer(option: number): boolean {
+    if (this.question.options.regexp !== undefined) {
+      console.log(`Testing if ${this.choice.regexp} is correct`)
+      return this.question.options.regexp!.isCorrect(this.choice.regexp!);
+    } else {
+      return this.original[option] < this.question.options.multi!.correct.length;
+    }
+  }
+
+  isCorrectMulti(option: number): boolean {
+    return this.original[option] < this.question.options.multi!.correct.length;
   }
 
   // Either it chosen by the user, or it must be chosen by them.
-  needsCorrection(question: number): boolean {
-    throw new Error("Not implemented");
+  needsCorrection(option: number): boolean {
+    return this.selected[option] || this.isRegexp() || this.isCorrectMulti(option);
   }
 
   isRegexp(): boolean {

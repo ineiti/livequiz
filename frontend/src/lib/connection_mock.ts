@@ -17,7 +17,7 @@ export class ConnectionMock {
         //     `${k.slice(0, 8)}: ${v.version}`).join(" ; "));
         const reply: JSONNomadUpdateReply = { nomadData: {} };
         for (const [k, v] of [...Object.entries(updates.nomadVersions)]) {
-            if (v.version < 1 && this.nomads.has(k)) {
+            if (this.nomads.has(k) && v.version < this.nomads.get(k)!.version) {
                 reply.nomadData[k] = this.nomads.get(k)!.getReply();
             }
         }
@@ -130,6 +130,19 @@ export class ConnectionMock {
         course2.update();
         this.nomads.set(courseId2, course2);
 
+        const courseId3 = "2123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        const course3 = new Course(NomadID.fromHex(courseId3));
+        course3.json = JSON.stringify({
+            name: 'Test Corrections',
+            admins: [secret.hash().toHex()],
+            students: [secret.hash().toHex()],
+            quizIds: [quiz.id.toHex()],
+            state: { Corrections: dojo.id.toHex() },
+            dojoIds: [dojoId],
+        });
+        course3.update();
+        this.nomads.set(courseId3, course3);
+
         for (const [_, v] of [...this.nomads.entries()]) {
             v.version = 1;
         }
@@ -137,6 +150,7 @@ export class ConnectionMock {
         const courses = new Courses();
         courses.list.set(course1.id.toHex(), course1.name);
         courses.list.set(course2.id.toHex(), course2.name);
+        courses.list.set(course3.id.toHex(), course3.name);
         courses.version = 2;
         this.nomads.set(courses.id.toHex(), courses);
     }

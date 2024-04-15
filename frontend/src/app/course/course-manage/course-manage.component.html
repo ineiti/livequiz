@@ -7,14 +7,20 @@
         <button *ngIf="course.state.isCorrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
             Restart Dojo
         </button>
+        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="corrections">
+            See Corrections
+        </button>
         <button *ngIf="course.state.isQuiz()" mat-stroked-button (click)="dojoCorrections()">
-            Show Corrections
+            End Quiz
         </button>
     </div>
     <div *ngIf="isStudent()">
-        <button *ngIf="course.state.isQuiz()" mat-stroked-button routerLink="dojo">Enter Dojo</button>
-        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="dojo/corrections">See
-            Corrections</button>
+        <button *ngIf="course.state.isQuiz()" mat-stroked-button routerLink="dojo">
+            Enter Dojo
+        </button>
+        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="dojo">
+            See Results
+        </button>
     </div>
 </div>
 

@@ -2,10 +2,10 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatListModule, MatSelectionListChange } from '@angular/material/list';
-import { GRID_MAX_WIDTH } from '../../../app.config';
+import { GRID_MAX_WIDTH } from '../../app.config';
 import { Subscription } from 'rxjs';
 import { RouterLink } from '@angular/router';
-import { Course, Dojo } from '../../../../lib/structs';
+import { Course, Dojo } from '../../../lib/structs';
 
 @Component({
   selector: 'app-corrections',
