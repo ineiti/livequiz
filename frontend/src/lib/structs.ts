@@ -1,6 +1,9 @@
-import { UserID, QuizID, DojoID, DojoAttemptID } from "./ids";
+import { ReplaySubject, Subscription } from "rxjs";
+import { UserID, QuizID, DojoID, DojoAttemptID, NomadID } from "./ids";
 import { JSONCourse, JSONQuiz, JSONQuestion, JSONChoice, JSONChoiceMulti as JSONOptionMulti, JSONChoiceRegexp as JSONOptionRegexp, JSONCourseState, JSONDojo, JSONDojoAttempt, JSONDojoChoice } from "./jsons";
 import { Nomad } from "./storage";
+import { User } from "../app/services/user.service";
+import { StorageService } from "../app/services/storage.service";
 
 export class Course extends Nomad {
   name: string = "";
@@ -86,6 +89,10 @@ export class Options {
     }
   }
 
+  size(): number {
+    return this.regexp !== undefined ? 1 : this.multi!.total();
+  }
+
   isCorrect(choice: DojoChoice): boolean[] {
     if (this.multi !== undefined) {
       return this.multi!.correct.concat(this.multi!.wrong).map((_, i) =>
@@ -106,6 +113,32 @@ export class Options {
       };
     }
   }
+
+  scoreStats(choice: DojoChoice): { score: number, stats: number[] } {
+    if (this.regexp !== undefined) {
+      if (choice.regexp === undefined){
+        return {score: 0, stats: []};
+      }
+      const result = this.regexp.matches(choice.regexp!);
+      const stats = this.regexp.match.map((_, i) => i == result ? 1 : 0);
+      return { score: result >= 0 ? 1 : 0, stats };
+    }
+    let score = 0;
+    let stats: number[] = [];
+    for (let i = 0; i < this.multi!.total(); i++) {
+      stats[i] = 0;
+      const correctOption = i < this.multi!.correct.length;
+      const chosen = choice.multi!.includes(i);
+      if (correctOption && chosen) {
+        score += 1 / this.multi!.correct.length;
+        stats[i] = 1;
+      } else if (!correctOption && chosen) {
+        stats[i] = 1;
+        score -= 0.5;
+      }
+    }
+    return { score: score > 0 ? score : 0, stats };
+  }
 }
 
 export class OptionsMulti {
@@ -119,6 +152,20 @@ export class OptionsMulti {
 
   total(): number {
     return this.correct.length + this.wrong.length;
+  }
+
+  fields(): string[]{
+    return this.correct.concat(this.wrong);
+  }
+
+  field(f: number): string {
+    if (f < this.correct.length){
+      return this.correct[f];
+    }
+    if (f < this.total()){
+      return this.wrong[f-this.correct.length];
+    }
+    throw new Error("Not so many fields");
   }
 
   toJson(): JSONOptionMulti {
@@ -137,7 +184,7 @@ interface ReplaceRegexp {
 
 export class OptionRegexp {
   replace: ReplaceRegexp[];
-  matches: RegExp[];
+  match: RegExp[];
 
   constructor(cr: JSONOptionRegexp) {
     this.replace = cr.replace!.map((r) => {
@@ -148,7 +195,7 @@ export class OptionRegexp {
       const flags = match.length > 3 ? match[3] : '';
       return { find: new RegExp(match[1], flags), replace: match[2] };
     });
-    this.matches = cr.matches!.map((m) => {
+    this.match = cr.match!.map((m) => {
       const match = m.match(/^\/?(.*)\/(.*)\/?/);
       if (!match) {
         throw new Error("Invalid match regexp");
@@ -157,23 +204,31 @@ export class OptionRegexp {
     });
   }
 
-  isCorrect(s: string): boolean {
-    let search = s;
+  applyReplace(s: string): string {
     for (const r of this.replace) {
-      search = search.replace(r.find, r.replace);
+      s = s.replace(r.find, r.replace);
     }
-    for (const m of this.matches) {
-      if (search.search(m) >= 0) {
-        return true;
+    return s;
+  }
+
+  isCorrect(s: string): boolean {
+    return this.matches(s) >= 0;
+  }
+
+  matches(s: string): number {
+    const search = this.applyReplace(s);
+    for (let m = 0; m < this.match.length; m++) {
+      if (search.search(this.match[m]) >= 0) {
+        return m;
       }
     }
-    return false;
+    return -1;
   }
 
   toJson(): JSONOptionRegexp {
     return {
       replace: this.replace.map((r) => `s${r.find}${r.replace}/${r.flags ?? ''}`),
-      matches: this.matches.map((m) => m.toString()),
+      match: this.match.map((m) => m.toString()),
     };
   }
 }
@@ -239,18 +294,20 @@ export class CourseState {
 
 export class Dojo extends Nomad {
   quizId: QuizID = new QuizID();
-  results: Map<string, DojoAttemptID> = new Map();
+  attempts: Map<string, DojoAttemptID> = new Map();
+  private bs = new ReplaySubject<Dojo>(1);
 
   override update() {
     const d: JSONDojo = JSON.parse(this.json);
     this.quizId = QuizID.fromHex(d.quizId!);
-    this.results = new Map(Object.entries(d.results!)
+    this.attempts = new Map(Object.entries(d.results!)
       .map(([user, result]) => [user, DojoAttemptID.fromHex(result)]));
+    this.bs.next(this);
   }
 
   override toJson(): string {
     const results: { [key: string]: string; } = {};
-    for (const [key, value] of this.results.entries()) {
+    for (const [key, value] of this.attempts.entries()) {
       results[key] = value.toHex();
     }
 
@@ -259,23 +316,47 @@ export class Dojo extends Nomad {
       results,
     });
   }
+
+  subscribe(observer: ((value: Dojo) => void)): Subscription {
+    return this.bs.subscribe(observer);
+  }
+
+  async getAttempts(storage: StorageService): Promise<DojoAttempt[]> {
+    return await storage.getNomads([...this.attempts.values()],
+      (id: NomadID) => { return new DojoAttempt(id) });
+  }
+
+  async getUsers(storage: StorageService): Promise<User[]> {
+    return storage.getNomads([...this.attempts.keys()].map((ids) => NomadID.fromHex(ids)),
+      (id: NomadID) => { return new User(id) });
+  }
 }
 
 export class DojoAttempt extends Nomad {
   dojoId: DojoID = new DojoID();
-  results: DojoChoice[] = [];
+  choices: DojoChoice[] = [];
 
   override update() {
     const dr: JSONDojoAttempt = JSON.parse(this.json);
     this.dojoId = QuizID.fromHex(dr.dojoId!);
-    this.results = dr.results?.map((r) => new DojoChoice(r)) ?? [];
+    this.choices = dr.results?.map((r) => new DojoChoice(r)) ?? [];
   }
 
   override toJson(): string {
     return JSON.stringify({
       dojoId: this.dojoId.toHex(),
-      results: this.results.map((r) => r.toJson()),
+      results: this.choices.map((r) => r.toJson()),
     });
+  }
+
+  choicesFilled(questions: Question[]): DojoChoice[] {
+    if (this.choices.length < questions.length) {
+      for (let i = this.choices.length; i < questions.length; i++) {
+        this.choices.push(new DojoChoice(questions[i].options.multi !== undefined ?
+          { Multi: [] } : { Regexp: "" }));
+      }
+    }
+    return this.choices;
   }
 }
 

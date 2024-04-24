@@ -43,7 +43,7 @@ describe('StorageHandler', () => {
   it('stores and replies with new nomad', async () => {
     const storage = new StorageHandler(new NetworkSimul([]));
     const mine = new MyNomad("foo");
-    storage.addNomad(mine);
+    storage.addNomads(mine);
     const mine2 = await storage.getNomad(mine.id, new MyNomad());
     expect(mine.toJson()).toBe(mine2.toJson());
   });
@@ -52,7 +52,7 @@ describe('StorageHandler', () => {
     const test = new Test();
     test.addReply(0);
     const mine = new MyNomad("foo");
-    test.storage0.addNomad(mine);
+    test.storage0.addNomads(mine);
     test.storage0.syncNomads();
     expect(test.simul0.requests.length).toBe(1);
     expect(test.simul0.requests[0].nomadVersions[mine.id.toHex()]!.version).toBe(1);
@@ -69,10 +69,10 @@ describe('StorageHandler', () => {
     const test = new Test();
     let mine = new MyNomad("foo");
     mine.version = 2;
-    test.storage0.addNomad(mine);
+    test.storage0.addNomads(mine);
     const mineRemote = mine.clone();
     mineRemote.name = "bar";
-    test.storage1.addNomad(mineRemote);
+    test.storage1.addNomads(mineRemote);
 
     // syncNomads updates the local nomad
     test.addReply(0, mineRemote);

@@ -71,7 +71,7 @@ export class ConnectionMock {
                     options: {
                         Regexp: {
                             replace: ["s/ +/ /"],
-                            matches: ["/one/i", "/two/i"],
+                            match: ["/one/i", "/two/i"],
                         }
                     },
                     explanation: "sounds great",

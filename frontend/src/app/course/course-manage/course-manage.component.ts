@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { StorageService } from '../../services/storage.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 
+// TODO: merge this into the CourseComponent. Something something "if no children active, show this".
 @Component({
   selector: 'app-course-manage',
   standalone: true,

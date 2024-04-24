@@ -13,7 +13,7 @@ export class LivequizStorageService {
   private courses: Courses = new Courses();
 
   constructor(private storage: StorageService) {
-    this.storage.addNomad(this.courses);
+    this.storage.addNomads(this.courses);
   }
 
   async getCourse(courseId: NomadID): Promise<Course> {
@@ -35,7 +35,7 @@ export class LivequizStorageService {
     if (dojoId === undefined) {
       const dojo = new Dojo();
       dojo.quizId = quizId;
-      this.storage.addNomad(dojo);
+      this.storage.addNomads(dojo);
       dojoId = dojo.id;
       course.dojoIds.push(dojoId);
     }
@@ -69,22 +69,22 @@ export class LivequizStorageService {
   createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
     const dr = new DojoAttempt();
     dr.dojoId = dojo.id;
-    this.storage.addNomad(dr);
+    this.storage.addNomads(dr);
     return dr;
   }
 
   async getDojoAttempt(dojo: Dojo, user: UserID): Promise<DojoAttempt> {
-    if (!dojo.results.has(user.toHex())) {
+    if (!dojo.attempts.has(user.toHex())) {
       const dr = this.createDojoAttempt(dojo, user);
-      dojo.results.set(user.toHex(), dr.id);
+      dojo.attempts.set(user.toHex(), dr.id);
     }
-    return await this.storage.getNomad(dojo.results.get(user.toHex())!, new DojoAttempt());
+    return await this.storage.getNomad(dojo.attempts.get(user.toHex())!, new DojoAttempt());
   }
 
   async createCourse(name: string): Promise<Course> {
     const course = new Course();
     course.name = name;
-    this.storage.addNomad(course);
+    this.storage.addNomads(course);
     this.courses.list.set(course.id.toHex(), course.name);
     return course;
   }

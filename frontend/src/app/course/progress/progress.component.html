@@ -1,0 +1,22 @@
+<h2>Progress of Users</h2>
+
+<button *ngIf="addTestUsers" mat-button (click)="summary.addUser()" style="margin-bottom: 1em;">Add test user</button>
+<a [routerLink]="['../corrections']"><button mat-button>Corrections</button></a>
+
+<div *ngIf="summary && summary.users.length > 0">
+  <h3>Questionnaire title is {{summary.quiz.title}}</h3>
+  <table style="width: 100%">
+    <tr>
+      <th style="width: 10em;">Name</th>
+      <th style="width: 2em;" *ngFor="let row of summary.answered[0]; index as i">{{i+1}}</th>
+    </tr>
+    @for (user of summary.users; track $index){
+    <tr>
+      <td>{{user.name.slice(0, 20)}}</td>
+      @for (answered of summary.answered[$index]; track idx; let idx = $index){
+      <td [class]="answered ? 'userAnswer_answered' : ''"></td>
+      }
+    </tr>
+    }
+  </table>
+</div>

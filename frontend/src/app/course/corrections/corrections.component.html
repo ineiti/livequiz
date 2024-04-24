@@ -1,63 +1,77 @@
-<h2>{{results.questionnaire.chapter}}</h2>
+<div *ngIf="course.state.isCorrections() && quiz && results">
+    <h2>{{quiz.title}}</h2>
 
-<a [routerLink]="['/admin']"><button mat-button>Overview</button></a>
-
-<div *ngIf="!results.empty">
     <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
-        <button mat-button [disabled]="results.first" (click)="results.previous()"
+        <button mat-button [disabled]="qIndex == 0" (click)="goto(qIndex-1)"
             style="margin: auto 1em auto; height: 2em;">Previous</button>
-        <mat-grid-list [cols]="gridWidth(results.questionnaire.questions.length)" rowHeight="2em">
-            @for (q of results.questionnaire.questions; track $index) {
-            <mat-grid-tile (click)="results.goto($index)" [class]="tileClasses[$index]">
-                {{results.results[$index].index+1}}
+        <mat-grid-list [cols]="gridWidth(quiz.questions.length)" rowHeight="2em">
+            @for (q of quiz.questions; track $index) {
+            <mat-grid-tile (click)="goto($index)" [class]="tileClasses[$index]">
+                {{sorted[$index][0]+1}}
             </mat-grid-tile>
             }
         </mat-grid-list>
-        <button mat-button [disabled]="results.last" (click)="results.next()"
+        <button mat-button [disabled]="qIndex === sorted.length - 1" (click)="goto(qIndex+1)"
             style="margin: auto 0 auto 1em; height: 2em;">Next</button>
     </div>
+    <h3 [innerHTML]="question.title"></h3>
 
-    <h3 [innerHTML]="result.title"></h3>
+    <p [innerHTML]="question.intro"></p>
 
-    <p [innerHTML]="result.description"></p>
-
-    <div *ngIf="result.qType === 0">
-        <mat-selection-list class="app-class" #choicesList multiple="false" (selectionChange)="clearSelection($event)">
-            @for (choice of result.choices; track $index) {
+    <div *ngIf="question.options.multi !== undefined">
+        <div *ngIf="question.options.multi!.correct.length === 1">
+            <mat-selection-list class="app-class" #choicesList multiple="false"
+                (selectionChange)="clearSelection($event)">
+                @for (field of question.options.multi.fields(); track $index) {
+                <div style="display: flex;">
+                    <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
+                        [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
+                        <span class="option" [innerHTML]="field"></span>
+                    </mat-list-option>
+                    <span class="option"
+                        style="margin: auto 0 auto 1em; font-size: 120%;">{{results.chosen[sorted[qIndex][0]][$index]}}</span>
+                </div>
+                }
+            </mat-selection-list>
+        </div>
+        <div *ngIf="question.options.multi!.correct.length > 1">
+            <mat-selection-list class="app-class" #choicesList multiple="true"
+                (selectionChange)="clearSelection($event)">
+                @for (field of question.options.multi.fields(); track $index) {
+                <div style="display: flex;">
+                    <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
+                        [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
+                        <span class="option" [innerHTML]="field"></span>
+                    </mat-list-option>
+                    <span class="option"
+                        style="margin: auto 0 auto 1em; font-size: 120%;">{{results.chosen[sorted[qIndex][0]][$index]}}</span>
+                </div>
+                }
+            </mat-selection-list>
+        </div>
+    </div>
+    <div *ngIf="question.options.regexp !== undefined">
+        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
+            @for (field of question.options.regexp.match; track $index) {
             <div style="display: flex;">
                 <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                    [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
-                    <span class="question" [innerHTML]="choice.field"></span>
+                    [style.width]="resultWidth[$index]" [selected]="false">
+                    <span class="option" [innerHTML]="field"></span>
                 </mat-list-option>
-                <span class="question" style="margin: auto 0 auto 1em; font-size: 120%;">{{choice.count}}</span>
+                <span class="option"
+                    style="margin: auto 0 auto 1em; font-size: 120%;">{{results.chosen[sorted[qIndex][0]][$index]}}</span>
+            </div>
+            }
+            @for (wrong of results.texts[sorted[qIndex][0]]; track $index) {
+            <div style="display: flex;">
+                <mat-list-option togglePosition="before" class="resultWrong" style="width: 50%">
+                    <span class="option" [innerHTML]="wrong"></span>
+                </mat-list-option>
+                <span class="option" style="margin: auto 0 auto 1em; font-size: 120%;">1</span>
             </div>
             }
         </mat-selection-list>
     </div>
-    <div *ngIf="result.qType === 1">
-        <p>Please select {{result.maxChoices}} answers</p>
-        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
-            @for (choice of result.choices; track $index) {
-            <div style="display: flex;">
-                <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                    [style.width]="resultWidth[$index]" [selected]="isSelected($index)">
-                    <span class="question" [innerHTML]="choice.field"></span>
-                </mat-list-option>
-                <span class="question" style="margin: auto 0 auto 1em; font-size: 120%;">{{choice.count}}</span>
-            </div>
-            }
-        </mat-selection-list>
-    </div>
-    <div *ngIf="result.qType === 2">
-        <mat-selection-list class="app-class" #choicesList multiple="true" (selectionChange)="clearSelection($event)">
-            @for (choice of result.choices; track $index) {
-            <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                [style.width]="resultWidth[$index]" [selected]="true">
-                <span class="question" [innerHTML]="choice.field"></span>
-            </mat-list-option>
-            }
-        </mat-selection-list>
-    </div>
 
-    <p [innerHTML]="result.hint"></p>
+    <p [innerHTML]="question.explanation"></p>
 </div>

@@ -4,7 +4,7 @@ describe('Structs', () => {
     it('OptionRegexp filters and matches correctly', async () => {
         const or = new OptionRegexp({
             replace: ["s/ //g", "s/;//"],
-            matches: ["/^one$/i", "/^two$/"]
+            match: ["/^one$/i", "/^two$/"]
         });
         expect(or.isCorrect("one")).toBeTrue();
         expect(or.isCorrect("One")).toBeTrue();

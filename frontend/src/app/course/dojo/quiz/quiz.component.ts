@@ -74,7 +74,7 @@ export class QuizComponent {
       this.first = this.currentQuestion === 0;
       this.last = this.currentQuestion === this.quiz!.questions.length - 1;
       this.answer = new Answer(this.quiz.questions[this.currentQuestion],
-        this.attempt.results[this.currentQuestion], this.user.secret.hash());
+        this.attempt.choices[this.currentQuestion], this.user.secret.hash());
       this.updateAnswer();
       this.showOptions = true;
     });
@@ -84,7 +84,7 @@ export class QuizComponent {
     for (let question = 0; question < this.quiz!.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "");
-      if (this.attempt.results[question]?.isAnswered()) {
+      if (this.attempt.choices[question]?.isAnswered()) {
         this.tileClasses[question] += " questionTileDone";
       }
     }
@@ -160,7 +160,6 @@ export class Answer {
   // or if the entered regexp is correct. 
   correctAnswer(option: number): boolean {
     if (this.question.options.regexp !== undefined) {
-      console.log(`Testing if ${this.choice.regexp} is correct`)
       return this.question.options.regexp!.isCorrect(this.choice.regexp!);
     } else {
       return this.original[option] < this.question.options.multi!.correct.length;
@@ -188,7 +187,7 @@ export class Answer {
     return !this.isRegexp() && this.question.options.multi!.correct.length === 1;
   }
 
-  updateSelection(selected: MatListOption[]) {
+  updateSelection(selected: MatListOption[] | { value: number }[]) {
     this.choice.multi = selected.map((s) => this.original[s.value]);
   }
 }

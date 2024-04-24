@@ -1,4 +1,4 @@
-import { NomadID } from "./ids";
+import { H256, NomadID } from "./ids";
 
 // 1st the client sends the nomadIDs and the versions, plus any local updates.
 // This supposes that conflicts are less common than successful updates.
@@ -51,7 +51,15 @@ export class Nomad {
     }
   }
 
+  // Returns a reply to send to the server
   getReply(): { version: number, json: string } {
     return { version: this.version, json: this.toJson() }
+  }
+
+
+  // Does a comparison using toHex, because the same H256 cannot be compared
+  // with 'includes'.
+  isIn(other: H256[]): boolean {
+    return this.id.isIn(other);
   }
 }

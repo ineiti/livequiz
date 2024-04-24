@@ -7,8 +7,11 @@
         <button *ngIf="course.state.isCorrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
             Restart Dojo
         </button>
-        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="corrections">
-            See Corrections
+        <button mat-stroked-button routerLink="corrections">
+            Start Corrections
+        </button>
+        <button mat-stroked-button routerLink="progress">
+            Show Progress
         </button>
         <button *ngIf="course.state.isQuiz()" mat-stroked-button (click)="dojoCorrections()">
             End Quiz

@@ -17,7 +17,7 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 export class DojoComponent {
   @Input() course!: Course;
 
-  constructor(private user: UserService, private livequiz: LivequizStorageService) { }
+  constructor(private user: UserService) { }
 
   isIdle(): boolean{
     return this.course.state.state === CourseStateEnum.Idle;

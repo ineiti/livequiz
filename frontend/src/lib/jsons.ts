@@ -34,7 +34,7 @@ export interface JSONChoiceMulti {
 
 export interface JSONChoiceRegexp {
     replace?: string[];
-    matches?: string[];
+    match?: string[];
 }
 
 export interface JSONCourseState {

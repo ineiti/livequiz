@@ -4,12 +4,24 @@ import { Secret } from '../../lib/ids';
 import { Nomad } from "../../lib/storage";
 import { NomadID, H256 } from "../../lib/ids";
 
+export class User extends Nomad {
+  name = "undefined";
+
+  override update() {
+    const json = JSON.parse(this.json);
+    this.name = json.name;
+  }
+
+  override toJson(): string {
+    return JSON.stringify({ name: this.name });
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
-export class UserService extends Nomad {
-  secret = new Secret();
-  name = "undefined";
+export class UserService extends User {
+  secret: Secret;
 
   constructor() {
     super();
@@ -25,6 +37,9 @@ export class UserService extends Nomad {
       } else {
         this.name = name;
       }
+      this.secret = new Secret();
+      this.json = this.toJson();
+      this.update();
     } else {
       const json = JSON.parse(jsonStr);
       this.name = json.name;
@@ -36,17 +51,10 @@ export class UserService extends Nomad {
   override update() {
     const json = JSON.parse(this.json);
     this.name = json.name;
+
     localStorage.setItem('user-json', JSON.stringify({
       name: this.name,
       secret: this.secret.toHex(),
     }));
-  }
-
-  override toJson(): string {
-    return JSON.stringify({ name: this.name });
-  }
-
-  isIn(other: H256[]): boolean {
-    return this.secret.hash().isIn(other);
   }
 }
