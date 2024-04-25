@@ -82,11 +82,11 @@ export class ConnectionMock {
         this.nomads.set(quizId, quiz);
 
         const dojoId = "0000000000000000111111111111111122222222222222223333333333333333";
-        const dojoResultId = "3333333333333333222222222222222211111111111111110000000000000000";
-        const dojoAttempt = new DojoAttempt(NomadID.fromHex(dojoResultId));
+        const dojoAttemptId = "3333333333333333222222222222222211111111111111110000000000000000";
+        const dojoAttempt = new DojoAttempt(NomadID.fromHex(dojoAttemptId));
         dojoAttempt.json = JSON.stringify({
             dojoId,
-            results: [
+            choices: [
                 { Multi: [0, 2] },
                 { Multi: [1, 3] },
                 { Multi: [1] },
@@ -94,12 +94,12 @@ export class ConnectionMock {
             ],
         });
         dojoAttempt.update();
-        this.nomads.set(dojoResultId, dojoAttempt);
+        this.nomads.set(dojoAttemptId, dojoAttempt);
 
         const dojo = new Dojo(NomadID.fromHex(dojoId));
         dojo.json = JSON.stringify({
             quizId: quizId,
-            results: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
+            attempts: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
         });
         dojo.update();
         this.nomads.set(dojoId, dojo);

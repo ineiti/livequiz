@@ -55,7 +55,7 @@
             @for (field of question.options.regexp.match; track $index) {
             <div style="display: flex;">
                 <mat-list-option [value]="$index" togglePosition="before" [class]="resultClasses[$index]"
-                    [style.width]="resultWidth[$index]" [selected]="false">
+                    [style.width]="resultWidth[$index]" [selected]="true">
                     <span class="option" [innerHTML]="field"></span>
                 </mat-list-option>
                 <span class="option"

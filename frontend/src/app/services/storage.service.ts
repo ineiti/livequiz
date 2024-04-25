@@ -39,7 +39,9 @@ export class StorageHandler {
     const nomadIdHexs = nomadIds.map((id) => id.toHex());
     const missing = nomadIdHexs.filter((id) => !this.cache.has(id));
     for (const n of missing) {
-      this.cache.set(n, newNomad(NomadID.fromHex(n)));
+      const nn = newNomad(NomadID.fromHex(n));
+      nn.json = nn.toJson();
+      this.cache.set(n, nn);
     }
     await this.updateLoop();
     return [...this.cache.entries()]

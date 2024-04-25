@@ -46,13 +46,13 @@ export interface JSONCourseState {
 export interface JSONDojo {
     id?: string,
     quizId?: string,
-    results?: { [key: string]: string },
+    attempts?: { [key: string]: string },
 }
 
 export interface JSONDojoAttempt {
     id?: string;
     dojoId?: string;
-    results?: JSONDojoChoice[];
+    choices?: JSONDojoChoice[];
 }
 
 export interface JSONDojoChoice {

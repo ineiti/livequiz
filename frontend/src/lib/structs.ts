@@ -116,8 +116,8 @@ export class Options {
 
   scoreStats(choice: DojoChoice): { score: number, stats: number[] } {
     if (this.regexp !== undefined) {
-      if (choice.regexp === undefined){
-        return {score: 0, stats: []};
+      if (choice.regexp === undefined) {
+        return { score: 0, stats: [] };
       }
       const result = this.regexp.matches(choice.regexp!);
       const stats = this.regexp.match.map((_, i) => i == result ? 1 : 0);
@@ -154,16 +154,16 @@ export class OptionsMulti {
     return this.correct.length + this.wrong.length;
   }
 
-  fields(): string[]{
+  fields(): string[] {
     return this.correct.concat(this.wrong);
   }
 
   field(f: number): string {
-    if (f < this.correct.length){
+    if (f < this.correct.length) {
       return this.correct[f];
     }
-    if (f < this.total()){
-      return this.wrong[f-this.correct.length];
+    if (f < this.total()) {
+      return this.wrong[f - this.correct.length];
     }
     throw new Error("Not so many fields");
   }
@@ -300,20 +300,20 @@ export class Dojo extends Nomad {
   override update() {
     const d: JSONDojo = JSON.parse(this.json);
     this.quizId = QuizID.fromHex(d.quizId!);
-    this.attempts = new Map(Object.entries(d.results!)
+    this.attempts = new Map(Object.entries(d.attempts!)
       .map(([user, result]) => [user, DojoAttemptID.fromHex(result)]));
     this.bs.next(this);
   }
 
   override toJson(): string {
-    const results: { [key: string]: string; } = {};
+    const attempts: { [key: string]: string; } = {};
     for (const [key, value] of this.attempts.entries()) {
-      results[key] = value.toHex();
+      attempts[key] = value.toHex();
     }
 
     return JSON.stringify({
       quizId: this.quizId.toHex(),
-      results,
+      attempts,
     });
   }
 
@@ -322,7 +322,8 @@ export class Dojo extends Nomad {
   }
 
   async getAttempts(storage: StorageService): Promise<DojoAttempt[]> {
-    return await storage.getNomads([...this.attempts.values()],
+    const attemptIds = [...this.attempts.values()];
+    return await storage.getNomads(attemptIds,
       (id: NomadID) => { return new DojoAttempt(id) });
   }
 
@@ -339,13 +340,13 @@ export class DojoAttempt extends Nomad {
   override update() {
     const dr: JSONDojoAttempt = JSON.parse(this.json);
     this.dojoId = QuizID.fromHex(dr.dojoId!);
-    this.choices = dr.results?.map((r) => new DojoChoice(r)) ?? [];
+    this.choices = dr.choices?.map((r) => new DojoChoice(r)) ?? [];
   }
 
   override toJson(): string {
     return JSON.stringify({
       dojoId: this.dojoId.toHex(),
-      results: this.choices.map((r) => r.toJson()),
+      choices: this.choices.map((r) => r.toJson()),
     });
   }
 

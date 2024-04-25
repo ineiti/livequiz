@@ -1,27 +1,29 @@
 <div *ngIf="!course.state.isIdle()">
-    <h3>Quiz in Dojo: {{currentQuiz()?.title ?? "unknown"}}</h3>
+    <h3>Quiz in Dojo: {{quiz?.title}}</h3>
     <div *ngIf="isAdmin()">
-        <button mat-stroked-button (click)="dojoIdle()">
+        Admin actions:
+        <button mat-button color="primary" (click)="dojoIdle()">
             Stop Dojo
         </button>
-        <button *ngIf="course.state.isCorrections()" mat-stroked-button (click)="dojoQuiz(currentQuiz()!.id)">
+        <button *ngIf="course.state.isCorrections()" mat-button color="primary" (click)="dojoQuiz(quiz!.id)">
             Restart Dojo
         </button>
-        <button mat-stroked-button routerLink="corrections">
+        <button mat-button color="primary" routerLink="corrections">
             Start Corrections
         </button>
-        <button mat-stroked-button routerLink="progress">
+        <button mat-button color="primary" routerLink="progress">
             Show Progress
         </button>
-        <button *ngIf="course.state.isQuiz()" mat-stroked-button (click)="dojoCorrections()">
+        <button *ngIf="course.state.isQuiz()" mat-button color="primary" (click)="dojoCorrections()">
             End Quiz
         </button>
     </div>
     <div *ngIf="isStudent()">
-        <button *ngIf="course.state.isQuiz()" mat-stroked-button routerLink="dojo">
+        User actions:
+        <button *ngIf="course.state.isQuiz()" mat-button color="primary" routerLink="dojo">
             Enter Dojo
         </button>
-        <button *ngIf="course.state.isCorrections()" mat-stroked-button routerLink="dojo">
+        <button *ngIf="course.state.isCorrections()" mat-button color="primary" routerLink="dojo">
             See Results
         </button>
     </div>
@@ -32,8 +34,8 @@
     <ul>
         <li *ngFor="let quiz of quizzes">
             {{quiz.title}}
-            <button *ngIf="isAdmin()" (click)="dojoQuiz(quiz.id)">Start Quiz</button>
-            <button *ngIf="isStudent()" routerLink="['./kata', quiz.id.toHex()]">Train Yourself</button>
+            <button *ngIf="isAdmin() && course.state.isIdle()" mat-button color="primary" (click)="dojoQuiz(quiz.id)">Start Quiz</button>
+            <!-- <button *ngIf="isStudent()" mat-button color="primary" routerLink="['./kata', quiz.id.toHex()]">Train Yourself</button> -->
         </li>
     </ul>
 </div>

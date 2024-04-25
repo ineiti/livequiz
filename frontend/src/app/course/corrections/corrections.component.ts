@@ -10,11 +10,12 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 import { StorageService } from '../../services/storage.service';
 import { User } from '../../services/user.service';
 import { ResultsSummary } from '../../../lib/results_summary';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-corrections',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatGridListModule, RouterLink],
+  imports: [CommonModule, MatListModule, MatGridListModule, RouterLink, MatButtonModule],
   templateUrl: './corrections.component.html',
   styleUrl: './corrections.component.scss'
 })
@@ -117,14 +118,14 @@ export class CorrectionsComponent {
   }
 
   isSelected(index: number): boolean {
-    // return index < this.result.maxChoices;
-    return false;
+    const options = this.quiz.questions[this.sorted[this.qIndex][0]].options;
+    return options.regexp !== undefined ? index < options.regexp!.match.length :
+      index < options.multi!.correct.length;
   }
 
   goto(q: number) {
     this.qIndex = q;
     this.question = this.quiz.questions[this.sorted[q][0]];
-    console.log(this.results.texts[q]);
     this.updateClasses();
   }
 }

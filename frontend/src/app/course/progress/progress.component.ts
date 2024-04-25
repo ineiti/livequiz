@@ -3,24 +3,20 @@ import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
-import { Buffer } from 'buffer';
-import { Router, RouterLink } from '@angular/router';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { ResultsSummary } from '../../../lib/results_summary';
 import { StorageService } from '../../services/storage.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
-import { DojoID } from '../../../lib/ids';
-import { Course, CourseStateEnum, DojoAttempt, DojoChoice } from '../../../lib/structs';
-import { User } from '../../services/user.service';
-import { Answer } from '../dojo/quiz/quiz.component';
+import { Course, CourseStateEnum } from '../../../lib/structs';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-progress',
   standalone: true,
   imports: [MatListModule, MatSelectionList, MatGridListModule, CommonModule, MatTableModule,
-    MatSlideToggleModule, RouterLink],
+    MatSlideToggleModule, RouterLink, MatButtonModule],
   templateUrl: './progress.component.html',
   styleUrl: './progress.component.scss'
 })
@@ -31,7 +27,7 @@ export class ProgressComponent {
   summary!: ResultsSummary;
 
   constructor(private storage: StorageService, private livequiz: LivequizStorageService,
-    private router: Router) {
+    public router: Router, public route: ActivatedRoute) {
   }
 
   async ngOnInit() {
