@@ -53,29 +53,94 @@ export class Quiz extends Nomad {
     });
   }
 
-  static fromStr(s: string): Quiz {
-    throw new Error("Not yet implemented");
+  static fromStr(text: string): Quiz {
+    const q = new Quiz();
+
+    let current = new Question();
+    let explanation = false;
+    let maxChoices = 0;
+    let reg: JSONOptionRegexp = { replace: [], match: [] };
+    for (const line of text.split("\n")) {
+      if (line.length === 0) {
+        continue;
+      }
+      const linePre = line.replace(/`(.*?)`/g, "<span class='pre'>$1</span>");
+      const interpret = linePre.match(/([#=~-]*) *(.*)/);
+      if (interpret?.length != 3) {
+        console.error(`Cannot parse line ${line}`);
+        continue;
+      }
+      const [_, tag, text] = interpret;
+      switch (tag) {
+        case '#':
+          q.title = text;
+          break;
+        case '##':
+          if (current.title !== "") {
+            if (maxChoices < 0) {
+              current.options.regexp = new OptionRegexp(reg);
+            }
+            q.questions.push(current);
+            current = new Question();
+            explanation = false;
+            reg = { replace: [], match: [] };
+          }
+          current.title = text;
+          break;
+        case '-':
+          if (maxChoices > 0) {
+            if (current.options.multi!.correct.length < maxChoices) {
+              current.options.multi!.correct.push(text);
+            } else {
+              current.options.multi!.wrong.push(text);
+            }
+          } else {
+            reg.match?.push(text);
+          }
+          explanation = true;
+          break;
+        case '~':
+          maxChoices = -1;
+          reg.replace?.push(text);
+          break;
+        case '=':
+          maxChoices = parseInt(text);
+          current.options.multi = new OptionsMulti();
+          break;
+        default:
+          if (explanation) {
+            current.explanation += linePre + " ";
+          } else {
+            current.intro += linePre + " ";
+          }
+          break;
+      }
+    }
+
+    return q;
   }
 }
 
 export class Question {
-  title: string;
-  intro: string;
-  options: Options;
-  explanation: string;
+  title: string = "";
+  intro: string = "";
+  options: Options = new Options();
+  explanation: string = "";
 
-  constructor(q: JSONQuestion) {
-    this.title = q.title!;
-    this.intro = q.intro!;
-    this.options = new Options(q.options!);
-    this.explanation = q.explanation!;
+  constructor(q?: JSONQuestion) {
+    if (q !== undefined) {
+      this.title = q.title!;
+      this.intro = q.intro!;
+      this.options = new Options(q.options!);
+      this.explanation = q.explanation!;
+    }
   }
 
   toJson(): JSONQuestion {
     return {
       title: this.title,
       intro: this.intro,
-      options: this.options.toJson(),
+      options: this.options?.toJson(),
       explanation: this.explanation
     };
   }
@@ -85,11 +150,13 @@ export class Options {
   multi?: OptionsMulti;
   regexp?: OptionRegexp;
 
-  constructor(c: JSONChoice) {
-    if (c.Multi !== undefined) {
-      this.multi = new OptionsMulti(c.Multi!);
-    } else {
-      this.regexp = new OptionRegexp(c.Regexp!);
+  constructor(c?: JSONChoice) {
+    if (c !== undefined) {
+      if (c.Multi !== undefined) {
+        this.multi = new OptionsMulti(c.Multi!);
+      } else {
+        this.regexp = new OptionRegexp(c.Regexp!);
+      }
     }
   }
 
@@ -146,12 +213,14 @@ export class Options {
 }
 
 export class OptionsMulti {
-  correct: string[];
-  wrong: string[];
+  correct: string[] = [];
+  wrong: string[] = [];
 
-  constructor(cm: JSONOptionMulti) {
-    this.correct = cm.correct!;
-    this.wrong = cm.wrong!;
+  constructor(cm?: JSONOptionMulti) {
+    if (cm !== undefined) {
+      this.correct = cm.correct!;
+      this.wrong = cm.wrong!;
+    }
   }
 
   total(): number {
@@ -183,14 +252,14 @@ export class OptionsMulti {
 interface ReplaceRegexp {
   find: RegExp,
   replace: string,
-  flags?: string,
 }
 
 export class OptionRegexp {
-  replace: ReplaceRegexp[];
-  match: RegExp[];
+  replace: ReplaceRegexp[] = [];
+  match: RegExp[] = [];
 
   constructor(cr: JSONOptionRegexp) {
+    console.log(cr);
     this.replace = cr.replace!.map((r) => {
       const match = r.match(/^s\/(.*)\/(.*)\/(.*)$/);
       if (!match) {
@@ -200,11 +269,14 @@ export class OptionRegexp {
       return { find: new RegExp(match[1], flags), replace: match[2] };
     });
     this.match = cr.match!.map((m) => {
-      const match = m.match(/^\/?(.*)\/(.*)\/?/);
+      const match = m.match(/(^\/(.*)\/(.*)|(.*))/);
       if (!match) {
-        throw new Error("Invalid match regexp");
+        throw new Error(`Invalid match regexp: ${m}`);
       }
-      return new RegExp(match[1], match.length > 2 ? match[2] : '');
+      if (match[4] !== undefined){
+        return new RegExp(match[4]);
+      }
+      return new RegExp(match[2], match[3] ?? '');
     });
   }
 
@@ -231,7 +303,7 @@ export class OptionRegexp {
 
   toJson(): JSONOptionRegexp {
     return {
-      replace: this.replace.map((r) => `s${r.find}${r.replace}/${r.flags ?? ''}`),
+      replace: this.replace.map((r) => `s/${r.find.source}/${r.replace}/${r.find.flags ?? ''}`),
       match: this.match.map((m) => m.toString()),
     };
   }
@@ -394,3 +466,4 @@ export class DojoChoice {
     }
   }
 }
+

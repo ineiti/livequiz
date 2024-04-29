@@ -1,11 +1,12 @@
 import { Subscription } from "rxjs";
 import { LivequizStorageService } from "../app/services/livequiz-storage.service";
 import { StorageService } from "../app/services/storage.service";
-import { DojoID, NomadID } from "./ids";
+import { DojoID, NomadID, UserID } from "./ids";
 import { Dojo, DojoAttempt, DojoChoice, Quiz } from "./structs";
 import { User } from "../app/services/user.service";
 import { animals, colors, uniqueNamesGenerator } from "unique-names-generator";
-import { Answer } from "../app/course/dojo/quiz/quiz.component";
+import { Question } from "./structs";
+import { sha256 } from "js-sha256";
 
 export class ResultsSummaryContainer {
     // Wheter a student clicked any of the boxes or entered some text
@@ -120,4 +121,83 @@ export class ResultsSummary extends ResultsSummaryContainer {
         this.dojo.attempts.set(user.id.toHex(), attempt.id);
         this.storage.addNomads(user, attempt);
     }
+}
+
+export class Answer {
+  maxChoices: number = 1;
+  options: string[] = [];
+  original: number[] = [];
+  selected: boolean[] = [];
+
+  constructor(public question: Question, public choice: DojoChoice, user: UserID) {
+    if (question.options.multi !== undefined) {
+      this.maxChoices = question.options.multi!.correct.length +
+        question.options.multi!.wrong.length;
+    }
+
+    if (!this.isRegexp()) {
+      this.options = question.options.multi!.correct.concat(question.options.multi!.wrong);
+      this.original = this.options.map((_, i) => i);
+      this.selected = this.options.map((_, i) => choice.multi!.includes(i));
+      this.shuffle(user);
+    }
+  }
+
+  // Shuffle the answers, seeding using the question and the userID.
+  // This allows to have an individual but constant shuffling of each question for one user,
+  // but different for each user.
+  shuffle(user: UserID) {
+    const multiplier = 1103515245;
+    const increment = 12345;
+    const modulus = Math.pow(2, 31);
+    const hash = sha256.create();
+    hash.update(user.data);
+    hash.update(JSON.stringify(this.question.toJson()));
+    let seed = hash.digest()[0];
+
+    for (let i = this.options.length - 1; i > 0; i--) {
+      seed = (multiplier * seed + increment) % modulus;
+      const j = Math.floor(seed / (modulus / (i + 1)));
+      for (const arr of [this.options, this.original, this.selected]) {
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+  }
+
+  // Returns whether the given option would be correct (for multiple choice),
+  // or if the entered regexp is correct. 
+  correctAnswer(option: number): boolean {
+    if (this.question.options.regexp !== undefined) {
+      return this.question.options.regexp!.isCorrect(this.choice.regexp!);
+    } else {
+      return this.original[option] < this.question.options.multi!.correct.length;
+    }
+  }
+
+  isCorrectMulti(option: number): boolean {
+    return this.original[option] < this.question.options.multi!.correct.length;
+  }
+
+  // Either it chosen by the user, or it must be chosen by them.
+  needsCorrection(option: number): boolean {
+    return this.selected[option] || this.isRegexp() || this.isCorrectMulti(option);
+  }
+
+  isRegexp(): boolean {
+    return this.question.options.regexp !== undefined;
+  }
+
+  isMulti(): boolean {
+    return !this.isRegexp() && this.question.options.multi!.correct.length > 1;
+  }
+
+  isSingle(): boolean {
+    return !this.isRegexp() && this.question.options.multi!.correct.length === 1;
+  }
+
+  // TODO: make something nicer with the MatListOption here...
+  // updateSelection(selected: MatListOption[] | { value: number }[]) {
+  updateSelection(selected: any[] | { value: number; }[]) {
+    this.choice.multi = selected.map((s) => this.original[s.value]);
+  }
 }
