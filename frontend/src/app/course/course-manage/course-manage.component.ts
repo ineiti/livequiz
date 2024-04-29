@@ -61,7 +61,7 @@ export class CourseManageComponent {
 
   async deleteQuiz(id: QuizID) {
     const quiz = await this.livequiz.getQuiz(id);
-    if (await ModalModule.open(this.dialog, 'Delete Quiz',
+    if (await ModalModule.openOKCancel(this.dialog, 'Delete Quiz',
       `Do you want to delete the quiz ${quiz.title}?`
     )) {
       this.course.quizIds = this.course.quizIds.filter((i) => !i.equals(i));
@@ -74,15 +74,21 @@ export class CourseManageComponent {
 
   onFileSelected(event: any) {
     const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const q = new Quiz();
+    reader.onload = async (e: any) => {
+      try {
+        const q = Quiz.fromStr(e.target.result);
+      } catch (e) {
+        await ModalModule.openOKCancel(this.dialog, 'Error',
+          `While reading quiz: ${e}`
+        );
+      }
     };
     reader.readAsText(event.target.files[0]);
   }
 
   openFileChooser() {
     document.getElementById('fileInput')!.click();
-  }  
+  }
 
-  addQuiz(){}
+  addQuiz() { }
 }

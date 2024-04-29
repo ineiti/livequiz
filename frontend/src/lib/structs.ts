@@ -52,6 +52,10 @@ export class Quiz extends Nomad {
       questions: this.questions.map((q) => q.toJson()),
     });
   }
+
+  static fromStr(s: string): Quiz {
+    throw new Error("Not yet implemented");
+  }
 }
 
 export class Question {

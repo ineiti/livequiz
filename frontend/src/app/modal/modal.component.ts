@@ -20,10 +20,24 @@ export class ModalModule {
     public dialogRef: MatDialogRef<ModalModule>,
     @Inject(MAT_DIALOG_DATA) public data: ModalVars) { }
 
-  static async open(dialog: MatDialog, title: string, message: string): Promise<boolean> {
+  static async openOKCancel(dialog: MatDialog, title: string, message: string,
+    cancel = "Cancel", accept = "Accept"): Promise<boolean> {
     const dialogRef = dialog.open(ModalModule, {
       width: '250px',
-      data: { title, message }
+      data: { title, message, cancel, accept }
+    });
+
+    return new Promise((resolve) => {
+      dialogRef.afterClosed().subscribe(ok => {
+        resolve(ok);
+      });
+    });
+  }
+  static async openError(dialog: MatDialog, title: string, message: string,
+    accept = "Close"): Promise<boolean> {
+    const dialogRef = dialog.open(ModalModule, {
+      width: '250px',
+      data: { title, message, accept }
     });
 
     return new Promise((resolve) => {
