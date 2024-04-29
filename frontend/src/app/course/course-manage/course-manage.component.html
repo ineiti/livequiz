@@ -29,12 +29,22 @@
     </div>
 </div>
 
+<div *ngIf="isAdmin()">
+    <input type="file" id="fileInput" (change)="onFileSelected($event)" style="display:none">
+    <button mat-raised-button (click)="openFileChooser()">Upload Quizz</button>
+    <p>File Content: {{ fileContent }}</p>
+    <!-- <button mat-button (click)="addQuiz()">Add Quiz ID</button> -->
+</div>
 <div *ngIf="quizzes.length > 0">
     <h3>Available Quizzes</h3>
     <ul>
         <li *ngFor="let quiz of quizzes">
             {{quiz.title}}
-            <button *ngIf="isAdmin() && course.state.isIdle()" mat-button color="primary" (click)="dojoQuiz(quiz.id)">Start Quiz</button>
+            <span *ngIf="isAdmin()">
+            <button mat-button color="warn" (click)="deleteQuiz(quiz.id)">Delete</button>
+            <button *ngIf="course.state.isIdle()" mat-button color="primary" (click)="dojoQuiz(quiz.id)">Start
+                    Quiz</button>
+            </span>
             <!-- <button *ngIf="isStudent()" mat-button color="primary" routerLink="['./kata', quiz.id.toHex()]">Train Yourself</button> -->
         </li>
     </ul>
