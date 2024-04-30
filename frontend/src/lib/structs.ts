@@ -259,7 +259,6 @@ export class OptionRegexp {
   match: RegExp[] = [];
 
   constructor(cr: JSONOptionRegexp) {
-    console.log(cr);
     this.replace = cr.replace!.map((r) => {
       const match = r.match(/^s\/(.*)\/(.*)\/(.*)$/);
       if (!match) {

@@ -59,4 +59,45 @@ Question
         expect(q.questions[0].options.regexp!.matches("cbn")).toBe(1);
         expect(q.questions[0].options.regexp!.matches("cBn")).toBe(1);
     });
+
+    it('gets multi question', () => {
+        const q = Quiz.fromStr(`# Test
+## Multi
+Question
+= 2
+- one
+- two
+- three
+some more comments
+## End`);
+        expect(q.questions.length).toBe(1);
+        expect(q.questions[0].options.multi).not.toBe(undefined);
+        const multi = q.questions[0].options.multi!;
+        expect(multi.total()).toBe(3);
+        expect(multi.correct.length).toBe(2);
+        expect(multi.wrong.length).toBe(1);
+        expect(q.title).toBe("Test");
+        expect(q.questions[0].title).toBe("Multi");
+        expect(q.questions[0].intro).toBe("Question ");
+        expect(q.questions[0].explanation).toBe("some more comments ");
+    });
+
+    it('gets two questions', () => {
+        const q = Quiz.fromStr(`# Test
+## Multi
+Question
+= 1
+- one
+- three
+some more comments
+## Regexp
+Question 2
+~ s/.*//
+- //
+extro
+## End`);
+        expect(q.questions.length).toBe(2);
+        expect(q.questions[0].options.multi).not.toBe(undefined);
+        expect(q.questions[1].options.regexp).not.toBe(undefined);
+    });
 })
