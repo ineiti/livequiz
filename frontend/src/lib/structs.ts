@@ -426,13 +426,17 @@ export class DojoAttempt extends Nomad {
   }
 
   choicesFilled(questions: Question[]): DojoChoice[] {
+    this.initChoices(questions);
+    return this.choices;
+  }
+
+  initChoices(questions: Question[]) {
     if (this.choices.length < questions.length) {
       for (let i = this.choices.length; i < questions.length; i++) {
         this.choices.push(new DojoChoice(questions[i].options.multi !== undefined ?
           { Multi: [] } : { Regexp: "" }));
       }
     }
-    return this.choices;
   }
 }
 

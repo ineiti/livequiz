@@ -43,6 +43,7 @@ export class QuizComponent {
     this.dojo = await this.livequiz.getDojo(this.dojoId!);
     this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
     this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.secret.hash());
+    this.attempt.initChoices(this.quiz.questions);
     this.goto(this.currentQuestion);
   }
 

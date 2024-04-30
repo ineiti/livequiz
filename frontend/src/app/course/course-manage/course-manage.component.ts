@@ -77,6 +77,9 @@ export class CourseManageComponent {
     reader.onload = async (e: any) => {
       try {
         const q = Quiz.fromStr(e.target.result);
+        this.storage.addNomads(q);
+        this.course.quizIds.push(q.id);
+        this.ngOnChanges();
       } catch (e) {
         await ModalModule.openOKCancel(this.dialog, 'Error',
           `While reading quiz: ${e}`
