@@ -9,10 +9,6 @@ use rocket::tokio::fs;
 use rocket::{tokio::sync::Mutex, State};
 use rocket::{Build, Request, Response, Rocket};
 
-mod structs;
-use structs::{Course};
-mod course;
-
 #[macro_use]
 extern crate rocket;
 

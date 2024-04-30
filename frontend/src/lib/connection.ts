@@ -18,7 +18,7 @@ export class Connection {
     constructor(private url: string) {
     }
 
-    async getBlobUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
+    async getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
         throw new Error("Not implemented yet");
     }
 }

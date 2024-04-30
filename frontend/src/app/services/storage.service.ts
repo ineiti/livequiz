@@ -7,6 +7,7 @@ import { NomadID } from "../../lib/ids";
 import { Nomad } from "../../lib/storage";
 import { JSONNomadUpdateRequest, JSONNomadUpdateReply } from '../../lib/storage';
 import { Subject } from 'rxjs';
+import { Connection } from '../../lib/connection';
 
 interface ConnectionUpdate {
   getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply>;
@@ -140,14 +141,14 @@ export class StorageHandler {
 }
 
 function getConnection(user: UserService): ConnectionUpdate {
-  const connection = new ConnectionMock();
   if (environment.realBackend) {
-    //   const base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
-    //   this.connection = new Connection(base);
+    const base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
+    return new Connection(base);
   } else {
+    const connection = new ConnectionMock();
     connection.initBasic(user.secret);
+    return connection;
   }
-  return connection;
 }
 
 @Injectable({
