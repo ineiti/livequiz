@@ -14,7 +14,7 @@
     </tr>
     @for (user of summary.users; track $index){
     <tr>
-      <td>{{user.name.slice(0, 20)}}</td>
+      <td>{{user.name.slice(0, 20)}}&nbsp;</td>
       @for (answered of summary.answered[$index]; track idx; let idx = $index){
       <td [class]="answered ? 'userAnswer_answered' : ''"></td>
       }

@@ -37,10 +37,13 @@ export class CourseManageComponent {
       const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
       this.quiz = await this.livequiz.getQuiz(dojo.quizId);
     }
-    if (!this.user.secret.hash().isIn(this.course.students)){
-      console.log("Adding user to course");
-      this.course.students.push(this.user.secret.hash());
+    if (!this.user.id.isIn(this.course.students)){
+      this.course.students.push(this.user.id);
     }
+    if (!this.user.courses.has(this.course.id.toHex())){
+      this.user.addCourse(this.course);
+    }
+    this.user.update();
   }
 
   isAdmin(): boolean {

@@ -4,12 +4,16 @@ import { Course } from "./structs";
 import { JSONNomadUpdateReply, JSONNomadUpdateRequest } from './storage';
 import { Nomad } from "./storage";
 import { NomadID } from "./ids";
-import { Courses } from '../app/services/livequiz-storage.service';
+import { UserService } from '../app/services/user.service';
 
 export class ConnectionMock {
     nomads: Map<string, Nomad> = new Map();
 
     constructor() {
+    }
+
+    async reset() {
+        this.nomads.clear();
     }
 
     async getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
@@ -26,7 +30,7 @@ export class ConnectionMock {
         return Promise.resolve(reply);
     }
 
-    initBasic(secret: Secret) {
+    initBasic(user: UserService) {
         const quizId = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
         const quiz = new Quiz(NomadID.fromHex(quizId));
         quiz.json = JSON.stringify({
@@ -99,7 +103,7 @@ export class ConnectionMock {
         const dojo = new Dojo(NomadID.fromHex(dojoId));
         dojo.json = JSON.stringify({
             quizId: quizId,
-            attempts: Object.fromEntries([[secret.hash().toHex(), dojoAttempt.id.toHex()]]),
+            attempts: Object.fromEntries([[user.id.toHex(), dojoAttempt.id.toHex()]]),
         });
         dojo.update();
         this.nomads.set(dojoId, dojo);
@@ -108,7 +112,7 @@ export class ConnectionMock {
         const course1 = new Course(NomadID.fromHex(courseId1));
         course1.json = JSON.stringify({
             name: 'Test',
-            admins: [secret.hash().toHex()],
+            admins: [user.id.toHex()],
             students: [],
             quizIds: [quiz.id.toHex()],
             state: { Idle: {} },
@@ -122,7 +126,7 @@ export class ConnectionMock {
         course2.json = JSON.stringify({
             name: 'Test Student',
             admins: [],
-            students: [secret.hash().toHex()],
+            students: [user.id.toHex()],
             quizIds: [quiz.id.toHex()],
             state: { Quiz: dojo.id.toHex() },
             dojoIds: [dojoId],
@@ -134,8 +138,8 @@ export class ConnectionMock {
         const course3 = new Course(NomadID.fromHex(courseId3));
         course3.json = JSON.stringify({
             name: 'Test Corrections',
-            admins: [secret.hash().toHex()],
-            students: [secret.hash().toHex()],
+            admins: [user.id.toHex()],
+            students: [user.id.toHex()],
             quizIds: [quiz.id.toHex()],
             state: { Corrections: dojo.id.toHex() },
             dojoIds: [dojoId],
@@ -147,11 +151,8 @@ export class ConnectionMock {
             v.version = 1;
         }
 
-        const courses = new Courses();
-        courses.list.set(course1.id.toHex(), course1.name);
-        courses.list.set(course2.id.toHex(), course2.name);
-        courses.list.set(course3.id.toHex(), course3.name);
-        courses.version = 2;
-        this.nomads.set(courses.id.toHex(), courses);
+        user.courses.set(course1.id.toHex(), course1.name);
+        user.courses.set(course2.id.toHex(), course2.name);
+        user.courses.set(course3.id.toHex(), course3.name);
     }
 }

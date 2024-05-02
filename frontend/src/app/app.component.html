@@ -4,8 +4,9 @@
         <mat-label>Your name:</mat-label>
         <input matInput [(ngModel)]="user.name">
     </mat-form-field>
-    
-    <router-outlet />
+    <div ngIf="userLoaded">
+        <router-outlet />
+    </div>
 </div>
 <footer class="footer">
     &copy; <a href="mailto:ineiti@gasser.blue">Linus Gasser</a> |

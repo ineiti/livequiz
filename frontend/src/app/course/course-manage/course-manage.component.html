@@ -31,7 +31,7 @@
 
 <div *ngIf="isAdmin()">
     <input type="file" id="fileInput" (change)="onFileSelected($event)" style="display:none">
-    <button mat-raised-button (click)="openFileChooser()">Upload Quizz</button>
+    <button id="fileInputButton" mat-raised-button (click)="openFileChooser()">Upload Quizz</button>
     <!-- <button mat-button (click)="addQuiz()">Add Quiz ID</button> -->
 </div>
 <div *ngIf="quizzes.length > 0">

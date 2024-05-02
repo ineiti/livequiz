@@ -20,6 +20,10 @@ export class Connection {
     constructor(private url: string, private secret: Secret) {
     }
 
+    async reset() {
+        await fetch(`${this.url}/api/v2/reset`);
+    }
+
     async getNomadUpdates(updates: JSONNomadUpdateRequest): Promise<JSONNomadUpdateReply> {
         const repl = await fetch(`${this.url}/api/v2/nomadUpdates`,
             {

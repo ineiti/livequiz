@@ -23,6 +23,13 @@ async fn nomad_updates(
     Ok(Json(nomads.get_updates(secret.hash(), list.0).await?))
 }
 
+#[get("/reset")]
+async fn reset(nomads: &State<Nomads>) {
+    if env::var("ENABLE_RESET").is_ok() {
+        nomads.reset();
+    }
+}
+
 #[catch(404)]
 async fn catchall() -> Option<NamedFile> {
     println!("catchall");
@@ -35,7 +42,7 @@ async fn catchall() -> Option<NamedFile> {
 async fn rocket() -> Rocket<Build> {
     let rb = rocket::build()
         .attach(CORS)
-        .mount("/api/v2", routes![nomad_updates,])
+        .mount("/api/v2", routes![nomad_updates, reset,])
         .manage(Nomads::new(
             &env::var("NOMADS_DB").unwrap_or("nomads_db".into()),
         ));
@@ -75,7 +82,7 @@ impl Fairing for CORS {
             response.set_header(ContentType::Plain);
             response.set_sized_body(body.len(), std::io::Cursor::new(body));
             response.set_status(Status::Ok);
-        }    
+        }
     }
 }
 

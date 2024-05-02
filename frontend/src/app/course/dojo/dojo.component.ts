@@ -24,7 +24,7 @@ export class DojoComponent {
   }
 
   showQuiz(): boolean{
-    return !this.isIdle() && this.user.secret.hash().isIn(this.course.students);
+    return !this.isIdle() && this.user.id.isIn(this.course.students);
   }
   
   showCorrections(): boolean{

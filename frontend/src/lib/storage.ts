@@ -43,7 +43,11 @@ export class Nomad {
   // This updates the map by overriding with the new key/value pairs from the 
   // server. But it keeps existing key/value pairs.
   // This is a very simple merge algorithm.
-  updateMap<K extends (string | number | symbol), V>(map: Map<K, V>, json: [K, V][]) {
+  updateMap<K extends (string | number | symbol), V>(map: Map<K, V>, json: [K, V][] | undefined) {
+    if (json === undefined){
+      return;
+    }
+    
     if (json.length > 0) {
       for (const [k, v] of json) {
         map.set(k, v);

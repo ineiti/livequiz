@@ -3,7 +3,7 @@ name: build-docker
 on:
   push:
     branches:
-      - "rewrite"
+      - "main"
 
 jobs:
   docker:

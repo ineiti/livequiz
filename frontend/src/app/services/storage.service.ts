@@ -17,8 +17,9 @@ export class StorageHandler {
   cache: Map<string, Nomad> = new Map();
   timeout?: any;
   updateObserver = new Subject<NomadID[]>();
+  connection!: ConnectionUpdate;
 
-  constructor(private connection: ConnectionUpdate) {
+  constructor() {
   }
 
   // Adds one or more new nomads to the local cache and sends them in the next
@@ -72,7 +73,7 @@ export class StorageHandler {
     } else {
       // console.log(`${this.cache.size} nomads: ${duration}ms`);
     }
-    this.timeout = setTimeout(() => this.updateLoop(), 2000);
+    this.timeout = setTimeout(() => this.updateLoop(), environment.syncInterval);
   }
 
   // Returns a nomad - either from the cache, or from the server.
@@ -117,6 +118,7 @@ export class StorageHandler {
         b.json = json;
         b.version++;
         request.nomadVersions[k] = b.getReply();
+        console.log("Sending update", b.constructor.name, b.getReply());
         updateIds.push(b.id);
       }
     }
@@ -140,13 +142,17 @@ export class StorageHandler {
   }
 }
 
-function getConnection(user: UserService): ConnectionUpdate {
+interface ConnectionUpRes extends ConnectionUpdate {
+  reset(): Promise<any>;
+}
+
+function getConnection(user: UserService): ConnectionUpRes {
   if (environment.realBackend) {
     const base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
     return new Connection(base, user.secret);
   } else {
     const connection = new ConnectionMock();
-    connection.initBasic(user.secret);
+    connection.initBasic(user);
     return connection;
   }
 }
@@ -155,9 +161,16 @@ function getConnection(user: UserService): ConnectionUpdate {
   providedIn: 'root'
 })
 export class StorageService extends StorageHandler {
+  conn: ConnectionUpRes;
+
   constructor(user: UserService) {
-    super(getConnection(user));
-    this.addNomads(user);
+    super();
+    this.conn = getConnection(user);
+    this.connection = this.conn;
     this.startUpdate();
+  }
+
+  async reset() {
+    await this.conn.reset();
   }
 }

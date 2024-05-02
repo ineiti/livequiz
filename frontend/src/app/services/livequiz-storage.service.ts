@@ -5,23 +5,17 @@ import { NomadID } from "../../lib/ids";
 import { CourseStateEnum, Dojo, DojoAttempt, Quiz } from "../../lib/structs";
 import { Course } from "../../lib/structs";
 import { DojoID, QuizID, UserID } from '../../lib/ids';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LivequizStorageService {
-  private courses: Courses = new Courses();
-
   constructor(private storage: StorageService) {
-    this.storage.addNomads(this.courses);
   }
 
   async getCourse(courseId: NomadID): Promise<Course> {
     return await this.storage.getNomad(courseId, new Course());
-  }
-
-  getCourseNames(): Map<string, string> {
-    return this.courses.list;
   }
 
   async setDojoIdle(courseId: NomadID) {
@@ -81,30 +75,12 @@ export class LivequizStorageService {
     return await this.storage.getNomad(dojo.attempts.get(user.toHex())!, new DojoAttempt());
   }
 
-  async createCourse(name: string): Promise<Course> {
+  async createCourse(name: string, user: UserService): Promise<Course> {
     const course = new Course();
     course.name = name;
+    course.admins = [user.id];
+    user.addCourse(course);
     this.storage.addNomads(course);
-    this.courses.list.set(course.id.toHex(), course.name);
     return course;
-  }
-}
-
-export class Courses extends Nomad {
-  static CoursesID = NomadID.fromGlobalID("re.fledg.livequiz.courses");
-  list: Map<string, string> = new Map();
-
-  constructor() {
-    super();
-    this.id = Courses.CoursesID;
-  }
-
-  override toJson(): string {
-    return JSON.stringify({ list: [...this.list] });
-  }
-
-  override update() {
-    const content = JSON.parse(this.json);
-    this.updateMap(this.list, content.list);
   }
 }

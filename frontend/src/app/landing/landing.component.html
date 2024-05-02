@@ -14,10 +14,10 @@
 <p>And of course it should one day join the <a href="https://web.fledg.re">Fledger network</a>,
     so that all of the storage is decentralized...</p>
 
-<div *ngIf="courses.size > 0; else noCourses">
+<div *ngIf="user.courses.size > 0; else noCourses">
     <p>Your courses:</p>
     <ul>
-        <li *ngFor="let course of courses | keyvalue">
+        <li *ngFor="let course of user.courses | keyvalue">
             <a [routerLink]="['/course', course.key]">{{course.value}}</a>
         </li>
     </ul>
@@ -28,7 +28,7 @@
 <div>
     <mat-form-field>
         <mat-label>New course name:</mat-label>
-        <input matInput [(ngModel)]="course_name">
+        <input id='cname' matInput [(ngModel)]="course_name">
     </mat-form-field>
     <button [disabled]="course_name.length == 0" mat-stroked-button (click)="addCourse()">Add a course</button>
 </div>

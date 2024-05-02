@@ -52,6 +52,10 @@ impl Nomads {
         Ok(reply)
     }
 
+    pub fn reset(&self){
+        self.tree.clear().expect("Clearing db");
+    }
+
     async fn get(&self, key: &H256) -> Result<Option<UpdateEntry>, String> {
         if let Some(res) = self.tree.get(key.as_ref()).map_err(|e| e.to_string())? {
             let ret = std::str::from_utf8(&res)

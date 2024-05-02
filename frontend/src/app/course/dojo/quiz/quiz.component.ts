@@ -42,7 +42,7 @@ export class QuizComponent {
   async ngOnInit() {
     this.dojo = await this.livequiz.getDojo(this.dojoId!);
     this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
-    this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.secret.hash());
+    this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.id);
     this.attempt.initChoices(this.quiz.questions);
     this.goto(this.currentQuestion);
   }
@@ -76,7 +76,7 @@ export class QuizComponent {
       this.first = this.currentQuestion === 0;
       this.last = this.currentQuestion === this.quiz!.questions.length - 1;
       this.answer = new Answer(this.quiz.questions[this.currentQuestion],
-        this.attempt.choices[this.currentQuestion], this.user.secret.hash());
+        this.attempt.choices[this.currentQuestion], this.user.id);
       this.updateAnswer();
       this.showOptions = true;
     });

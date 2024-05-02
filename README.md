@@ -4,7 +4,22 @@ This is a very simple livequiz based on MD files with a live view of what the st
 It allows to send a link to students, who can answer questions.
 The admin view shows all students, and what they answered already.
 
-# TODO
+# TODO v2
+
+- bugs:
+- ui
+  - certains boutons ne sont pas visibles
+- features
+  - self-chosen quizzes
+  - modes
+    - exam mode: only once the admin switch is flicked will the students see if they answered correctly
+    - live mode: after every question, students see if they answered correctly
+      - updatable: students can update their questions
+    - modes are a combination of switches:
+      - students directly see if they answered correctly or not
+      - stop students from changing their answers
+
+# TODO v1
 
 - bugs:
   - l'interface admin peut "perdre" des noms après le redémarrage du système
@@ -26,13 +41,6 @@ The admin view shows all students, and what they answered already.
 - general
   - admin can upload quizzes
   - admin can choose which quizz is shown
-  - modes
-    - exam mode: only once the admin switch is flicked will the students see if they answered correctly
-    - live mode: after every question, students see if they answered correctly
-      - updatable: students can update their questions
-    - modes are a combination of switches:
-      - students directly see if they answered correctly or not
-      - stop students from changing their answers
 - backend
   - accept directory for quizzes, and offer all .md files as quizzes
     - store answers per quiz
@@ -40,7 +48,7 @@ The admin view shows all students, and what they answered already.
 
 # CHANGELOG
 
-2024-04-xx:
+2024-05-02:
 - rewrite of backend
 - more general frontend, with possibility for other admins
 

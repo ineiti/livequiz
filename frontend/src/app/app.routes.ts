@@ -5,6 +5,7 @@ import { DojoComponent } from './course/dojo/dojo.component';
 import { CourseManageComponent } from './course/course-manage/course-manage.component';
 import { CorrectionsComponent } from './course/corrections/corrections.component';
 import { ProgressComponent } from './course/progress/progress.component';
+import { ResetComponent } from './reset/reset.component';
 
 export const routes: Routes = [
     {
@@ -30,5 +31,6 @@ export const routes: Routes = [
         ]
     },
     { path: '', component: LandingComponent, pathMatch: 'full' },
+    { path: 'reset', component: ResetComponent },
     { path: '**', redirectTo: '/' }
 ];

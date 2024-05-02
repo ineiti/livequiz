@@ -17,14 +17,11 @@ import { Course } from "../../lib/structs";
 })
 export class LandingComponent {
   course_name = "";
-  courses: Map<string, string>;
 
   constructor(public user: UserService, private livequiz: LivequizStorageService) {
-    this.courses = livequiz.getCourseNames();
   }
 
   async addCourse() {
-    const course = await this.livequiz.createCourse(this.course_name);
-    course.admins = [this.user.secret.hash()];
+    await this.livequiz.createCourse(this.course_name, this.user);
   }
 }
