@@ -28,13 +28,6 @@ export class CourseManageComponent {
     private livequiz: LivequizStorageService,
     public dialog: MatDialog) { }
 
-  async ngOnInit() {
-    if (!this.user.secret.hash().isIn(this.course.students)){
-      console.log("Adding user to course");
-      this.course.students.push(this.user.secret.hash());
-    }
-  }
-
   async ngOnChanges() {
     this.quizzes = [];
     for (const id of this.course.quizIds) {
@@ -43,6 +36,10 @@ export class CourseManageComponent {
     if (this.course.state.state !== CourseStateEnum.Idle) {
       const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
       this.quiz = await this.livequiz.getQuiz(dojo.quizId);
+    }
+    if (!this.user.secret.hash().isIn(this.course.students)){
+      console.log("Adding user to course");
+      this.course.students.push(this.user.secret.hash());
     }
   }
 

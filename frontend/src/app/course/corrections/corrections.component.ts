@@ -76,9 +76,9 @@ export class CorrectionsComponent {
             this.quiz.questions[question].options.scoreStats(attempt.choices[question]).score)
           .concat([1])
           .reduce((prev, curr) => prev + (1 - curr) ** 2);
-        this.sorted[question] = [question, sum / attemptsAnswered.length];
+        this.sorted[question] = [question, 1 - sum / attemptsAnswered.length];
       } else {
-        this.sorted[question] = [question, 1]
+        this.sorted[question] = [question, 0]
       }
     }
     this.sorted.sort((a, b) => b[1] - a[1]);

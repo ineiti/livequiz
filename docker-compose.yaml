@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   livequiz:
-    image: ghcr.io/ineiti/livequiz:latest
+    image: ghcr.io/ineiti/livequiz2:latest
     build: .
     environment:
       - ADMIN_SECRET=1234
