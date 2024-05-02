@@ -50,11 +50,13 @@ export class UserService extends User {
 
   override update() {
     const json = JSON.parse(this.json);
-    this.name = json.name;
+    if (json) {
+      this.name = json.name;
 
-    localStorage.setItem('user-json', JSON.stringify({
-      name: this.name,
-      secret: this.secret.toHex(),
-    }));
+      localStorage.setItem('user-json', JSON.stringify({
+        name: this.name,
+        secret: this.secret.toHex(),
+      }));
+    }
   }
 }
