@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -13,7 +14,7 @@ export interface ModalVars {
   selector: 'app-modal',
   standalone: true,
   templateUrl: 'modal.component.html',
-  imports: [MatDialogModule, MatButtonModule],
+  imports: [MatDialogModule, MatButtonModule, CommonModule],
 })
 export class ModalModule {
   constructor(

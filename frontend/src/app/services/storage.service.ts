@@ -143,7 +143,7 @@ export class StorageHandler {
 function getConnection(user: UserService): ConnectionUpdate {
   if (environment.realBackend) {
     const base = document.location.host.startsWith("localhost") ? "http://localhost:8000" : document.location.origin;
-    return new Connection(base);
+    return new Connection(base, user.secret);
   } else {
     const connection = new ConnectionMock();
     connection.initBasic(user.secret);

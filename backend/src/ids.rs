@@ -1,5 +1,11 @@
 use rand::random;
-use rocket::{http::Status, request::{FromRequest, Outcome}, response::status::BadRequest, serde::{Deserialize, Serialize}, Request};
+use rocket::{
+    http::Status,
+    request::{FromRequest, Outcome},
+    response::status::BadRequest,
+    serde::{Deserialize, Serialize},
+    Request,
+};
 use sha2::{Digest, Sha256};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
@@ -19,7 +25,8 @@ impl H256 {
 
     pub fn from_hex(h: &str) -> Result<Self, BadRequest<String>> {
         let mut b = [0u8; 32];
-        hex::decode_to_slice(h, &mut b).map_err(|e| BadRequest(format!("Wrong hex string: {e:?}")))?;
+        hex::decode_to_slice(h, &mut b)
+            .map_err(|e| BadRequest(format!("Wrong hex string: {e:?}")))?;
         Ok(Self(primitive_types::H256(b)))
     }
 
@@ -27,6 +34,14 @@ impl H256 {
         let mut h = Sha256::new();
         h.update(self.0);
         Self(primitive_types::H256(h.finalize().into()))
+    }
+
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.0)
+    }
+
+    pub fn as_ref(&self) -> &primitive_types::H256 {
+        &self.0
     }
 }
 
@@ -48,7 +63,7 @@ impl Secret {
 
     pub fn hash(&self) -> UserID {
         UserID(self.0.hash())
-    } 
+    }
 }
 
 #[derive(Debug)]
@@ -84,37 +99,19 @@ impl UserID {
         Ok(Self(H256::from_hex(h)?))
     }
 }
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
-#[serde(crate = "rocket::serde")]
-pub struct QuizID(H256);
-impl QuizID {
-    pub fn rnd() -> Self {
-        Self(H256::rnd())
-    }
 
-    pub fn from_str(s: &str) -> Self {
-        Self(H256::from_str(s))
-    }
+#[cfg(test)]
+mod test {
+    use std::error::Error;
 
-    pub fn from_hex(h: &str) -> Result<Self, BadRequest<String>> {
-        Ok(Self(H256::from_hex(h)?))
-    }
-}
+    use super::*;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
-#[serde(crate = "rocket::serde")]
-pub struct CourseID(H256);
-impl CourseID {
-    pub fn rnd() -> Self {
-        Self(H256::rnd())
-    }
-
-    pub fn from_str(s: &str) -> Self {
-        Self(H256::from_str(s))
-    }
-
-    pub fn from_hex(h: &str) -> Result<Self, BadRequest<String>> {
-        Ok(Self(H256::from_hex(h)?))
+    #[test]
+    fn to_hex() -> Result<(), Box<dyn Error>> {
+        let value = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        let a = UserID::from_hex(value).map_err(|_| "".to_string())?;
+        let b = a.0.to_hex();
+        assert_eq!(value, &b);
+        Ok(())
     }
 }
-

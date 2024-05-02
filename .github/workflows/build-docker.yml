@@ -3,7 +3,7 @@ name: build-docker
 on:
   push:
     branches:
-      - "main"
+      - "rewrite"
 
 jobs:
   docker:
@@ -25,4 +25,4 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/heig-srx-2024/livequiz
+          tags: ghcr.io/heig-srx-2024/livequiz2

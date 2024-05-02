@@ -1,99 +1,55 @@
 use std::env;
+use std::path::Path;
 
-use rocket::fs::FileServer;
-use rocket::http::Header;
+use rocket::fs::{FileServer, NamedFile};
+use rocket::http::{ContentType, Header, Method, Status};
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
 use rocket::{Build, Request, Response, Rocket, State};
 
-mod course;
 mod ids;
 mod storage;
-mod structs;
-use ids::{CourseID, Secret, UserID};
-use structs::{Course, Quiz};
+use ids::Secret;
 
 #[macro_use]
 extern crate rocket;
 
-#[put("/v2/users", data = "<name>")]
-async fn update_name(
-    users: &State<Users>,
+#[post("/nomadUpdates", data = "<list>")]
+async fn nomad_updates(
+    nomads: &State<Nomads>,
     secret: Secret,
-    name: &str,
-) -> Result<(), BadRequest<String>> {
-    users.put(secret.hash(), name).await;
-    Ok(())
+    list: Json<UpdateRequest>,
+) -> Result<Json<UpdateReply>, BadRequest<String>> {
+    Ok(Json(nomads.get_updates(secret.hash(), list.0).await?))
 }
 
-#[post("/v2/courses", data = "<name>")]
-async fn create_course(courses: &State<Courses>, secret: Secret, name: &str) -> Json<Course> {
-    Json(courses.create(name, secret.hash()).await)
-}
-
-#[get("/v2/courses")]
-async fn list_courses(courses: &State<Courses>, secret: Secret) -> Json<Vec<Course>> {
-    Json(courses.list(secret.hash()).await)
-}
-
-#[put("/v2/courses/<course_id>/admins", data = "<new_admin>")]
-async fn add_admin(
-    courses: &State<Courses>,
-    secret: Secret,
-    course_id: &str,
-    new_admin: &str,
-) -> Result<(), BadRequest<String>> {
-    courses
-        .add_admin(
-            CourseID::from_hex(course_id)?,
-            secret.hash(),
-            UserID::from_hex(new_admin)?,
-        )
+#[catch(404)]
+async fn catchall() -> Option<NamedFile> {
+    println!("catchall");
+    NamedFile::open(Path::new(&env::var("STATIC_PAGE").unwrap()).join("index.html"))
         .await
-}
-
-#[post("/v2/courses/<course_id>/quizzes", data = "<quiz>")]
-async fn create_quiz(
-    courses: &State<Courses>,
-    secret: Secret,
-    course_id: &str,
-    quiz: &str,
-) -> Result<Json<Quiz>, BadRequest<String>> {
-    Ok(Json(
-        courses
-            .create_quiz(CourseID::from_hex(course_id)?, secret.hash(), quiz)
-            .await,
-    ))
+        .ok()
 }
 
 #[launch]
 async fn rocket() -> Rocket<Build> {
     let rb = rocket::build()
         .attach(CORS)
-        .mount(
-            "/api",
-            routes![
-                update_name,
-                create_course,
-                list_courses,
-                add_admin,
-                create_quiz
-            ],
-        )
-        .manage(Users::new());
+        .mount("/api/v2", routes![nomad_updates,])
+        .manage(Nomads::new(
+            &env::var("NOMADS_DB").unwrap_or("nomads_db".into()),
+        ));
 
     if let Ok(web) = env::var("STATIC_PAGE") {
-        rb.mount("/student", FileServer::from(web.clone()).rank(10))
-            .mount("/admin", FileServer::from(web.clone()).rank(9))
-            .mount("/", FileServer::from(web.clone()).rank(8))
+        rb.register("/", catchers![catchall])
+            .mount("/", FileServer::from(web.clone()))
     } else {
         rb
     }
 }
 
 use rocket::fairing::{Fairing, Info, Kind};
-
-use crate::storage::{Courses, Users};
+use storage::{Nomads, UpdateReply, UpdateRequest};
 
 pub struct CORS;
 
@@ -102,11 +58,11 @@ impl Fairing for CORS {
     fn info(&self) -> Info {
         Info {
             name: "Add CORS headers to responses",
-            kind: Kind::Response,
+            kind: Kind::Request | Kind::Response,
         }
     }
 
-    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
+    async fn on_response<'r>(&self, request: &'r Request<'_>, response: &mut Response<'r>) {
         response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
         response.set_header(Header::new(
             "Access-Control-Allow-Methods",
@@ -114,6 +70,12 @@ impl Fairing for CORS {
         ));
         response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
         response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+        if request.method() == Method::Options {
+            let body = "";
+            response.set_header(ContentType::Plain);
+            response.set_sized_body(body.len(), std::io::Cursor::new(body));
+            response.set_status(Status::Ok);
+        }    
     }
 }
 

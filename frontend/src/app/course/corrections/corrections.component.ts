@@ -48,9 +48,9 @@ export class CorrectionsComponent {
     this.results = new ResultsSummary(this.storage, this.livequiz, this.dojo.id);
     await this.results.init();
     // DEBUG: Adding 10 test users
-    for (let i = 0; i < 10; i++) {
-      this.results.addUser();
-    }
+    // for (let i = 0; i < 10; i++) {
+    //   this.results.addUser();
+    // }
     this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
     this.attempts = await this.dojo.getAttempts(this.storage);
     this.users = await this.dojo.getUsers(this.storage);
