@@ -62,7 +62,6 @@ export class LivequizStorageService {
 
   createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
     const dr = new DojoAttempt();
-    dr.dojoId = dojo.id;
     this.storage.addNomads(dr);
     return dr;
   }

@@ -1,14 +1,14 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { CourseStateEnum, Quiz } from "../../../lib/structs";
 import { Course } from "../../../lib/structs";
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { QuizID } from '../../../lib/ids';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { StorageService } from '../../services/storage.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 import { MatButtonModule } from '@angular/material/button';
-import { ModalModule } from '../../modal/modal.component';
+import { ModalModule } from '../../components/modal/modal.component';
 import { MatDialog } from '@angular/material/dialog';
 
 // TODO: merge this into the CourseComponent. Something something "if no children active, show this".
@@ -25,7 +25,7 @@ export class CourseManageComponent {
   quiz?: Quiz;
 
   constructor(private storage: StorageService, private user: UserService,
-    private livequiz: LivequizStorageService,
+    private livequiz: LivequizStorageService, private router: Router,
     public dialog: MatDialog) { }
 
   async ngOnChanges() {
@@ -101,4 +101,8 @@ export class CourseManageComponent {
   }
 
   addQuiz() { }
+
+  async trainQuiz(id: QuizID){
+    this.router.navigate([`/quiz/${id.toHex()}`]);
+  }
 }

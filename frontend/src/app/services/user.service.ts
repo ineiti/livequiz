@@ -12,7 +12,6 @@ export class User extends Nomad {
     const json = JSON.parse(this.json);
     if (json) {
       this.name = json.name;
-      console.log("json courses is", json.courses);
       this.updateMap(this.courses, json.courses);
     }
   }
@@ -35,34 +34,42 @@ export class User extends Nomad {
   providedIn: 'root'
 })
 export class UserService extends User {
-  secret: Secret;
+  secret!: Secret;
 
   constructor() {
     super();
 
     const jsonStr = localStorage.getItem('user-json');
-    if (jsonStr === null) {
-      const name = localStorage.getItem('user-name');
-      if (name === null) {
-        this.name = uniqueNamesGenerator({
-          dictionaries: [colors, animals],
-          separator: '-',
-        });
-      } else {
-        this.name = name;
+    if (jsonStr !== null) {
+      try {
+        const json = JSON.parse(jsonStr);
+        this.version = json.reply.version;
+        this.json = json.reply.json;
+        super.update();
+        this.secret = Secret.from_hex(json.secret);
+      } catch (e) {
+        console.warn("While loading user:", e, "resetting");
+        this.reset();
       }
-      this.secret = new Secret();
-      this.store();
     } else {
-      console.log("got user json", jsonStr);
-      const json = JSON.parse(jsonStr);
-      this.version = json.reply.version;
-      this.json = json.reply.json;
-      super.update();
-      this.secret = Secret.from_hex(json.secret);
+      this.reset();
     }
 
     this.id = this.secret.hash();
+  }
+
+  reset() {
+    const name = localStorage.getItem('user-name');
+    if (name === null) {
+      this.name = uniqueNamesGenerator({
+        dictionaries: [colors, animals],
+        separator: '-',
+      });
+    } else {
+      this.name = name;
+    }
+    this.secret = new Secret();
+    this.store();
   }
 
   override update() {

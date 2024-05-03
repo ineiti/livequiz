@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CourseStateEnum, Dojo } from "../../../lib/structs";
+import { CourseStateEnum, Dojo, DojoAttempt, Quiz } from "../../../lib/structs";
 import { Course } from "../../../lib/structs";
-import { QuizComponent } from './quiz/quiz.component';
+import { QuizComponent } from '../../components/quiz/quiz.component';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
@@ -16,18 +16,38 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 })
 export class DojoComponent {
   @Input() course!: Course;
+  dojo?: Dojo;
+  quiz?: Quiz;
+  attempt?: DojoAttempt;
 
-  constructor(private user: UserService) { }
+  constructor(private user: UserService, private livequiz: LivequizStorageService) { }
 
-  isIdle(): boolean{
+  async ngOnChanges() {
+    if (!this.isIdle()) {
+      this.dojo = await this.livequiz.getDojo(this.course.state.dojoId!);
+      this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
+      this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.id);
+    }
+  }
+
+  isIdle(): boolean {
     return this.course.state.state === CourseStateEnum.Idle;
   }
 
-  showQuiz(): boolean{
+  showQuiz(): boolean {
     return !this.isIdle() && this.user.id.isIn(this.course.students);
   }
-  
-  showCorrections(): boolean{
+
+  showCorrections(): boolean {
     return this.course.state.state === CourseStateEnum.Corrections;
+  }
+
+  async getQuiz(): Promise<Quiz | null> {
+    return null;
+    // return this.livequiz.getQuiz(this.dojo!.quizId)
+  }
+
+  async getAttempt(): Promise<DojoAttempt> {
+    return this.livequiz.getDojoAttempt(this.dojo!, this.user.id);
   }
 }

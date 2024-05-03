@@ -118,7 +118,6 @@ export class StorageHandler {
         b.json = json;
         b.version++;
         request.nomadVersions[k] = b.getReply();
-        console.log("Sending update", b.constructor.name, b.getReply());
         updateIds.push(b.id);
       }
     }

@@ -7,12 +7,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 
-import { GRID_MAX_WIDTH } from '../../../app.config';
-import { Dojo, DojoAttempt, Quiz } from "../../../../lib/structs";
-import { Answer } from "../../../../lib/results_summary";
-import { UserService } from '../../../services/user.service';
-import { LivequizStorageService } from '../../../services/livequiz-storage.service';
-import { DojoID } from '../../../../lib/ids';
+import { GRID_MAX_WIDTH } from '../../app.config';
+import { DojoAttempt, Quiz } from "../../../lib/structs";
+import { Answer } from "../../../lib/results_summary";
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-quiz',
@@ -23,11 +21,9 @@ import { DojoID } from '../../../../lib/ids';
   styleUrl: './quiz.component.scss'
 })
 export class QuizComponent {
-  @Input() dojoId?: DojoID;
+  @Input() quiz?: Quiz;
+  @Input() attempt?: DojoAttempt;
   @Input() corrections!: boolean;
-  dojo!: Dojo;
-  quiz!: Quiz;
-  attempt!: DojoAttempt;
   answer!: Answer;
   showOptions = true;
 
@@ -37,14 +33,17 @@ export class QuizComponent {
   last = false;
   currentQuestion = 0;
 
-  constructor(private livequiz: LivequizStorageService, private user: UserService) { }
+  constructor(private user: UserService) { }
 
   async ngOnInit() {
-    this.dojo = await this.livequiz.getDojo(this.dojoId!);
-    this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
-    this.attempt = await this.livequiz.getDojoAttempt(this.dojo, this.user.id);
-    this.attempt.initChoices(this.quiz.questions);
+    this.attempt!.initChoices(this.quiz!.questions);
     this.goto(this.currentQuestion);
+  }
+
+  ngOnChanges() {
+    if (this.answer) {
+      this.update();
+    }
   }
 
   updateSelection(event: MatSelectionList) {
@@ -75,8 +74,8 @@ export class QuizComponent {
     setTimeout(() => {
       this.first = this.currentQuestion === 0;
       this.last = this.currentQuestion === this.quiz!.questions.length - 1;
-      this.answer = new Answer(this.quiz.questions[this.currentQuestion],
-        this.attempt.choices[this.currentQuestion], this.user.id);
+      this.answer = new Answer(this.quiz!.questions[this.currentQuestion],
+        this.attempt!.choices[this.currentQuestion], this.user.id);
       this.updateAnswer();
       this.showOptions = true;
     });
@@ -86,7 +85,7 @@ export class QuizComponent {
     for (let question = 0; question < this.quiz!.questions.length; question++) {
       this.tileClasses[question] = "questionTile" + (this.currentQuestion === question ? " questionTileChosen" : "") +
         (question % 2 === 1 ? " questionTileOdd" : "");
-      if (this.attempt.choices[question]?.isAnswered()) {
+      if (this.attempt!.choices[question]?.isAnswered()) {
         this.tileClasses[question] += " questionTileDone";
       }
     }

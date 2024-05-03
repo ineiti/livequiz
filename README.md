@@ -10,7 +10,8 @@ The admin view shows all students, and what they answered already.
 - ui
   - certains boutons ne sont pas visibles
 - features
-  - self-chosen quizzes
+  - re-arrange quizzes
+  - update quizzes
   - modes
     - exam mode: only once the admin switch is flicked will the students see if they answered correctly
     - live mode: after every question, students see if they answered correctly
@@ -47,6 +48,9 @@ The admin view shows all students, and what they answered already.
   - store user data on disk
 
 # CHANGELOG
+
+2024-05-03:
+- self-chosen quizzes
 
 2024-05-02:
 - rewrite of backend

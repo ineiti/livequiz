@@ -46,12 +46,10 @@ export class ResultsSummaryContainer {
 export class ResultsSummary extends ResultsSummaryContainer {
     dojo!: Dojo;
     quiz!: Quiz;
-
     attempts: DojoAttempt[] = [];
-
     updates: Subscription;
-
     users: User[] = [];
+    
     constructor(private storage: StorageService,
         private livequiz: LivequizStorageService,
         private dojoId: DojoID) {
@@ -96,7 +94,6 @@ export class ResultsSummary extends ResultsSummaryContainer {
             separator: '-',
         });
         const attempt = new DojoAttempt();
-        attempt.dojoId = this.dojo.id;
         for (const question of this.quiz.questions) {
             if (question.options.multi !== undefined) {
                 const choice = new DojoChoice({ Multi: [] });

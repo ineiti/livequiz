@@ -1,4 +1,4 @@
-<div *ngIf="dojo && quiz && attempt && answer">
+<div *ngIf="quiz && attempt && answer">
     <h2>{{quiz.title}}</h2>
 
     <div style="display: grid; grid-template-columns: auto 1fr auto; margin: 1em 0 1em; width: 100%;">
@@ -48,6 +48,13 @@
                 <input matInput [(ngModel)]="answer.choice.regexp" (input)="updateRegexp()" [class]="resultClasses[0]"
                     [disabled]="corrections">
             </mat-form-field>
+            <div *ngIf="corrections">
+                @for (match of answer.question.options.regexp!.match; track $index ) {
+                <mat-form-field style="width: 100%;">
+                    <input matInput [value]="match" [class]="'optionCorrect'" [disabled]="true">
+                </mat-form-field>
+                }
+            </div>
         </div>
     </div>
 

@@ -6,28 +6,17 @@ import { CourseManageComponent } from './course/course-manage/course-manage.comp
 import { CorrectionsComponent } from './course/corrections/corrections.component';
 import { ProgressComponent } from './course/progress/progress.component';
 import { ResetComponent } from './reset/reset.component';
+import { KataComponent } from './course/kata/kata.component';
 
 export const routes: Routes = [
     {
-        path: 'course/:courseId',
-        component: CourseComponent,
+        path: 'course/:courseId', component: CourseComponent,
         children: [
-            {
-                path: '', pathMatch: 'full',
-                component: CourseManageComponent,
-            },
-            {
-                path: 'dojo',
-                component: DojoComponent,
-            },
-            {
-                path: 'corrections',
-                component: CorrectionsComponent,
-            },
-            {
-                path: 'progress',
-                component: ProgressComponent,
-            }
+            { path: '', pathMatch: 'full', component: CourseManageComponent },
+            { path: 'dojo', component: DojoComponent },
+            { path: 'corrections', component: CorrectionsComponent },
+            { path: 'progress', component: ProgressComponent },
+            { path: 'kata/:quizId', component: KataComponent },
         ]
     },
     { path: '', component: LandingComponent, pathMatch: 'full' },

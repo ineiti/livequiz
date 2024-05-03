@@ -409,18 +409,15 @@ export class Dojo extends Nomad {
 }
 
 export class DojoAttempt extends Nomad {
-  dojoId: DojoID = new DojoID();
   choices: DojoChoice[] = [];
 
   override update() {
     const dr: JSONDojoAttempt = JSON.parse(this.json);
-    this.dojoId = QuizID.fromHex(dr.dojoId!);
     this.choices = dr.choices?.map((r) => new DojoChoice(r)) ?? [];
   }
 
   override toJson(): string {
     return JSON.stringify({
-      dojoId: this.dojoId.toHex(),
       choices: this.choices.map((r) => r.toJson()),
     });
   }

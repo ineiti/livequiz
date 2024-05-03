@@ -29,7 +29,6 @@ export class CourseComponent {
   }
 
   onOutletLoaded(component: any) {
-    console.log("course loaded", this.courseId, this.course);
     component.course = this.course;
   }
 }
