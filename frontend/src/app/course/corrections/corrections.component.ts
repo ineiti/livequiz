@@ -11,6 +11,7 @@ import { StorageService } from '../../services/storage.service';
 import { User } from '../../services/user.service';
 import { ResultsSummary } from '../../../lib/results_summary';
 import { MatButtonModule } from '@angular/material/button';
+import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-corrections',
@@ -35,7 +36,8 @@ export class CorrectionsComponent {
   qIndex = 0;
   sorted: number[][] = [];
 
-  constructor(private livequiz: LivequizStorageService, private storage: StorageService) {
+  constructor(private livequiz: LivequizStorageService, private storage: StorageService,
+    private bcs: BreadcrumbService) {
   }
 
   async ngOnInit() {
@@ -57,9 +59,11 @@ export class CorrectionsComponent {
     this.sorted = this.quiz.questions.map((_, i) => [i, 0]);
     this.updateResults();
     this.goto(0);
+    this.bcs.push('Corrections', 'corrections');
   }
 
   ngOnDestroy() {
+    this.bcs.pop();
     if (this.updateDojo) {
       this.updateDojo.unsubscribe();
     }

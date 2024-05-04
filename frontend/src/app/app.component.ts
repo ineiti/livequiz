@@ -5,11 +5,12 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { UserService } from './services/user.service';
 import { StorageService } from './services/storage.service';
+import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, FormsModule, MatInputModule, MatButtonModule],
+  imports: [RouterOutlet, RouterLink, FormsModule, MatInputModule, MatButtonModule, BreadcrumbComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

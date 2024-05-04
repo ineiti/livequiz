@@ -1,0 +1,6 @@
+  <ng-container *ngFor="let bc of bcs.path; let last = last">
+    <a [routerLink]="bc.link" [ngClass]="{ 'font-weight-bold': last }">[{{
+      bc.label
+      }}]</a>
+    <span *ngIf="!last"> / </span>
+  </ng-container>

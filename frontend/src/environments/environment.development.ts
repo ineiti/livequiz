@@ -1,6 +1,6 @@
 export const environment = {
     addTestUsers: true,
-    realBackend: true,
+    realBackend: false,
     syncInterval: 100,
     enableReset: true,
 };

@@ -1,6 +1,5 @@
-<div *ngIf="course !== undefined && course.id.toHex !== undefined">
-    <h2>Course {{ course.name }}
-        [<a routerLink="/course/{{course.id.toHex()}}">Manage</a>]</h2>
+<div *ngIf="course !== undefined && course.id.toHex() !== undefined">
+    <h2>Course {{ course.name }}</h2>
 
     <router-outlet (activate)="onOutletLoaded($event)" />
 </div>

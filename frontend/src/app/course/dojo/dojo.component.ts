@@ -6,6 +6,7 @@ import { QuizComponent } from '../../components/quiz/quiz.component';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
+import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-dojo',
@@ -20,7 +21,16 @@ export class DojoComponent {
   quiz?: Quiz;
   attempt?: DojoAttempt;
 
-  constructor(private user: UserService, private livequiz: LivequizStorageService) { }
+  constructor(private user: UserService, private livequiz: LivequizStorageService,
+    private bcs: BreadcrumbService) { }
+
+  ngOnInit() {
+    this.bcs.push('Dojo', 'dojo');
+  }
+
+  ngOnDestroy(){
+    this.bcs.pop();
+  }
 
   async ngOnChanges() {
     if (!this.isIdle()) {

@@ -49,6 +49,9 @@ The admin view shows all students, and what they answered already.
 
 # CHANGELOG
 
+2024-05-04
+- add breadcrumbs
+
 2024-05-03:
 - self-chosen quizzes
 

@@ -11,6 +11,7 @@ import { StorageService } from '../../services/storage.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 import { Course, CourseStateEnum } from '../../../lib/structs';
 import { MatButtonModule } from '@angular/material/button';
+import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-progress',
@@ -27,7 +28,7 @@ export class ProgressComponent {
   summary!: ResultsSummary;
 
   constructor(private storage: StorageService, private livequiz: LivequizStorageService,
-    public router: Router, public route: ActivatedRoute) {
+    public router: Router, public route: ActivatedRoute, private bcs: BreadcrumbService) {
   }
 
   async ngOnInit() {
@@ -38,5 +39,10 @@ export class ProgressComponent {
       this.summary = new ResultsSummary(this.storage, this.livequiz, this.course.state.getDojoID());
       await this.summary.init();
     }
+    this.bcs.push('Progress', 'progress');
+  }
+
+  ngOnDestroy() {
+    this.bcs.pop();
   }
 }
