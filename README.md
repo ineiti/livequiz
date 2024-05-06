@@ -7,50 +7,22 @@ The admin view shows all students, and what they answered already.
 # TODO v2
 
 - bugs:
-- ui
-  - certains boutons ne sont pas visibles
+  - ui
+    - certains boutons ne sont pas visibles
+    - on mobile devices, long answers are hidden partially
 - features
-  - re-arrange quizzes
   - update quizzes
+  - re-arrange quizzes
+  - add "delete" button to clean students
   - modes
     - exam mode: only once the admin switch is flicked will the students see if they answered correctly
     - live mode: after every question, students see if they answered correctly
       - updatable: students can update their questions
-    - modes are a combination of switches:
-      - students directly see if they answered correctly or not
-      - stop students from changing their answers
-
-# TODO v1
-
-- bugs:
-  - l'interface admin peut "perdre" des noms après le redémarrage du système
-    - probably due to clients only sending updates to questions
-    - -> on startup, should send "sendAllStats" in "getStats"
-  - when changing quiz, /admin still shows the attempts
-    - backend stores answers globally, instead of per-quiz
-  - on mobile devices, long answers are hidden partially
-- admin view:
-  - route to /student if it's not an admin
-  - add "delete" button to clean students
-- student view:
-  - loss of "answered" in the upper table of questions if questionnaire is reloaded
-  - color is missing in upper table of questions
-- correction view:
-  - route to /student if it's not an admin
-- quizzes:
-  - add possibility for a `~ /something/i` and `s/ *//g` to ignore case and delete all spaces
-- general
-  - admin can upload quizzes
-  - admin can choose which quizz is shown
-- backend
-  - accept directory for quizzes, and offer all .md files as quizzes
-    - store answers per quiz
-  - store user data on disk
 
 # CHANGELOG
 
-2024-05-04
-- add breadcrumbs
+2024-05-06:
+- edit quizzes
 
 2024-05-03:
 - self-chosen quizzes

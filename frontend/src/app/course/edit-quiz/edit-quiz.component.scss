@@ -1,0 +1,31 @@
+.grid-container-element {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    grid-gap: 20px;
+    width: 100%;
+}
+
+.grid-child-element {
+    margin: 10px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 70vh;
+}
+
+#myTextarea {
+    width: 80ch;
+    min-height: 25ch;
+    resize: vertical;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+#rightText {
+    flex: 1;
+    margin-left: 10px;
+    min-width: 30em;
+    word-wrap: break-word;
+}

@@ -7,6 +7,7 @@ import { CorrectionsComponent } from './course/corrections/corrections.component
 import { ProgressComponent } from './course/progress/progress.component';
 import { ResetComponent } from './reset/reset.component';
 import { KataComponent } from './course/kata/kata.component';
+import { EditQuizComponent } from './course/edit-quiz/edit-quiz.component';
 
 export const routes: Routes = [
     {
@@ -16,6 +17,8 @@ export const routes: Routes = [
             { path: 'dojo', component: DojoComponent },
             { path: 'corrections', component: CorrectionsComponent },
             { path: 'progress', component: ProgressComponent },
+            { path: 'createQuiz', component: EditQuizComponent },
+            { path: 'editQuiz/:quizId', component: EditQuizComponent },
             { path: 'kata/:quizId', component: KataComponent },
         ]
     },

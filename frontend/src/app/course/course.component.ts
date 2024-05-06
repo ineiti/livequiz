@@ -24,7 +24,7 @@ export class CourseComponent {
   async ngOnInit() {
     try {
       this.course = await this.livequiz.getCourse(NomadID.fromHex(this.courseId))!;
-      this.bcs.push('Course', `course/${this.course.id.toHex()}`);
+      this.bcs.push(this.course.name, `course/${this.course.id.toHex()}`);
     } catch (e) {
       console.error(e);
       this.router.navigate(['/']);

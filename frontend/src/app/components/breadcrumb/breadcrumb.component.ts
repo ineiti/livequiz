@@ -22,7 +22,7 @@ export class BreadcrumbComponent {
   providedIn: 'root'
 })
 export class BreadcrumbService {
-  path: Breadcrumb[] = [{ label: "Home", link: '' }];
+  path: Breadcrumb[] = [{ label: "LiveQuiz", link: '' }];
 
   push(label: string, l: string) {
     const link = `${this.path[this.path.length - 1].link}/${l}`;

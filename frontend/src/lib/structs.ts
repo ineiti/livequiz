@@ -53,6 +53,11 @@ export class Quiz extends Nomad {
     });
   }
 
+  toText(): string {
+    return `# ${this.title}\n` +
+      this.questions.map((q) => q.toText() + "\n").join("\n");
+  }
+
   static fromStr(text: string): Quiz {
     const q = new Quiz();
 
@@ -60,12 +65,13 @@ export class Quiz extends Nomad {
     let explanation = false;
     let maxChoices = 0;
     let reg: JSONOptionRegexp = { replace: [], match: [] };
+    text += "\n## end"
     for (const line of text.split("\n")) {
       if (line.length === 0) {
         continue;
       }
       const linePre = line.replace(/`(.*?)`/g, "<span class='pre'>$1</span>");
-      const interpret = linePre.match(/([#=~-]*) *(.*)/);
+      const interpret = linePre.match(/([#=~;-]*) *(.*)/);
       if (interpret?.length != 3) {
         console.error(`Cannot parse line ${line}`);
         continue;
@@ -77,14 +83,17 @@ export class Quiz extends Nomad {
           break;
         case '##':
           if (current.title !== "") {
-            if (maxChoices < 0) {
-              current.options.regexp = new OptionRegexp(reg);
+            if (maxChoices !== 0) {
+              if (maxChoices < 0) {
+                current.options.regexp = new OptionRegexp(reg);
+              }
+              q.questions.push(current);
             }
-            q.questions.push(current);
             current = new Question();
             explanation = false;
             reg = { replace: [], match: [] };
           }
+          maxChoices = 0;
           current.title = text;
           break;
         case '-':
@@ -107,6 +116,8 @@ export class Quiz extends Nomad {
           maxChoices = parseInt(text);
           current.options.multi = new OptionsMulti();
           break;
+        case ';':
+          continue;
         default:
           if (explanation) {
             current.explanation += linePre + " ";
@@ -136,6 +147,10 @@ export class Question {
     }
   }
 
+  toText(): string {
+    return `## ${this.title}\n\n${this.intro}\n\n` + this.options.toText();
+  }
+
   toJson(): JSONQuestion {
     return {
       title: this.title,
@@ -158,6 +173,10 @@ export class Options {
         this.regexp = new OptionRegexp(c.Regexp!);
       }
     }
+  }
+
+  toText(): string {
+    return this.multi !== undefined ? this.multi!.toText() : this.regexp!.toText();
   }
 
   size(): number {
@@ -223,6 +242,10 @@ export class OptionsMulti {
     }
   }
 
+  toText(): string {
+    return `= ${this.correct.length}\n${this.fields().map((f) => `- ${f}`).join("\n")}`;
+  }
+
   total(): number {
     return this.correct.length + this.wrong.length;
   }
@@ -272,11 +295,16 @@ export class OptionRegexp {
       if (!match) {
         throw new Error(`Invalid match regexp: ${m}`);
       }
-      if (match[4] !== undefined){
+      if (match[4] !== undefined) {
         return new RegExp(match[4]);
       }
       return new RegExp(match[2], match[3] ?? '');
     });
+  }
+
+  toText(): string {
+    return (this.replace.map((r) => `~ s/${r.find.source}/${r.replace}/${r.find.flags}`)
+      .concat(this.match.map((m) => `- ${m}`))).join("\n");
   }
 
   applyReplace(s: string): string {

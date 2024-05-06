@@ -1,7 +1,7 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CourseStateEnum, Quiz } from "../../../lib/structs";
 import { Course } from "../../../lib/structs";
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { QuizID } from '../../../lib/ids';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
@@ -10,12 +10,14 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 import { MatButtonModule } from '@angular/material/button';
 import { ModalModule } from '../../components/modal/modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { MenuItem } from 'primeng/api';
 
 // TODO: merge this into the CourseComponent. Something something "if no children active, show this".
 @Component({
   selector: 'app-course-manage',
   standalone: true,
-  imports: [RouterLink, CommonModule, MatButtonModule, ModalModule],
+  imports: [RouterLink, CommonModule, MatButtonModule, ModalModule, SplitButtonModule],
   templateUrl: './course-manage.component.html',
   styleUrl: './course-manage.component.scss'
 })
@@ -23,10 +25,26 @@ export class CourseManageComponent {
   @Input() course!: Course;
   quizzes: Quiz[] = [];
   quiz?: Quiz;
+  items = [
+    {
+      label: 'Upload',
+      icon: 'pi pi-refresh',
+      command: () => {
+        this.openFileChooser();
+      }
+    },
+    {
+      label: 'By ID',
+      icon: 'pi pi-times',
+      command: () => {
+        this.addQuiz();
+      }
+    }];
+
 
   constructor(private storage: StorageService, private user: UserService,
     private livequiz: LivequizStorageService, private router: Router,
-    public dialog: MatDialog) { }
+    public dialog: MatDialog, private route: ActivatedRoute) { }
 
   async ngOnChanges() {
     this.quizzes = [];
@@ -37,10 +55,10 @@ export class CourseManageComponent {
       const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
       this.quiz = await this.livequiz.getQuiz(dojo.quizId);
     }
-    if (!this.user.id.isIn(this.course.students)){
+    if (!this.user.id.isIn(this.course.students)) {
       this.course.students.push(this.user.id);
     }
-    if (!this.user.courses.has(this.course.id.toHex())){
+    if (!this.user.courses.has(this.course.id.toHex())) {
       this.user.addCourse(this.course);
     }
     this.user.update();
@@ -102,7 +120,7 @@ export class CourseManageComponent {
 
   addQuiz() { }
 
-  async trainQuiz(id: QuizID){
-    this.router.navigate([`/quiz/${id.toHex()}`]);
+  createQuiz() { 
+    this.router.navigate(['./createQuiz'], { relativeTo: this.route });
   }
 }
