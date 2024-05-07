@@ -25,4 +25,4 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/heig-srx-2024/livequiz2
+          tags: ghcr.io/ineiti/livequiz2
