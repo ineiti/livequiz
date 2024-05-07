@@ -9,10 +9,16 @@
     <li>Activating a quiz for your students</li>
     <li>Showing progress of the students in the quiz</li>
     <li>Correcting the quiz, showing worst answers first</li>
+    <li>Letting students train quizzes on their own</li>
 </ul>
 
 <p>And of course it should one day join the <a href="https://web.fledg.re">Fledger network</a>,
     so that all of the storage is decentralized...</p>
+
+<p>One cool feature on the backend is that it uses <strong>Nomads</strong>, which I used
+here to reduce the number of calls to the backend down to 1. I hope I can soon write
+an introduction how they work. If you're curious, contact me on 
+<a href="mailto:ineiti@gasser.blue">my email</a>.</p>
 
 <div *ngIf="user.courses.size > 0; else noCourses">
     <p>Your courses:</p>
