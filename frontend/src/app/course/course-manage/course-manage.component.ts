@@ -73,7 +73,7 @@ export class CourseManageComponent {
     if (await ModalModule.openOKCancel(this.dialog, 'Delete Quiz',
       `Do you want to delete the quiz ${quiz.title}?`
     )) {
-      this.course.quizIds = this.course.quizIds.filter((i) => !i.equals(i));
+      this.course.quizIds = this.course.quizIds.filter((i) => !id.equals(i));
       if (!this.course.state.isIdle() && id.equals(this.quiz!.id)) {
         this.course.state.state = CourseStateEnum.Idle;
       }
