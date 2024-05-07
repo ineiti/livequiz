@@ -11,12 +11,13 @@ import { GRID_MAX_WIDTH } from '../../app.config';
 import { DojoAttempt, Quiz } from "../../../lib/structs";
 import { Answer } from "../../../lib/results_summary";
 import { UserService } from '../../services/user.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-quiz',
   standalone: true,
   imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatProgressBarModule,
-    MatListModule, MatGridListModule],
+    MatListModule, MatGridListModule, MatButtonModule],
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.scss'
 })

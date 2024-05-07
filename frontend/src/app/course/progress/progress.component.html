@@ -1,8 +1,8 @@
 <h2>Progress of Users</h2>
 
 <div style="margin-bottom: 1em;">
-  <button *ngIf="addTestUsers" mat-button (click)="summary.addUser()">Add test user</button>
-  <button mat-button (click)="router.navigate(['../corrections'], { relativeTo: route })">Corrections</button>
+  <button *ngIf="addTestUsers" mat-stroked-button (click)="summary.addUser()">Add test user</button>
+  <button mat-stroked-button (click)="router.navigate(['../corrections'], { relativeTo: route })">Corrections</button>
 </div>
 
 <div *ngIf="summary && summary.users.length > 0">

@@ -7,11 +7,12 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
+import { MatButton, MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-dojo',
   standalone: true,
-  imports: [RouterOutlet, QuizComponent, CommonModule],
+  imports: [RouterOutlet, QuizComponent, CommonModule, MatButtonModule, MatButton],
   templateUrl: './dojo.component.html',
   styleUrl: './dojo.component.scss'
 })

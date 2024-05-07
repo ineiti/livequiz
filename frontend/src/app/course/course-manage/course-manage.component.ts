@@ -10,14 +10,13 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 import { MatButtonModule } from '@angular/material/button';
 import { ModalModule } from '../../components/modal/modal.component';
 import { MatDialog } from '@angular/material/dialog';
-import { SplitButtonModule } from 'primeng/splitbutton';
-import { MenuItem } from 'primeng/api';
+import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 // TODO: merge this into the CourseComponent. Something something "if no children active, show this".
 @Component({
   selector: 'app-course-manage',
   standalone: true,
-  imports: [RouterLink, CommonModule, MatButtonModule, ModalModule, SplitButtonModule],
+  imports: [RouterLink, CommonModule, MatButtonModule, ModalModule, CdkDropList, CdkDrag],
   templateUrl: './course-manage.component.html',
   styleUrl: './course-manage.component.scss'
 })
@@ -25,22 +24,7 @@ export class CourseManageComponent {
   @Input() course!: Course;
   quizzes: Quiz[] = [];
   quiz?: Quiz;
-  items = [
-    {
-      label: 'Upload',
-      icon: 'pi pi-refresh',
-      command: () => {
-        this.openFileChooser();
-      }
-    },
-    {
-      label: 'By ID',
-      icon: 'pi pi-times',
-      command: () => {
-        this.addQuiz();
-      }
-    }];
-
+  uploadQuizId?: QuizID;
 
   constructor(private storage: StorageService, private user: UserService,
     private livequiz: LivequizStorageService, private router: Router,
@@ -102,8 +86,14 @@ export class CourseManageComponent {
     reader.onload = async (e: any) => {
       try {
         const q = Quiz.fromStr(e.target.result);
-        this.storage.addNomads(q);
-        this.course.quizIds.push(q.id);
+        if (this.uploadQuizId) {
+          const quiz = await this.livequiz.getQuiz(this.uploadQuizId!);
+          quiz.json = q.toJson();
+          quiz.update();
+        } else {
+          this.storage.addNomads(q);
+          this.course.quizIds.push(q.id);
+        }
         this.ngOnChanges();
       } catch (e) {
         await ModalModule.openOKCancel(this.dialog, 'Error',
@@ -114,13 +104,19 @@ export class CourseManageComponent {
     reader.readAsText(event.target.files[0]);
   }
 
-  openFileChooser() {
+  openFileChooser(uploadQuizId?: QuizID) {
+    this.uploadQuizId = uploadQuizId;
     document.getElementById('fileInput')!.click();
   }
 
   addQuiz() { }
 
-  createQuiz() { 
+  createQuiz() {
     this.router.navigate(['./createQuiz'], { relativeTo: this.route });
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.course.quizIds, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.quizzes, event.previousIndex, event.currentIndex);
   }
 }

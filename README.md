@@ -8,11 +8,10 @@ The admin view shows all students, and what they answered already.
 
 - bugs:
   - ui
-    - certains boutons ne sont pas visibles
     - on mobile devices, long answers are hidden partially
 - features
-  - update quizzes
-  - re-arrange quizzes
+  - get all quizzes from a github repo
+    - enter the name of a github / gitlab 
   - add "delete" button to clean students
   - modes
     - exam mode: only once the admin switch is flicked will the students see if they answered correctly
@@ -21,8 +20,13 @@ The admin view shows all students, and what they answered already.
 
 # CHANGELOG
 
+2024-05-07:
+- update quizzes
+- re-arrange quizzes
+
 2024-05-06:
 - edit quizzes
+- certains boutons ne sont pas visibles
 
 2024-05-03:
 - self-chosen quizzes

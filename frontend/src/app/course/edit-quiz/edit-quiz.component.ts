@@ -60,9 +60,12 @@ export class EditQuizComponent {
       this.storage.addNomads(quiz);
       this.course.quizIds.push(quiz.id);
     }
-    this.router.navigate([this.quizId ? '../..' : '..'], { relativeTo: this.route })
+    this.cancel();
   }
 
+  cancel(){
+    this.router.navigate([this.quizId ? '../..' : '..'], { relativeTo: this.route });
+  }
 }
 
 const exampleQuiz = `# Title of Quiz
