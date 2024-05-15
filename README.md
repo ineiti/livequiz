@@ -10,7 +10,7 @@ You can either run it on your own server using the `docker-compose.yaml` file,
 or use the publicly available [Livequiz](https://livequiz.fledg.re) on the
 upcoming [Fledger](https://web.fledg.re) platform.
 
-<img src="https://private-user-images.githubusercontent.com/1545067/330181960-7f1e459b-0415-4902-8ac2-581cecf28310.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTU2MjkwMjYsIm5iZiI6MTcxNTYyODcyNiwicGF0aCI6Ii8xNTQ1MDY3LzMzMDE4MTk2MC03ZjFlNDU5Yi0wNDE1LTQ5MDItOGFjMi01ODFjZWNmMjgzMTAuZ2lmP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDUxMyUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA1MTNUMTkzMjA2WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MzIwN2Q1N2Q3NTYyODhjNzg4YmE5MTNiYTE0ODIyMDE3YjI1NjRkNjUwMzYzNGM2MjEwNzBhNzNhYTY1NGYxNyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.I5gBGvdS4C-SkQTCi_euqKS1kXsF1stMhUk5dxuJtjQ">
+![](https://github.com/ineiti/livequiz_example/blob/main/example.gif?raw=true)
 
 ## Dojo
 
@@ -164,6 +164,7 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 # TODO v2
 
 - bugs:
+  - authentication: only allow changes to Nomads by the owner...
   - ui
     - on mobile devices, long answers are hidden partially
 - features

@@ -20,7 +20,7 @@ async fn nomad_updates(
     secret: Secret,
     list: Json<UpdateRequest>,
 ) -> Result<Json<UpdateReply>, BadRequest<String>> {
-    Ok(Json(nomads.get_updates(secret.hash(), list.0).await?))
+    Ok(Json(nomads.get_updates(&secret.hash(), list.0).await?))
 }
 
 #[get("/reset")]
