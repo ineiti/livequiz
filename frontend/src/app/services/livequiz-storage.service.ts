@@ -29,7 +29,7 @@ export class LivequizStorageService {
     if (dojoId === undefined) {
       const dojo = new Dojo();
       dojo.quizId = quizId;
-      // dojo.owner = this.user.id;
+      // dojo.owners.push(this.user.id);
       this.storage.addNomads(dojo);
       dojoId = dojo.id;
       course.dojoIds.push(dojoId);
@@ -63,7 +63,7 @@ export class LivequizStorageService {
 
   createDojoAttempt(dojo: Dojo, user: UserID): DojoAttempt {
     const dr = new DojoAttempt();
-    dr.owner = this.user.id;
+    dr.owners.push(this.user.id);
     this.storage.addNomads(dr);
     return dr;
   }
@@ -80,7 +80,7 @@ export class LivequizStorageService {
     const course = new Course();
     course.name = name;
     course.admins = [this.user.id];
-    course.owner = this.user.id;
+    course.owners.push(this.user.id);
     this.user.addCourse(course);
     this.storage.addNomads(course);
     return course;

@@ -58,7 +58,7 @@ export class EditQuizComponent {
       quiz.update();
     } else {
       const quiz = Quiz.fromStr(this.text);
-      quiz.owner = this.user.id;
+      quiz.owners.push(this.user.id);
       this.storage.addNomads(quiz);
       this.course.quizIds.push(quiz.id);
     }

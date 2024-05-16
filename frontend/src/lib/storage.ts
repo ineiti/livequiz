@@ -22,14 +22,14 @@ export interface JSONNomadUpdateReply {
 export interface JSONUpdateEntry {
   version: number;
   json: string;
-  owner?: string;
+  owners: string[];
   time_created: number;
   time_last_updated: number;
   time_last_read: number;
 }
 
 export class Nomad {
-  owner?: UserID;
+  owners: UserID[] = [];
   time_created = Date.now();
   time_last_updated = Date.now();
   time_last_read = Date.now();
@@ -74,7 +74,7 @@ export class Nomad {
     return {
       version: this.version,
       json: this.toJson(),
-      owner: this.owner?.toHex(),
+      owners: this.owners.map((owner) => owner.toHex()),
       time_created: this.time_created,
       time_last_updated: this.time_last_updated,
       time_last_read: this.time_last_read,

@@ -164,7 +164,7 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 # TODO v2
 
 - bugs:
-  - authentication: only allow changes to Nomads by the owner...
+  - check why update of quiz during dojo didn't work
   - ui
     - on mobile devices, long answers are hidden partially
 - features
@@ -178,6 +178,10 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
       - updatable: students can update their questions
 
 # CHANGELOG
+
+2024-05-16:
+- authentication: only allow changes to Nomads by the owner...
+  - change owner to owner: UserID[] to allow for more than one owner.
 
 2024-05-13:
 - Added LICENSE

@@ -56,7 +56,7 @@ export class UserService extends User {
     }
 
     this.id = this.secret.hash();
-    this.owner = this.id;
+    this.owners.push(this.id);
   }
 
   reset() {

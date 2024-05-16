@@ -91,7 +91,7 @@ export class CourseManageComponent {
           quiz.json = q.toJson();
           quiz.update();
         } else {
-          q.owner = this.user.id;
+          q.owners.push(this.user.id);
           this.storage.addNomads(q);
           this.course.quizIds.push(q.id);
         }

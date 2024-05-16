@@ -92,9 +92,7 @@ export class StorageHandler {
     nomad.id = id;
     nomad.version = nomadData.version;
     nomad.json = nomadData.json;
-    if (nomadData.owner !== null && nomadData.owner!.length === 64) {
-      nomad.owner = UserID.fromHex(nomadData.owner!);
-    }
+    nomad.owners = nomadData.owners.map((owner) => UserID.fromHex(owner));
     nomad.update();
     this.cache.set(id.toHex(), nomad);
     return nomad;

@@ -36,8 +36,8 @@ impl Nomads {
                     if remote.version == 0 || stored.version > remote.version {
                         reply.nomad_data.insert(id_str, stored.into());
                     } else if remote.version > stored.version {
-                        if stored.owner.as_ref().unwrap_or(user) == user {
-                            println!(
+                        if stored.owners.len() == 0 || stored.owners.contains(user) {
+                            log::debug!(
                                 "{:.8} Updates {:.8}: {:?}",
                                 user.to_hex(),
                                 id.to_hex(),
@@ -47,18 +47,24 @@ impl Nomads {
                                 .await
                                 .map_err(|e| BadRequest(e.to_string()))?;
                         } else {
-                            reply.nomad_data.insert(id_str, stored.into());
-                            println!(
-                                "{:.8} is not owner of {:.8}, so not updating {:?}",
+                            log::debug!(
+                                "{:.8} is not owner ({:.8}) of {:.8}, so not updating {:?}",
                                 user.to_hex(),
+                                stored
+                                    .owners
+                                    .iter()
+                                    .map(|o| format!("{:.8}", o.to_hex()))
+                                    .collect::<Vec<String>>()
+                                    .join(":"),
                                 id.to_hex(),
                                 remote
                             );
+                            reply.nomad_data.insert(id_str, stored.into());
                         }
                     }
                 }
                 Ok(None) => {
-                    println!(
+                    log::debug!(
                         "{:.8} Creates {:.8}: {:?}",
                         user.to_hex(),
                         id.to_hex(),
@@ -151,7 +157,7 @@ pub struct UpdateReply {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq)]
 #[serde(crate = "rocket::serde")]
 pub struct SerdeEntry {
-    pub owner: Option<UserID>,
+    pub owners: Option<Vec<UserID>>,
     pub version: u32,
     pub json: Option<String>,
     pub time_created: Option<u64>,
@@ -162,7 +168,7 @@ pub struct SerdeEntry {
 impl From<Entry> for SerdeEntry {
     fn from(value: Entry) -> Self {
         Self {
-            owner: value.owner,
+            owners: Some(value.owners),
             version: value.version,
             json: value.json,
             time_created: Some(value.time_created),
@@ -183,12 +189,12 @@ impl EntryVersions {
     fn to_latest(self) -> Entry {
         match self {
             EntryVersions::V0(old) => Entry {
-                owner: None,
+                version: old.version,
+                json: old.json,
+                owners: vec![],
                 time_created: Nomads::get_now(),
                 time_last_updated: Nomads::get_now(),
                 time_last_read: Nomads::get_now(),
-                version: old.version,
-                json: old.json,
             },
             EntryVersions::V1(ue) => ue,
         }
@@ -205,7 +211,7 @@ pub struct EntryV0 {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Ord, Eq)]
 #[serde(crate = "rocket::serde")]
 pub struct Entry {
-    pub owner: Option<UserID>,
+    pub owners: Vec<UserID>,
     pub version: u32,
     pub json: Option<String>,
     // TODO: use the timing fields to decide which entries to remove if the db gets
@@ -229,7 +235,7 @@ impl TryFrom<SerdeEntry> for Entry {
             return Err(BadRequest("missing json value".into()));
         }
         Ok(Self {
-            owner: value.owner,
+            owners: value.owners.unwrap_or(vec![]),
             version: value.version,
             json: value.json,
             time_created: value.time_created.unwrap(),
@@ -262,7 +268,7 @@ mod test {
 
     impl Entry {
         fn equal_some(&self, other: &Self) -> bool {
-            return self.owner == other.owner
+            return self.owners == other.owners
                 && self.version == other.version
                 && self.json == other.json
                 && self.time_created == other.time_created;
@@ -280,7 +286,7 @@ mod test {
         let mut value = Entry {
             version: 2,
             json: Some("1234".into()),
-            owner: Some(owner1),
+            owners: vec![owner1],
             time_created: now,
             time_last_updated: now,
             time_last_read: now,
@@ -320,7 +326,7 @@ mod test {
             let value = Entry {
                 version: 2,
                 json: Some("1234".into()),
-                owner: None,
+                owners: vec![],
                 time_created: now,
                 time_last_updated: now,
                 time_last_read: now,
@@ -341,11 +347,11 @@ mod test {
             &mut self,
             version: u32,
             json: Option<String>,
-            owner: Option<UserID>,
+            owners: Vec<UserID>,
         ) -> Result<UpdateReply, Box<dyn Error>> {
             self.value.version = version;
             self.value.json = json;
-            self.value.owner = owner;
+            self.value.owners = owners;
             self.request
                 .nomad_versions
                 .insert(self.id.to_hex(), self.value.clone().into());
@@ -357,7 +363,7 @@ mod test {
         }
 
         async fn get_ue(&mut self) -> Result<Entry, Box<dyn Error>> {
-            let mut answer = self.get_updates(0, None, None).await?;
+            let mut answer = self.get_updates(0, None, vec![]).await?;
             Ok(answer
                 .nomad_data
                 .remove(&self.id.to_hex())
@@ -394,43 +400,60 @@ mod test {
         let mut so = SetOwner::new();
         let user2 = UserID::rnd();
 
-        let answer = so.get_updates(2, Some("1234".into()), None).await?;
+        let answer = so.get_updates(2, Some("1234".into()), vec![]).await?;
         assert_eq!(0, answer.nomad_data.len());
         assert_eq!("1234", &so.read_json().await?);
 
         // Allow setting of owner
         let answer = so
-            .get_updates(3, Some("3456".into()), Some(user2.clone()))
+            .get_updates(3, Some("3456".into()), vec![user2.clone()])
             .await?;
         assert_eq!(0, answer.nomad_data.len());
         let ue = so.get_ue().await?;
-        assert!(ue.owner.unwrap().eq(&user2));
+        assert!(ue.owners.contains(&user2));
         assert_eq!("3456", ue.json.unwrap());
 
         // Refuse overwriting of owner
-        let answer = so.get_updates(4, None, Some(so.user.clone())).await?;
-        assert_eq!(0, answer.nomad_data.len());
+        let answer = so.get_updates(4, None, vec![so.user.clone()]).await?;
+        assert_eq!(1, answer.nomad_data.len());
         let ue = so.get_ue().await?;
-        assert!(ue.owner.unwrap().eq(&user2));
+        assert!(ue.owners.contains(&user2));
 
         // Refuse updating by non-owner
-        let answer = so.get_updates(4, Some("5678".into()), None).await?;
-        assert_eq!(0, answer.nomad_data.len());
+        let answer = so
+            .get_updates(4, Some("5678".into()), vec![so.user.clone()])
+            .await?;
+        assert_eq!(1, answer.nomad_data.len());
         let ue = so.get_ue().await?;
-        assert!(ue.owner.unwrap().eq(&user2));
+        assert!(ue.owners.contains(&user2));
 
         // Allow updating by owner
         so.user = user2.clone();
-        let answer = so.get_updates(4, Some("5678".into()), None).await?;
+        let answer = so
+            .get_updates(4, Some("6789".into()), vec![so.user.clone()])
+            .await?;
         assert_eq!(0, answer.nomad_data.len());
-        assert_eq!("5678", so.read_json().await?);
+        assert_eq!("6789", so.read_json().await?);
 
         // Allow updating of owner by owner
-        let user3 = UserID::rnd();
-        let answer = so.get_updates(5, None, Some(user3.clone())).await?;
+        let owners = vec![so.user.clone(), UserID::rnd()];
+        let answer = so
+            .get_updates(5, Some("789a".into()), owners.clone())
+            .await?;
         assert_eq!(0, answer.nomad_data.len());
         let ue = so.get_ue().await?;
-        assert!(ue.owner.unwrap().eq(&user3));
+        assert!(ue.owners.contains(&owners[1]));
+
+        // Update for each of the owners
+        let mut version = 6;
+        for u in &owners {
+            so.user = u.clone();
+            let json = format!("{version}");
+            so.get_updates(version, Some(json.clone()), owners.clone())
+                .await?;
+            assert_eq!(so.get_ue().await?.json.unwrap(), json);
+            version += 1;
+        }
 
         Ok(())
     }
