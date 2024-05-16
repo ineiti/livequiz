@@ -39,7 +39,7 @@ export interface JSONChoiceRegexp {
 
 export interface JSONCourseState {
     Idle?: {};
-    Quiz?: string;
+    Dojo?: string;
     Corrections?: string;
 }
 

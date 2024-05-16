@@ -22,6 +22,6 @@ export class LandingComponent {
   }
 
   async addCourse() {
-    await this.livequiz.createCourse(this.course_name, this.user);
+    await this.livequiz.createCourse(this.course_name);
   }
 }

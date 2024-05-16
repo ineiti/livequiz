@@ -1,4 +1,4 @@
-import { H256, NomadID } from "./ids";
+import { H256, NomadID, UserID } from "./ids";
 
 // 1st the client sends the nomadIDs and the versions, plus any local updates.
 // This supposes that conflicts are less common than successful updates.
@@ -16,10 +16,24 @@ export interface JSONNomadUpdateRequest {
 // It is up to the client to decide what to do with conflicting fields
 // (the ones which changed on the client and on the server).
 export interface JSONNomadUpdateReply {
-  nomadData: { [key: string]: { version: number; json: string; }; };
+  nomadData: { [key: string]: JSONUpdateEntry; };
+}
+
+export interface JSONUpdateEntry {
+  version: number;
+  json: string;
+  owner?: string;
+  time_created: number;
+  time_last_updated: number;
+  time_last_read: number;
 }
 
 export class Nomad {
+  owner?: UserID;
+  time_created = Date.now();
+  time_last_updated = Date.now();
+  time_last_read = Date.now();
+
   // The json field is used to detect changes in the object.
   // It must only be read by the object, never written to.
   constructor(public id = new NomadID(), public version = 0, public json = "") {
@@ -44,10 +58,10 @@ export class Nomad {
   // server. But it keeps existing key/value pairs.
   // This is a very simple merge algorithm.
   updateMap<K extends (string | number | symbol), V>(map: Map<K, V>, json: [K, V][] | undefined) {
-    if (json === undefined){
+    if (json === undefined) {
       return;
     }
-    
+
     if (json.length > 0) {
       for (const [k, v] of json) {
         map.set(k, v);
@@ -56,8 +70,15 @@ export class Nomad {
   }
 
   // Returns a reply to send to the server
-  getReply(): { version: number, json: string } {
-    return { version: this.version, json: this.toJson() }
+  getReply(): JSONUpdateEntry {
+    return {
+      version: this.version,
+      json: this.toJson(),
+      owner: this.owner?.toHex(),
+      time_created: this.time_created,
+      time_last_updated: this.time_last_updated,
+      time_last_read: this.time_last_read,
+    };
   }
 
 

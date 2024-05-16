@@ -2,7 +2,7 @@
     <h1><app-breadcrumb></app-breadcrumb></h1>
     <mat-form-field>
         <mat-label>Your name:</mat-label>
-        <input matInput [(ngModel)]="user.name">
+        <input id="userName" matInput [(ngModel)]="user.name">
     </mat-form-field>
     <div ngIf="userLoaded">
         <router-outlet />

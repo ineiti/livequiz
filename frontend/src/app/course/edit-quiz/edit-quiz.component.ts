@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 import { QuizID } from '../../../lib/ids';
 import { StorageService } from '../../services/storage.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-edit-quiz',
@@ -24,7 +25,7 @@ export class EditQuizComponent {
 
   constructor(private bcs: BreadcrumbService, private router: Router,
     private route: ActivatedRoute, private livequiz: LivequizStorageService,
-    private storage: StorageService) { }
+    private storage: StorageService, private user: UserService) { }
 
   async ngOnInit() {
     if (this.quizId) {
@@ -57,6 +58,7 @@ export class EditQuizComponent {
       quiz.update();
     } else {
       const quiz = Quiz.fromStr(this.text);
+      quiz.owner = this.user.id;
       this.storage.addNomads(quiz);
       this.course.quizIds.push(quiz.id);
     }

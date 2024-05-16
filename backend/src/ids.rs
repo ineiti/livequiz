@@ -90,6 +90,12 @@ impl<'r> FromRequest<'r> for Secret {
 #[serde(crate = "rocket::serde")]
 pub struct UserID(H256);
 
+impl UserID {
+    pub fn to_hex(&self) -> String {
+        return self.0.to_hex();
+    }
+}
+
 impl From<&H256> for UserID {
     fn from(value: &H256) -> Self {
         Self(value.clone())

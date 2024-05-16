@@ -39,8 +39,8 @@ export class CourseManageComponent {
       const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
       this.quiz = await this.livequiz.getQuiz(dojo.quizId);
     }
-    if (!this.user.id.isIn(this.course.students)) {
-      this.course.students.push(this.user.id);
+    if (!this.isStudent()) {
+      this.user.courses.set(this.course.id.toHex(), this.course.name);
     }
     if (!this.user.courses.has(this.course.id.toHex())) {
       this.user.addCourse(this.course);
@@ -53,7 +53,7 @@ export class CourseManageComponent {
   }
 
   isStudent(): boolean {
-    return this.user.isIn(this.course.students);
+    return this.user.courses.has(this.course.id.toHex());
   }
 
   async dojoQuiz(id: QuizID) {
@@ -91,6 +91,7 @@ export class CourseManageComponent {
           quiz.json = q.toJson();
           quiz.update();
         } else {
+          q.owner = this.user.id;
           this.storage.addNomads(q);
           this.course.quizIds.push(q.id);
         }

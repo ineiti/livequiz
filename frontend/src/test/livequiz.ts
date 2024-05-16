@@ -1,4 +1,4 @@
-import { Builder, Browser, By, WebDriver, Locator, WebElementPromise } from 'selenium-webdriver';
+import { Builder, Browser, By, WebDriver, Locator, WebElementPromise, WebElement } from 'selenium-webdriver';
 
 export class Livequiz {
     browser!: WebDriver;
@@ -7,6 +7,10 @@ export class Livequiz {
         lq.browser = await new Builder().forBrowser(Browser.CHROME).build();
         await lq.browser.get(url);
         return lq;
+    }
+
+    static async wait(ms: number) {
+        await new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     by(loc: Locator): WEP {
@@ -45,6 +49,12 @@ export class WEP {
     }
     async sendKeys(t: string) {
         await (await this.p).sendKeys(t);
+    }
+    async clear() {
+        await (await this.p).clear();
+    }
+    async find(): Promise<WebElement>{
+        return await this.p;
     }
 }
 

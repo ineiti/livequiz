@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ConnectionMock } from "../../lib/connection_mock";
 import { UserService } from "./user.service";
 import { environment } from "../../environments/environment";
-import { NomadID } from "../../lib/ids";
+import { NomadID, UserID } from "../../lib/ids";
 import { Nomad } from "../../lib/storage";
 import { JSONNomadUpdateRequest, JSONNomadUpdateReply } from '../../lib/storage';
 import { Subject } from 'rxjs';
@@ -92,6 +92,9 @@ export class StorageHandler {
     nomad.id = id;
     nomad.version = nomadData.version;
     nomad.json = nomadData.json;
+    if (nomadData.owner !== null && nomadData.owner!.length === 64) {
+      nomad.owner = UserID.fromHex(nomadData.owner!);
+    }
     nomad.update();
     this.cache.set(id.toHex(), nomad);
     return nomad;

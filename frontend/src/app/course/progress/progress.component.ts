@@ -35,7 +35,7 @@ export class ProgressComponent {
     if (this.course.state.state === CourseStateEnum.Idle) {
       this.router.navigate(['..']);
     } else {
-      this.course.state.state = CourseStateEnum.Quiz;
+      this.course.state.state = CourseStateEnum.Dojo;
       this.summary = new ResultsSummary(this.storage, this.livequiz, this.course.state.getDojoID());
       await this.summary.init();
     }

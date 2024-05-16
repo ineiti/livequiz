@@ -29,7 +29,7 @@ export class DojoComponent {
     this.bcs.push('Dojo', 'dojo');
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.bcs.pop();
   }
 
@@ -46,7 +46,7 @@ export class DojoComponent {
   }
 
   showQuiz(): boolean {
-    return !this.isIdle() && this.user.id.isIn(this.course.students);
+    return !this.isIdle() && this.user.courses.has(this.course.id.toHex());
   }
 
   showCorrections(): boolean {

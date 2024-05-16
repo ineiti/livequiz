@@ -8,8 +8,6 @@ import { StorageService } from "../app/services/storage.service";
 export class Course extends Nomad {
   name: string = "";
   admins: UserID[] = [];
-  // TODO: make a map of students, to allow for concurrent updates.
-  students: UserID[] = [];
   quizIds: QuizID[] = [];
   state: CourseState = new CourseState({});
   dojoIds: DojoID[] = [];
@@ -18,7 +16,6 @@ export class Course extends Nomad {
     const json: JSONCourse = JSON.parse(this.json);
     this.name = json.name!;
     this.admins = json.admins?.map((a) => UserID.fromHex(a)) ?? [];
-    this.students = json.students?.map((a) => UserID.fromHex(a)) ?? [];
     this.quizIds = json.quizIds?.map((q) => QuizID.fromHex(q)) ?? [];
     this.state = new CourseState(json.state ?? { Idle: {} });
     this.dojoIds = json.dojoIds?.map((r) => DojoID.fromHex(r)) ?? [];
@@ -28,7 +25,6 @@ export class Course extends Nomad {
     return JSON.stringify({
       name: this.name,
       admins: this.admins.map((a) => a.toHex()),
-      students: this.students.map((s) => s.toHex()),
       quizIds: this.quizIds.map((q) => q.toHex()),
       state: this.state.toJson(),
       dojoIds: this.dojoIds.map((d) => d.toHex()),
@@ -338,7 +334,7 @@ export class OptionRegexp {
 
 export enum CourseStateEnum {
   Idle,
-  Quiz,
+  Dojo,
   Corrections
 }
 
@@ -347,9 +343,9 @@ export class CourseState {
   dojoId?: DojoID;
 
   constructor(cs: JSONCourseState) {
-    if (cs.Quiz !== undefined) {
-      this.state = CourseStateEnum.Quiz;
-      this.dojoId = DojoID.fromHex(cs.Quiz!);
+    if (cs.Dojo !== undefined) {
+      this.state = CourseStateEnum.Dojo;
+      this.dojoId = DojoID.fromHex(cs.Dojo!);
     } else if (cs.Corrections !== undefined) {
       this.state = CourseStateEnum.Corrections;
       this.dojoId = DojoID.fromHex(cs.Corrections);
@@ -363,7 +359,7 @@ export class CourseState {
   }
 
   isQuiz(): boolean {
-    return this.state === CourseStateEnum.Quiz;
+    return this.state === CourseStateEnum.Dojo;
   }
 
   isCorrections(): boolean {
@@ -387,9 +383,9 @@ export class CourseState {
         return {
           Corrections: this.dojoId?.toHex(),
         };
-      case CourseStateEnum.Quiz:
+      case CourseStateEnum.Dojo:
         return {
-          Quiz: this.dojoId?.toHex(),
+          Dojo: this.dojoId?.toHex(),
         };
     }
   }
