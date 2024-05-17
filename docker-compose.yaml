@@ -5,10 +5,11 @@ services:
     image: ghcr.io/ineiti/livequiz2:latest
     build: .
     environment:
-      - ADMIN_SECRET=1234
-      - QUESTIONNAIRE=./questionnaire.md
+      - ROCKET_ADDRESS=0.0.0.0
+      - STATIC_PAGE=./frontend
+      - NOMADS_DB=/root/db
     volumes:
-      - ./questionnaire.md:/root/questionnaire.md
+      - ./db:/root/db
     ports:
       - 8000:8000
 #     labels:

@@ -23,6 +23,12 @@ async fn nomad_updates(
     Ok(Json(nomads.get_updates(&secret.hash(), list.0).await?))
 }
 
+#[options("/nomadUpdates")]
+fn nomad_updates_options() -> Status {
+    Status::Ok
+}
+
+
 #[get("/reset")]
 async fn reset(nomads: &State<Nomads>) {
     if env::var("ENABLE_RESET").is_ok() {
@@ -42,7 +48,7 @@ async fn catchall() -> Option<NamedFile> {
 async fn rocket() -> Rocket<Build> {
     let rb = rocket::build()
         .attach(CORS)
-        .mount("/api/v2", routes![nomad_updates, reset,])
+        .mount("/api/v2", routes![nomad_updates, nomad_updates_options, reset,])
         .manage(Nomads::new(
             &env::var("NOMADS_DB").unwrap_or("nomads_db".into()),
         ));

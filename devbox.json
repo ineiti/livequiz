@@ -16,7 +16,7 @@
     ],
     "scripts": {
       "frontend": "cd frontend; bun start",
-      "backend": "cd backend; ENABLE_RESET=true cargo run"
+      "backend": "cd backend; ENABLE_RESET=true ROCKET_LOG_LEVEL='critical' cargo run"
     }
   },
   "env": {

@@ -56,6 +56,8 @@ export class EditQuizComponent {
       const quiz = await this.livequiz.getQuiz(QuizID.fromHex(this.quizId!));
       quiz.json = Quiz.fromStr(this.text).toJson();
       quiz.update();
+      // Reset json to send an update to the server
+      quiz.json = "";
     } else {
       const quiz = Quiz.fromStr(this.text);
       quiz.owners.push(this.user.id);

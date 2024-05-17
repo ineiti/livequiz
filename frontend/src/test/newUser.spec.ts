@@ -1,4 +1,5 @@
 import { Livequiz } from './livequiz';
+import { readFileSync } from 'fs';
 
 describe("Logging in", () => {
     it("Correctly identifies 2 users", async () => {
@@ -33,6 +34,16 @@ describe("Logging in", () => {
         await Livequiz.wait(200);
         await admin.text("user1").find();
         await admin.text("user2").find();
+
+        await admin.click("Testing");
+        await admin.click("Edit");
+        await admin.css("textarea").clear();
+        const quiz = readFileSync(`${__dirname}/quiz1.md`).toString().replace("second", "zweite");
+        await admin.css("textarea").sendKeys(quiz);
+        await admin.click("Save");
+
+        await Livequiz.wait(200);
+        await user2.text("zweite").find();
 
         await Livequiz.wait(100);
         user1.browser.quit();

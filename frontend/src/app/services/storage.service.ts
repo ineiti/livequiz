@@ -131,6 +131,7 @@ export class StorageHandler {
         nomad.version = d.version;
         nomad.json = d.json;
         nomad.update();
+        nomad.updated.next(d.json);
 
         updateIds.push(nomad.id);
       }

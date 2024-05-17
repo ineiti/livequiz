@@ -12,6 +12,7 @@ import { DojoAttempt, Quiz } from "../../../lib/structs";
 import { Answer } from "../../../lib/results_summary";
 import { UserService } from '../../services/user.service';
 import { MatButtonModule } from '@angular/material/button';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-quiz',
@@ -27,6 +28,7 @@ export class QuizComponent {
   @Input() corrections!: boolean;
   answer!: Answer;
   showOptions = true;
+  quizUpdated?: Subscription;
 
   tileClasses: string[] = [];
   resultClasses: string[] = [];
@@ -39,12 +41,17 @@ export class QuizComponent {
   async ngOnInit() {
     this.attempt!.initChoices(this.quiz!.questions);
     this.goto(this.currentQuestion);
+    this.quizUpdated = this.quiz!.updated.subscribe(() => this.ngOnChanges());
   }
 
   ngOnChanges() {
     if (this.answer) {
       this.update();
     }
+  }
+
+  ngOnDestroy(){
+    this.quizUpdated?.unsubscribe();
   }
 
   updateSelection(event: MatSelectionList) {

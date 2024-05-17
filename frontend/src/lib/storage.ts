@@ -1,3 +1,4 @@
+import { BehaviorSubject, Subject } from "rxjs";
 import { H256, NomadID, UserID } from "./ids";
 
 // 1st the client sends the nomadIDs and the versions, plus any local updates.
@@ -33,6 +34,7 @@ export class Nomad {
   time_created = Date.now();
   time_last_updated = Date.now();
   time_last_read = Date.now();
+  updated = new Subject<string>();
 
   // The json field is used to detect changes in the object.
   // It must only be read by the object, never written to.

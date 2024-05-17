@@ -37,7 +37,7 @@ impl Nomads {
                         reply.nomad_data.insert(id_str, stored.into());
                     } else if remote.version > stored.version {
                         if stored.owners.len() == 0 || stored.owners.contains(user) {
-                            log::debug!(
+                            log::trace!(
                                 "{:.8} Updates {:.8}: {:?}",
                                 user.to_hex(),
                                 id.to_hex(),
@@ -47,7 +47,7 @@ impl Nomads {
                                 .await
                                 .map_err(|e| BadRequest(e.to_string()))?;
                         } else {
-                            log::debug!(
+                            log::trace!(
                                 "{:.8} is not owner ({:.8}) of {:.8}, so not updating {:?}",
                                 user.to_hex(),
                                 stored
@@ -64,7 +64,7 @@ impl Nomads {
                     }
                 }
                 Ok(None) => {
-                    log::debug!(
+                    log::trace!(
                         "{:.8} Creates {:.8}: {:?}",
                         user.to_hex(),
                         id.to_hex(),
