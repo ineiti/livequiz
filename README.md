@@ -167,6 +167,8 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
   - ui
     - on mobile devices, long answers are hidden partially
 - features
+  - add statistics
+    - show statistics
   - get all quizzes from a github repo
     - enter the name of a github / gitlab 
   - compatibility with Delibay - probably difficult

@@ -12,6 +12,7 @@ import { User } from '../../services/user.service';
 import { ResultsSummary } from '../../../lib/results_summary';
 import { MatButtonModule } from '@angular/material/button';
 import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-corrections',
@@ -37,7 +38,7 @@ export class CorrectionsComponent {
   sorted: number[][] = [];
 
   constructor(private livequiz: LivequizStorageService, private storage: StorageService,
-    private bcs: BreadcrumbService) {
+    private bcs: BreadcrumbService, private stats: StatsService) {
   }
 
   async ngOnInit() {
@@ -57,9 +58,10 @@ export class CorrectionsComponent {
     this.attempts = await this.dojo.getAttempts(this.storage);
     this.users = await this.dojo.getUsers(this.storage);
     this.sorted = this.quiz.questions.map((_, i) => [i, 0]);
-    this.updateResults();
+    this.updateAttempts();
     this.goto(0);
     this.bcs.push('Corrections', 'corrections');
+    this.stats.add(StatsService.dojo_correction);
   }
 
   ngOnDestroy() {
@@ -69,8 +71,7 @@ export class CorrectionsComponent {
     }
   }
 
-  updateResults() {
-    const scores: number[][] = [];
+  updateAttempts() {
     for (let question = 0; question < this.quiz.questions.length; question++) {
       const attemptsAnswered = this.attempts
         .filter((attempt) => attempt.choicesFilled(this.quiz.questions)[question].isAnswered());
@@ -104,8 +105,10 @@ export class CorrectionsComponent {
     } else {
       this.resultClasses = question.options.regexp!.match.map((_) => 'resultCorrect')
     }
-    this.resultWidth = this.results.chosen[this.sorted[this.qIndex][0]]
-      .map((s) => `${Math.round(s / this.users.length * 50) + 50}%`);
+    if (this.results.chosen.length > 0) {
+      this.resultWidth = this.results.chosen[this.sorted[this.qIndex][0]]
+        .map((s) => `${Math.round(s / this.users.length * 50) + 50}%`);
+    }
   }
 
   gridWidth(a: number): number {

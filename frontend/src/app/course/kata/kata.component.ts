@@ -7,6 +7,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { QuizComponent } from '../../components/quiz/quiz.component';
 import { FormsModule } from '@angular/forms';
 import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-kata',
@@ -21,11 +22,13 @@ export class KataComponent {
   attempt = new DojoAttempt();
   corrections = false;
 
-  constructor(private livequiz: LivequizStorageService, private bcs: BreadcrumbService){}
+  constructor(private livequiz: LivequizStorageService, private bcs: BreadcrumbService,
+    private stats: StatsService) { }
 
-  async ngOnInit(){
+  async ngOnInit() {
     this.quiz = await this.livequiz.getQuiz(QuizID.fromHex(this.quizId));
     this.bcs.push('Kata', `kata/${this.quizId}`);
+    this.stats.add(StatsService.kata_start);
   }
 
   ngOnDestroy() {

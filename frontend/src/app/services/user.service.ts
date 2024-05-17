@@ -3,6 +3,7 @@ import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
 import { NomadID, Secret } from '../../lib/ids';
 import { Nomad } from "../../lib/storage";
 import { Course } from '../../lib/structs';
+import { ReplaySubject } from 'rxjs';
 
 export class User extends Nomad {
   name = "undefined";
@@ -35,6 +36,9 @@ export class User extends Nomad {
 })
 export class UserService extends User {
   secret!: Secret;
+  create = true;
+  error = false;
+  loaded = new ReplaySubject<boolean>(1);
 
   constructor() {
     super();
@@ -47,8 +51,9 @@ export class UserService extends User {
         this.json = json.reply.json;
         super.update();
         this.secret = Secret.from_hex(json.secret);
+        this.create = false;
       } catch (e) {
-        console.warn("While loading user:", e, "resetting");
+        this.error = true;
         this.reset();
       }
     } else {
@@ -57,6 +62,7 @@ export class UserService extends User {
 
     this.id = this.secret.hash();
     this.owners.push(this.id);
+    this.loaded.next(true);
   }
 
   reset() {

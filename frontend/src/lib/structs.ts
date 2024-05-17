@@ -1,6 +1,6 @@
 import { ReplaySubject, Subscription } from "rxjs";
-import { UserID, QuizID, DojoID, DojoAttemptID, NomadID } from "./ids";
-import { JSONCourse, JSONQuiz, JSONQuestion, JSONChoice, JSONChoiceMulti as JSONOptionMulti, JSONChoiceRegexp as JSONOptionRegexp, JSONCourseState, JSONDojo, JSONDojoAttempt, JSONDojoChoice } from "./jsons";
+import { UserID, QuizID, DojoID, DojoAttemptID, NomadID, H256, StatsEntriesID } from "./ids";
+import { JSONCourse, JSONQuiz, JSONQuestion, JSONChoice, JSONChoiceMulti as JSONOptionMulti, JSONChoiceRegexp as JSONOptionRegexp, JSONCourseState, JSONDojo, JSONDojoAttempt, JSONDojoChoice, JSONStats, JSONStatsEntry } from "./jsons";
 import { Nomad } from "./storage";
 import { User } from "../app/services/user.service";
 import { StorageService } from "../app/services/storage.service";
@@ -399,16 +399,15 @@ export class Dojo extends Nomad {
   override update() {
     const d: JSONDojo = JSON.parse(this.json);
     this.quizId = QuizID.fromHex(d.quizId!);
-    this.attempts = new Map(Object.entries(d.attempts!)
-      .map(([user, result]) => [user, DojoAttemptID.fromHex(result)]));
+    const attempts = Object.entries(d.attempts!)
+      .map<[string, DojoAttemptID]>(([user, result]) => [user, DojoAttemptID.fromHex(result)]);
+    this.updateMap(this.attempts, attempts);
     this.bs.next(this);
   }
 
   override toJson(): string {
-    const attempts: { [key: string]: string; } = {};
-    for (const [key, value] of this.attempts.entries()) {
-      attempts[key] = value.toHex();
-    }
+    const attempts = Object.fromEntries([...this.attempts.entries()]
+      .map(([k, v]) => [k, v.toHex()]));
 
     return JSON.stringify({
       quizId: this.quizId.toHex(),
@@ -491,3 +490,35 @@ export class DojoChoice {
   }
 }
 
+export class Stats extends Nomad {
+  operations: Map<string, StatsEntriesID> = new Map();
+
+  override update() {
+    const d: JSONStats = JSON.parse(this.json);
+    this.updateMap(this.operations, Object.entries(d.operations!)
+      .map<[string, StatsEntriesID]>(([user, result]) => [user, StatsEntriesID.fromHex(result)]));
+  }
+
+  override toJson(): string {
+    return JSON.stringify({
+      operations: Object.fromEntries([...this.operations.entries()]
+        .map(([id, _]) => [id, id]))
+    });
+  }
+}
+
+export class StatsEntries extends Nomad {
+  entries: JSONStatsEntry[] = [];
+
+  override update() {
+    this.entries = JSON.parse(this.json);
+  }
+
+  override toJson(): string {
+    return JSON.stringify(this.entries);
+  }
+
+  add(action: string) {
+    this.entries.push({ time: Date.now(), action });
+  }
+}

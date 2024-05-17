@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { UserService } from '../services/user.service';
 import { LivequizStorageService } from '../services/livequiz-storage.service';
 import { Course } from "../../lib/structs";
+import { StatsService } from '../services/stats.service';
 
 @Component({
   selector: 'app-landing',
@@ -18,10 +19,12 @@ import { Course } from "../../lib/structs";
 export class LandingComponent {
   course_name = "";
 
-  constructor(public user: UserService, private livequiz: LivequizStorageService) {
+  constructor(public user: UserService, private livequiz: LivequizStorageService,
+    private stats: StatsService) {
   }
 
   async addCourse() {
+    this.stats.add(StatsService.course_create);
     await this.livequiz.createCourse(this.course_name);
   }
 }

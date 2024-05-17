@@ -101,7 +101,7 @@ export class StorageHandler {
   // Synchronizes the nomads. First sends all the clients nomad versions,
   // then updates those received from the server.
   // Concurrent updates must be handled by the nomads themselves.
-  async syncNomads(): Promise<number> {
+  private async syncNomads(): Promise<number> {
     const start = Date.now();
     const updateIds: NomadID[] = [];
 
@@ -119,19 +119,21 @@ export class StorageHandler {
         b.json = json;
         b.version++;
         request.nomadVersions[k] = b.getReply();
+        // console.log("Sending new version of", b.constructor.name, b.getReply());
         updateIds.push(b.id);
       }
     }
     const duration = Date.now() - start;
 
     const updates = await this.connection.getNomadUpdates(request);
-    for (const [k, d] of Object.entries(updates.nomadData)) {
+    for (const [k, server] of Object.entries(updates.nomadData)) {
       const nomad = this.cache.get(k);
       if (nomad !== undefined) {
-        nomad.version = d.version;
-        nomad.json = d.json;
+        // console.log("Got new version", server);
+        nomad.version = server.version;
+        nomad.json = server.json;
         nomad.update();
-        nomad.updated.next(d.json);
+        nomad.updated.next(server.json);
 
         updateIds.push(nomad.id);
       }

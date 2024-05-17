@@ -1,11 +1,14 @@
 <div class="content">
-    <h1><app-breadcrumb></app-breadcrumb></h1>
-    <mat-form-field>
-        <mat-label>Your name:</mat-label>
-        <input id="userName" matInput [(ngModel)]="user.name">
-    </mat-form-field>
-    <div ngIf="userLoaded">
+    <div *ngIf="userLoaded">
+        <h1><app-breadcrumb></app-breadcrumb></h1>
+        <mat-form-field>
+            <mat-label>Your name:</mat-label>
+            <input id="userName" matInput [(ngModel)]="user.name" (input)="userRename()">
+        </mat-form-field>
         <router-outlet />
+    </div>
+    <div *ngIf="!userLoaded">
+        <h1>Loading nomads...</h1>
     </div>
 </div>
 <footer class="footer">

@@ -6,11 +6,14 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { UserService } from './services/user.service';
 import { StorageService } from './services/storage.service';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
+import { StatsService } from './services/stats.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, FormsModule, MatInputModule, MatButtonModule, BreadcrumbComponent],
+  imports: [RouterOutlet, RouterLink, FormsModule, MatInputModule, MatButtonModule, BreadcrumbComponent,
+    CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -18,10 +21,30 @@ export class AppComponent {
   title = 'livequiz';
   userLoaded = false;
 
-  constructor(public user: UserService, private storage: StorageService) { }
+  constructor(public user: UserService, private storage: StorageService,
+    private stats: StatsService) { }
 
-  async ngOnInit(){
-    this.storage.addNomads(this.user);
-    this.userLoaded = true;
+  ngOnInit() {
+    this.user.loaded.subscribe(async (_) => {
+      this.storage.addNomads(this.user);
+      await this.storage.updateLoop();
+      this.userLoaded = true;
+      this.stats.add(StatsService.page_loaded);
+      if (this.user.error) {
+        this.stats.add(StatsService.user_error);
+      }
+      if (this.user.create) {
+        this.stats.add(StatsService.user_create);
+      }
+    })
+  }
+
+  print_stats(): string {
+    const log = this.stats.entries.entries.map((entry) => `${entry.time}: ${entry.action}`);
+    return log.reverse().join("\n");
+  }
+
+  userRename(){
+    this.stats.add(StatsService.user_rename);
   }
 }

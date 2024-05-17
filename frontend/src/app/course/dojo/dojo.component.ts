@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { LivequizStorageService } from '../../services/livequiz-storage.service';
 import { BreadcrumbService } from '../../components/breadcrumb/breadcrumb.component';
 import { MatButton, MatButtonModule } from '@angular/material/button';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-dojo',
@@ -23,12 +24,13 @@ export class DojoComponent {
   attempt?: DojoAttempt;
 
   constructor(private user: UserService, private livequiz: LivequizStorageService,
-    private bcs: BreadcrumbService) { }
+    private bcs: BreadcrumbService, private stats: StatsService) { }
 
   ngOnInit() {
     this.bcs.push('Dojo', 'dojo');
     if (!this.user.courses.has(this.course.id.toHex())){
       this.user.courses.set(this.course.id.toHex(), this.course.name);
+      this.stats.add(StatsService.course_join);
     }
   }
 

@@ -13,6 +13,7 @@ import { Answer } from "../../../lib/results_summary";
 import { UserService } from '../../services/user.service';
 import { MatButtonModule } from '@angular/material/button';
 import { Subscription } from 'rxjs';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-quiz',
@@ -36,12 +37,13 @@ export class QuizComponent {
   last = false;
   currentQuestion = 0;
 
-  constructor(private user: UserService) { }
+  constructor(private user: UserService, private stats: StatsService) { }
 
   async ngOnInit() {
     this.attempt!.initChoices(this.quiz!.questions);
     this.goto(this.currentQuestion);
     this.quizUpdated = this.quiz!.updated.subscribe(() => this.ngOnChanges());
+    this.stats.add(StatsService.dojo_join);
   }
 
   ngOnChanges() {
@@ -50,7 +52,7 @@ export class QuizComponent {
     }
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.quizUpdated?.unsubscribe();
   }
 

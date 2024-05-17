@@ -1,4 +1,4 @@
-import { OptionRegexp, OptionsMulti, Question, Quiz } from "./structs";
+import { OptionRegexp, OptionsMulti, Question, Quiz, Stats } from "./structs";
 
 describe('Structs', () => {
     it('OptionRegexp filters and matches correctly', async () => {
@@ -100,4 +100,14 @@ extro
         expect(q.questions[0].options.multi).not.toBe(undefined);
         expect(q.questions[1].options.regexp).not.toBe(undefined);
     });
+});
+
+describe("(de)serialization", () => {
+    it("for Stats", () => {
+        const json_s = JSON.stringify({ "operations": { "1234": [{ "time": 0, action: "user::create" }] } });
+        const s = new Stats();
+        s.json = json_s;
+        s.update();
+        expect(s.toJson()).toBe(json_s);
+    })
 })

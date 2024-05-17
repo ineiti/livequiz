@@ -59,3 +59,12 @@ export interface JSONDojoChoice {
     Multi?: number[];
     Regexp?: string;
 }
+
+export interface JSONStats {
+    operations?: { [key: string]: string },
+}
+
+export interface JSONStatsEntry {
+    time: number;
+    action: string;
+}

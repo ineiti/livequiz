@@ -9,6 +9,7 @@ import { LivequizStorageService } from '../../services/livequiz-storage.service'
 import { QuizID } from '../../../lib/ids';
 import { StorageService } from '../../services/storage.service';
 import { UserService } from '../../services/user.service';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-edit-quiz',
@@ -25,15 +26,18 @@ export class EditQuizComponent {
 
   constructor(private bcs: BreadcrumbService, private router: Router,
     private route: ActivatedRoute, private livequiz: LivequizStorageService,
-    private storage: StorageService, private user: UserService) { }
+    private storage: StorageService, private user: UserService,
+    private stats: StatsService) { }
 
   async ngOnInit() {
     if (this.quizId) {
-      this.bcs.push('Edit Quiz', `editQuiz/${this.quizId}`)
+      this.bcs.push('Edit Quiz', `editQuiz/${this.quizId}`);
+      this.stats.add(StatsService.quiz_edit);
       const quiz = await this.livequiz.getQuiz(QuizID.fromHex(this.quizId!));
       this.text = quiz.toText();
     } else {
       this.bcs.push('Create Quiz', 'createQuiz');
+      this.stats.add(StatsService.quiz_create_editor);
     }
     this.compile();
   }
@@ -67,7 +71,7 @@ export class EditQuizComponent {
     this.cancel();
   }
 
-  cancel(){
+  cancel() {
     this.router.navigate([this.quizId ? '../..' : '..'], { relativeTo: this.route });
   }
 }

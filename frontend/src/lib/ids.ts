@@ -99,3 +99,10 @@ export class DojoAttemptID extends NomadID {
         this.idStr = "DojoAttemptID";
     }
 }
+
+export class StatsEntriesID extends NomadID {
+    constructor(init?: ArrayBuffer) {
+        super(init);
+        this.idStr = "StatsEntriesID";
+    }
+}
