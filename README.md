@@ -180,6 +180,10 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 
 2024-05-17:
 - fixed: update of quiz during dojo doesn't work
+- new user starting a dojo is not signed up to course - and has wrong message
+- ui
+  - buttons in course overview are not hidden in bottom bar
+  - bottom bar is too high
 
 2024-05-16:
 - authentication: only allow changes to Nomads by the owner...

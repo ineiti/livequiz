@@ -4,10 +4,6 @@
     <h4>Currently there is no ongoing dojo training.</h4>
 </div>
 
-<div *ngIf="showQuiz() && quiz && attempt">
+<div *ngIf="!isIdle() && quiz && attempt">
     <app-quiz [quiz]="quiz" [attempt]="attempt" [corrections]="showCorrections()"></app-quiz>
-</div>
-
-<div *ngIf="!isIdle() && !showQuiz()">
-    You're not signed up to the cours.
 </div>

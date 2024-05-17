@@ -15,17 +15,17 @@ describe("Logging in", () => {
 
         await Livequiz.wait(200);
 
-        let user1 = await Livequiz.init(courseUrl);
+        let user1 = await Livequiz.init(courseUrl + '/dojo');
+        await Livequiz.wait(200);
+        await user1.click("correct");
         await user1.id("userName").clear();
         await user1.id("userName").sendKeys("user1");
-        await user1.click("LiveQuiz");
-        await user1.click("Testing");
-        await user1.click("Enter Dojo");
-        await user1.click("correct");
 
         let user2 = await Livequiz.init(courseUrl);
         await user2.id("userName").clear();
         await user2.id("userName").sendKeys("user2");
+        await user2.click("LiveQuiz");
+        await user2.click("Testing");
         await user2.click("Enter Dojo");
         await user2.click("wrong");
         await user2.click("Next");

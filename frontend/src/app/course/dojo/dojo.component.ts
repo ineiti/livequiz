@@ -27,6 +27,9 @@ export class DojoComponent {
 
   ngOnInit() {
     this.bcs.push('Dojo', 'dojo');
+    if (!this.user.courses.has(this.course.id.toHex())){
+      this.user.courses.set(this.course.id.toHex(), this.course.name);
+    }
   }
 
   ngOnDestroy() {
