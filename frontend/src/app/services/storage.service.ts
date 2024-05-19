@@ -34,21 +34,35 @@ export class StorageHandler {
     }
   }
 
+  // Removes these nomads from the cache.
+  // The server still keeps them, so this will not remove them.
+  // But it's useful if a big operation with lots of nomads took place.
+  async clearNomads(...nomads: Nomad[]) {
+    // Wait for the system not updating the nomads.
+    while (this.timeout === undefined) {
+      await new Promise((resolve) => setTimeout(resolve, environment.syncInterval / 2));
+    }
+
+    for (const nomad of nomads){
+      this.cache.delete(nomad.id.toHex());
+    }
+  }
+
   // Returns an array of Nomads and makes sure that they are correctly fetched
   // from the server.
   // It takes an array of Ids, and a callback to create a new Nomad with the given ID.
   async getNomads<T extends Nomad>(nomadIds: NomadID[], newNomad: (id: NomadID) => T): Promise<T[]> {
     const nomadIdHexs = nomadIds.map((id) => id.toHex());
     const missing = nomadIdHexs.filter((id) => !this.cache.has(id));
-    for (const n of missing) {
-      const nn = newNomad(NomadID.fromHex(n));
-      nn.json = nn.toJson();
-      this.cache.set(n, nn);
+    if (missing.length > 0) {
+      for (const n of missing) {
+        const nn = newNomad(NomadID.fromHex(n));
+        nn.json = nn.toJson();
+        this.cache.set(n, nn);
+      }
+      await this.updateLoop();
     }
-    await this.updateLoop();
-    return [...this.cache.entries()]
-      .filter(([id, _]) => nomadIdHexs.includes(id))
-      .map(([_, nomad]) => nomad as T);
+    return nomadIdHexs.map((id) => this.cache.get(id) as T).filter((n) => n !== undefined)
   }
 
   startUpdate() {
@@ -68,10 +82,10 @@ export class StorageHandler {
     clearTimeout(this.timeout);
     this.timeout = undefined;
     const duration = await this.syncNomads()
-    if (duration > 100) {
-      alert("Serializing all this stuff takes more than 100ms!");
-    } else {
-      // console.log(`${this.cache.size} nomads: ${duration}ms`);
+    if (duration > 10) {
+      alert("Serializing all this stuff takes more than 10ms!");
+    // } else {
+    //   console.log(`${this.cache.size} nomads: ${duration}ms`);
     }
     this.timeout = setTimeout(() => this.updateLoop(), environment.syncInterval);
   }
@@ -136,9 +150,12 @@ export class StorageHandler {
         nomad.updated.next(server.json);
 
         updateIds.push(nomad.id);
+      } else {
+        console.warn("Got nomad with unknown id", server);
       }
     }
 
+    // console.log("Sync done for", updateIds.length);
     this.updateObserver.next(updateIds);
 
     return duration;
@@ -170,7 +187,13 @@ export class StorageService extends StorageHandler {
     super();
     this.conn = getConnection(user);
     this.connection = this.conn;
-    this.startUpdate();
+    // This is not really nice, but is needed for the integration tests to work.
+    // For a production system, the 'reset' endpoint is not active.
+    if (environment.enableReset && window.location.hash == "#reset") {
+      this.reset().then(() => this.startUpdate());
+    } else {
+      this.startUpdate();
+    }
   }
 
   async reset() {

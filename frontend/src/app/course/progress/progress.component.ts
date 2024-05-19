@@ -32,6 +32,7 @@ export class ProgressComponent {
   }
 
   async ngOnInit() {
+    this.bcs.push('Progress', 'progress');
     if (this.course.state.state === CourseStateEnum.Idle) {
       this.router.navigate(['..']);
     } else {
@@ -39,7 +40,6 @@ export class ProgressComponent {
       this.summary = new ResultsSummary(this.storage, this.livequiz, this.course.state.getDojoID());
       await this.summary.init();
     }
-    this.bcs.push('Progress', 'progress');
   }
 
   ngOnDestroy() {

@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 
 describe("Logging in", () => {
     it("Correctly identifies 2 users", async () => {
-        const admin = await Livequiz.init();
+        const admin = await Livequiz.reset();
         await admin.id('cname').sendKeys('Testing');
         await admin.css('button').click();
         await admin.linkText('Testing').click();
@@ -52,4 +52,21 @@ describe("Logging in", () => {
         await Livequiz.wait(100);
         admin.browser.quit();
     });
+
+    it("Stores stats", async () => {
+        const admin = await Livequiz.reset();
+
+        await Livequiz.wait(200);
+        let user1 = await Livequiz.init();
+        await user1.id('cname').sendKeys('Testing');
+        await user1.css('button').click();
+        await user1.click('Testing');
+        await user1.click('Create Quiz');
+        await user1.click('Save');
+        await user1.click('Start Quiz');
+        await user1.click('Enter Dojo');
+
+        await Livequiz.wait(200);
+        await admin.click("Stats");
+    })
 })

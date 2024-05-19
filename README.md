@@ -166,9 +166,8 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 - bugs:
   - ui
     - on mobile devices, long answers are hidden partially
+    - statistics are not shown anymore if switched to a tab and back
 - features
-  - add statistics
-    - show statistics
   - get all quizzes from a github repo
     - enter the name of a github / gitlab 
   - compatibility with Delibay - probably difficult
@@ -179,6 +178,10 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
       - updatable: students can update their questions
 
 # CHANGELOG
+
+2024-05-19:
+- add statistics
+- show statistics
 
 2024-05-17:
 - fixed: update of quiz during dojo doesn't work

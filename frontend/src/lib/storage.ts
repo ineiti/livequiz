@@ -29,6 +29,25 @@ export interface JSONUpdateEntry {
   time_last_read: number;
 }
 
+// Nomad is the base class to implement a simple client/server storage synchronization.
+// In the current implementation, the storage service checks if it needs to send updated
+// nomads to the server by calling `toJson` on all nomads.
+// Then it sends the nomads to be updated, and a version-# of the other nomads to the server.
+// The server replies with nomads for which it has a more up-to-date version.
+// This is not very efficient, and the current access management using the `owners` field
+// is not very flexible.
+// Here some thoughts of how to do it better:
+// TODO:
+// - Use setters in the child classes, which also set a 'changed' flag to 'true'.
+//  This allows the storage service to go through the nomads quicker.
+// - Store access-rights related to fields, e.g., 'name::update', or
+//  'students::push', and then only send the actions to the server. This allows
+//  the server to verify the actions in a simple way and gives more fine-grained
+//  access control. This could be implemented using a macro in rust, and then
+//  use rust-to-wasm to implement the same in javascript.
+// - Create an array of NomadID/version for the server, and then only add/remove from
+//  those. So the client doesn't have to send all NomadID/version just to know if something
+//  changed on the server.
 export class Nomad {
   owners: UserID[] = [];
   time_created = Date.now();

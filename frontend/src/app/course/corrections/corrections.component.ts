@@ -42,6 +42,7 @@ export class CorrectionsComponent {
   }
 
   async ngOnInit() {
+    this.bcs.push('Corrections', 'corrections');
     if (this.course.state.state === CourseStateEnum.Idle) {
       console.error("Cannot show corrections in idle mode");
       return;
@@ -60,7 +61,6 @@ export class CorrectionsComponent {
     this.sorted = this.quiz.questions.map((_, i) => [i, 0]);
     this.updateAttempts();
     this.goto(0);
-    this.bcs.push('Corrections', 'corrections');
     this.stats.add(StatsService.dojo_correction);
   }
 

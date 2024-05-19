@@ -496,7 +496,7 @@ export class Stats extends Nomad {
   override update() {
     const d: JSONStats = JSON.parse(this.json);
     this.updateMap(this.operations, Object.entries(d.operations!)
-      .map<[string, StatsEntriesID]>(([user, result]) => [user, StatsEntriesID.fromHex(result)]));
+      .map<[string, StatsEntriesID]>(([user, _]) => [user, StatsEntriesID.fromHex(user)]));
   }
 
   override toJson(): string {

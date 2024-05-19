@@ -30,10 +30,18 @@ impl Nomads {
             nomad_data: HashMap::new(),
         };
         for (id_str, remote) in list.nomad_versions {
+            log::debug!("{:.8}: {:?}", id_str, remote);
             let id = H256::from_hex(&id_str)?;
             match self.get(&id).await {
                 Ok(Some(stored)) => {
-                    if remote.version == 0 || stored.version > remote.version {
+                    if remote.version == 0
+                        || stored.version > remote.version
+                        || (stored.version == remote.version
+                            && stored.json.is_some()
+                            && remote.json.is_some()
+                            && stored.json.as_ref().unwrap() != remote.json.as_ref().unwrap())
+                    {
+                        log::debug!("Sending stored version");
                         reply.nomad_data.insert(id_str, stored.into());
                     } else if remote.version > stored.version {
                         if stored.owners.len() == 0 || stored.owners.contains(user) {
@@ -64,15 +72,23 @@ impl Nomads {
                     }
                 }
                 Ok(None) => {
-                    log::trace!(
-                        "{:.8} Creates {:.8}: {:?}",
-                        user.to_hex(),
-                        id.to_hex(),
-                        remote
-                    );
-                    self.set(&id, remote.try_into()?)
-                        .await
-                        .map_err(|e| BadRequest(e.to_string()))?
+                    if remote.version > 0 {
+                        log::debug!(
+                            "{:.8} Creates {:.8}: {:?}",
+                            user.to_hex(),
+                            id.to_hex(),
+                            remote
+                        );
+                        match remote.try_into() {
+                            Ok(value) => self
+                                .set(&id, value)
+                                .await
+                                .map_err(|e| BadRequest(e.to_string()))?,
+                            Err(e) => {
+                                log::warn!("Nomad is not stored on the server: {:?}", e)
+                            }
+                        }
+                    }
                 }
                 Err(_) => todo!(),
             }

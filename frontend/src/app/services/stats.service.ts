@@ -10,7 +10,7 @@ import { NomadID } from '../../lib/ids';
 export class StatsService {
   stats!: Stats;
   entries!: StatsEntries;
-  days = -1;
+  today = -1;
 
   static page_loaded = "page::loaded";
   static user_create = "user::create";
@@ -33,13 +33,17 @@ export class StatsService {
     this.createStats();
   }
 
+  static getStatsID(today: number): NomadID {
+    return NomadID.fromGlobalID(`LivequizStats${today}`);
+  }
+
   createStats() {
     const today = Math.floor(Date.now() / 1000 / 24 / 60 / 60);
-    if (this.days === today) {
+    if (this.today === today) {
       return;
     }
-    this.days = today;
-    this.stats = new Stats(NomadID.fromGlobalID(`LivequizStats${today}`));
+    this.today = today;
+    this.stats = new Stats(StatsService.getStatsID(this.today));
     const key = NomadID.fromGlobalID(`${this.user.id.toHex()}${today}`);
     this.stats.operations.set(key.toHex(), key)
     this.storage.addNomads(this.stats);

@@ -26,8 +26,8 @@ export class KataComponent {
     private stats: StatsService) { }
 
   async ngOnInit() {
-    this.quiz = await this.livequiz.getQuiz(QuizID.fromHex(this.quizId));
     this.bcs.push('Kata', `kata/${this.quizId}`);
+    this.quiz = await this.livequiz.getQuiz(QuizID.fromHex(this.quizId));
     this.stats.add(StatsService.kata_start);
   }
 

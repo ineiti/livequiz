@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { animals, colors, uniqueNamesGenerator } from 'unique-names-generator';
-import { NomadID, Secret } from '../../lib/ids';
+import { Secret } from '../../lib/ids';
 import { Nomad } from "../../lib/storage";
 import { Course } from '../../lib/structs';
 import { ReplaySubject } from 'rxjs';
@@ -53,6 +53,7 @@ export class UserService extends User {
         this.secret = Secret.from_hex(json.secret);
         this.create = false;
       } catch (e) {
+        console.warn("Error while reading user:", e);
         this.error = true;
         this.reset();
       }

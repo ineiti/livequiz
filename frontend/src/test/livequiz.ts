@@ -2,11 +2,16 @@ import { Builder, Browser, By, WebDriver, Locator, WebElementPromise, WebElement
 
 export class Livequiz {
     browser!: WebDriver;
-    static async init(url = 'http://localhost:4200/reset'): Promise<Livequiz> {
+    static async init(url = 'http://localhost:4200'): Promise<Livequiz> {
         const lq = new Livequiz();
         lq.browser = await new Builder().forBrowser(Browser.CHROME).build();
         await lq.browser.get(url);
+        await Livequiz.wait(300);
         return lq;
+    }
+
+    static async reset(): Promise<Livequiz> {
+        return Livequiz.init('http://localhost:4200#reset');
     }
 
     static async wait(ms: number) {
@@ -53,7 +58,7 @@ export class WEP {
     async clear() {
         await (await this.p).clear();
     }
-    async find(): Promise<WebElement>{
+    async find(): Promise<WebElement> {
         return await this.p;
     }
 }

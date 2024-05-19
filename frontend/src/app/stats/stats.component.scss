@@ -1,0 +1,16 @@
+.light {
+    background-color: #f8f8f8;
+}
+
+.dark {
+    background-color: #eee;
+}
+
+.light,
+.dark {
+    padding-top: 2em;
+}
+
+.light h1, .dark h1 {
+    text-align: center;
+}

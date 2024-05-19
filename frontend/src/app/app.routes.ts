@@ -5,9 +5,9 @@ import { DojoComponent } from './course/dojo/dojo.component';
 import { CourseManageComponent } from './course/course-manage/course-manage.component';
 import { CorrectionsComponent } from './course/corrections/corrections.component';
 import { ProgressComponent } from './course/progress/progress.component';
-import { ResetComponent } from './reset/reset.component';
 import { KataComponent } from './course/kata/kata.component';
 import { EditQuizComponent } from './course/edit-quiz/edit-quiz.component';
+import { StatsComponent } from './stats/stats.component';
 
 export const routes: Routes = [
     {
@@ -23,6 +23,6 @@ export const routes: Routes = [
         ]
     },
     { path: '', component: LandingComponent, pathMatch: 'full' },
-    { path: 'reset', component: ResetComponent },
+    { path: 'stats', component: StatsComponent },
     { path: '**', redirectTo: '/' }
 ];

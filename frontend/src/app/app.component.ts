@@ -24,8 +24,8 @@ export class AppComponent {
   constructor(public user: UserService, private storage: StorageService,
     private stats: StatsService) { }
 
-  ngOnInit() {
-    this.user.loaded.subscribe(async (_) => {
+  async ngOnInit() {
+    return new Promise((resolve) => this.user.loaded.subscribe(async (_) => {
       this.storage.addNomads(this.user);
       await this.storage.updateLoop();
       this.userLoaded = true;
@@ -36,7 +36,8 @@ export class AppComponent {
       if (this.user.create) {
         this.stats.add(StatsService.user_create);
       }
-    })
+      resolve(false);
+    }));
   }
 
   print_stats(): string {
@@ -44,7 +45,7 @@ export class AppComponent {
     return log.reverse().join("\n");
   }
 
-  userRename(){
+  userRename() {
     this.stats.add(StatsService.user_rename);
   }
 }
