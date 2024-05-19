@@ -53,7 +53,7 @@ There is only one API-call: `nomadUpdates`
 
 ### Nomads
 
-I'm actually quite proud of the implementation of `Nomads`, which are javascript-objects
+I'm proud of the implementation of `Nomads`, which are javascript-objects
 that are automatically synchronized with the server and the clients.
 This simplifies the architecture of the system a lot:
 the backend is only used to synchronize the data, while the frontends do all the
@@ -167,7 +167,10 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
   - ui
     - on mobile devices, long answers are hidden partially
     - statistics are not shown anymore if switched to a tab and back
+  - stats
+    - when all values are 0, it doesn't show nicely
 - features
+  - show stats for 7 / 14 / 31 days
   - get all quizzes from a github repo
     - enter the name of a github / gitlab 
   - compatibility with Delibay - probably difficult
@@ -256,4 +259,21 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 
 # Installation
 
-Launch the docker-compose.yml
+Download and launch the docker-compose.yml :
+
+```bash
+wget https://raw.githubusercontent.com/ineiti/livequiz/main/docker-compose.yaml
+docker compose pull
+docker compose up -d
+```
+
+Now you can point your browser to http://localhost:8000 and start using it.
+If you install it on your server and use traefik, there are some labels to
+get you started.
+At least they worked for me :)
+
+# Acknowledgements
+
+Thanks a lot to the Network Security Class 2024 of [HEIG/VD](https://heig-vd.ch/) for their
+(un)voluntarily beta-testing of the app.
+I hope you enjoyed it as much as I did :)
