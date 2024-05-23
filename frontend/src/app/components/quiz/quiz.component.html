@@ -46,7 +46,7 @@
             <mat-form-field style="width: 100%;">
                 <mat-label>Answer</mat-label>
                 <input matInput [(ngModel)]="answer.choice.regexp" (input)="updateRegexp()" [class]="resultClasses[0]"
-                    [disabled]="corrections">
+                    [disabled]="corrections" id="quizInput">
             </mat-form-field>
             <div *ngIf="corrections">
                 @for (match of answer.question.options.regexp!.match; track $index ) {

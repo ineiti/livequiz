@@ -38,12 +38,18 @@ export class Livequiz {
         return this.by(By.xpath(xp));
     }
 
-    text(t: string): WEP {
-        return this.xpath(`//*[contains(text(), "${t}")]`);
+    text(t: string, occurence = 1): WEP {
+        return this.xpath(`(//*[contains(text(), "${t}")])[${occurence}]`);
     }
 
-    async click(t: string) {
-        await this.text(t).click();
+    async click(...texts: string[]) {
+        for (const text of texts) {
+            await this.text(text).click();
+        }
+    }
+
+    async find(t: string){
+        await this.text(t).find();
     }
 }
 export class WEP {

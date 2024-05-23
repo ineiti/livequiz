@@ -33,14 +33,7 @@ export class CourseManageComponent {
     private stats: StatsService) { }
 
   async ngOnChanges() {
-    this.quizzes = [];
-    for (const id of this.course.quizIds) {
-      this.quizzes.push(await this.storage.getNomad(id, new Quiz()));
-    }
-    if (this.course.state.state !== CourseStateEnum.Idle) {
-      const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
-      this.quiz = await this.livequiz.getQuiz(dojo.quizId);
-    }
+    await this.updateQuizzes();
     if (!this.isStudent()) {
       this.user.courses.set(this.course.id.toHex(), this.course.name);
       this.stats.add(StatsService.course_join);
@@ -49,6 +42,21 @@ export class CourseManageComponent {
       this.user.addCourse(this.course);
     }
     this.user.update();
+    await this.updateDojo();
+  }
+
+  async updateDojo(){
+    if (this.course.state.state !== CourseStateEnum.Idle) {
+      const dojo = await this.livequiz.getDojo(this.course.state.getDojoID());
+      this.quiz = await this.livequiz.getQuiz(dojo.quizId);
+    }
+  }
+
+  async updateQuizzes(){
+    this.quizzes = [];
+    for (const id of this.course.quizIds) {
+      this.quizzes.push(await this.storage.getNomad(id, new Quiz()));
+    }
   }
 
   isAdmin(): boolean {
@@ -62,6 +70,7 @@ export class CourseManageComponent {
   async dojoQuiz(id: QuizID) {
     this.stats.add(StatsService.dojo_start);
     await this.livequiz.setDojoQuiz(this.course.id, id);
+    await this.updateDojo();
   }
 
   async dojoCorrections() {
@@ -71,6 +80,7 @@ export class CourseManageComponent {
   async dojoIdle() {
     this.stats.add(StatsService.dojo_stop);
     await this.livequiz.setDojoIdle(this.course.id);
+    await this.updateDojo();
   }
 
   async deleteQuiz(id: QuizID) {
@@ -83,7 +93,7 @@ export class CourseManageComponent {
         this.course.state.state = CourseStateEnum.Idle;
       }
       this.stats.add(StatsService.quiz_delete);
-      this.ngOnChanges();
+      await this.updateDojo();
     }
   }
 
@@ -103,7 +113,7 @@ export class CourseManageComponent {
           this.course.quizIds.push(q.id);
           this.stats.add(StatsService.quiz_create_upload);
         }
-        this.ngOnChanges();
+        this.updateQuizzes();
       } catch (e) {
         await ModalModule.openOKCancel(this.dialog, 'Error',
           `While reading quiz: ${e}`

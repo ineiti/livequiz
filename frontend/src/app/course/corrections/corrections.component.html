@@ -1,5 +1,4 @@
 <div *ngIf="course.state.isCorrections() && quiz && results">
-    <h2>{{quiz.title}}</h2>
     <div *ngIf="results.chosen.length === 0">
         <h3>No results available</h3>
     </div>
@@ -68,12 +67,13 @@
                         style="margin: auto 0 auto 1em; font-size: 120%;">{{results.chosen[sorted[qIndex][0]][$index]}}</span>
                 </div>
                 }
-                @for (wrong of results.texts[sorted[qIndex][0]]; track $index) {
+                @for (wrong of wrongRegexps; track $index) {
                 <div style="display: flex;">
-                    <mat-list-option togglePosition="before" class="resultWrong" style="width: 50%">
-                        <span class="option" [innerHTML]="wrong"></span>
+                    <mat-list-option togglePosition="before" class="resultWrong" 
+                    [style.width]="resultWidth[$index + question.options.regexp.match.length]">
+                        <span class="option" [innerHTML]="wrong[0]"></span>
                     </mat-list-option>
-                    <span class="option" style="margin: auto 0 auto 1em; font-size: 120%;">1</span>
+                    <span class="option" style="margin: auto 0 auto 1em; font-size: 120%;">{{ wrong[1] }}</span>
                 </div>
                 }
             </mat-selection-list>

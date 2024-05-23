@@ -36,6 +36,7 @@ export class CorrectionsComponent {
   results!: ResultsSummary;
   qIndex = 0;
   sorted: number[][] = [];
+  wrongRegexps: [string, number][] = [];
 
   constructor(private livequiz: LivequizStorageService, private storage: StorageService,
     private bcs: BreadcrumbService, private stats: StatsService) {
@@ -92,22 +93,31 @@ export class CorrectionsComponent {
   updateClasses() {
     for (let question = 0; question < this.quiz.questions.length; question++) {
       const score = Math.round(this.sorted[question][1] * 8);
+      console.log(question, score);
       this.tileClasses[question] = "questionTile" +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         ` questionTileColor${score}`;
     }
     this.tileClasses[this.qIndex] += " questionTileChosen";
 
+    this.wrongRegexps = [];
     const question = this.quiz.questions[this.sorted[this.qIndex][0]];
     if (question.options.multi !== undefined) {
       this.resultClasses = question.options.multi.correct.map((_) => 'resultCorrect')
         .concat(question.options.multi!.wrong.map((_) => 'resultWrong'));
     } else {
-      this.resultClasses = question.options.regexp!.match.map((_) => 'resultCorrect')
+      this.resultClasses = question.options.regexp!.match.map((_) => 'resultCorrect');
+      const wrongAnswers = this.results.texts[this.sorted[this.qIndex][0]];
+      [...new Set(wrongAnswers)].map((wrong, i) =>
+        this.wrongRegexps[i] = [wrong, wrongAnswers.filter((ans) => ans === wrong).length]);
     }
+
     if (this.results.chosen.length > 0) {
       this.resultWidth = this.results.chosen[this.sorted[this.qIndex][0]]
         .map((s) => `${Math.round(s / this.users.length * 50) + 50}%`);
+      if (this.wrongRegexps.length > 0) {
+        this.resultWidth = this.resultWidth.concat(this.wrongRegexps.map(([_, n]) => `${Math.round(n / this.users.length * 50) + 50}%`));
+      }
     }
   }
 

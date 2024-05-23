@@ -170,17 +170,21 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
   - stats
     - when all values are 0, it doesn't show nicely
 - features
+  - add other user to owner of course
   - show stats for 7 / 14 / 31 days
   - get all quizzes from a github repo
     - enter the name of a github / gitlab 
   - compatibility with Delibay - probably difficult
   - add "delete" button to clean students
   - modes
-    - exam mode: only once the admin switch is flicked will the students see if they answered correctly
-    - live mode: after every question, students see if they answered correctly
-      - updatable: students can update their questions
+    - groups of students for race
 
 # CHANGELOG
+
+2024-05-23:
+- regroup wrong answers in regexps
+- when changing quiz for dojo, got the previous quiz in the dojo multiple times
+- twice quiz name in corrections
 
 2024-05-19:
 - add statistics
