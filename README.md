@@ -164,12 +164,18 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 # TODO v2
 
 - bugs:
+  - corrections
+    - order is still buggy with db_240523
+    - even in reverse order, the result is not satisfactory
+    - when called with course/id/corrections, all fields are green
+    - even when clicking directly on "corrections" the first time, it shows all green.
   - ui
     - on mobile devices, long answers are hidden partially
-    - statistics are not shown anymore if switched to a tab and back
   - stats
     - when all values are 0, it doesn't show nicely
 - features
+  - propose link with `/recover#secret`
+  - visit old dojos
   - add other user to owner of course
   - show stats for 7 / 14 / 31 days
   - get all quizzes from a github repo
@@ -181,6 +187,9 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 
 # CHANGELOG
 
+2024-05-28:
+- recover user with a `/recover#secret` path
+
 2024-05-23:
 - regroup wrong answers in regexps
 - when changing quiz for dojo, got the previous quiz in the dojo multiple times
@@ -189,6 +198,7 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 2024-05-19:
 - add statistics
 - show statistics
+- statistics are not shown anymore if switched to a tab and back
 
 2024-05-17:
 - fixed: update of quiz during dojo doesn't work

@@ -8,6 +8,7 @@ import { ProgressComponent } from './course/progress/progress.component';
 import { KataComponent } from './course/kata/kata.component';
 import { EditQuizComponent } from './course/edit-quiz/edit-quiz.component';
 import { StatsComponent } from './stats/stats.component';
+import { RecoverComponent } from './recover/recover.component';
 
 export const routes: Routes = [
     {
@@ -24,5 +25,6 @@ export const routes: Routes = [
     },
     { path: '', component: LandingComponent, pathMatch: 'full' },
     { path: 'stats', component: StatsComponent },
+    { path: 'recover', component: RecoverComponent },
     { path: '**', redirectTo: '/' }
 ];

@@ -4,6 +4,7 @@ import { Secret } from '../../lib/ids';
 import { Nomad } from "../../lib/storage";
 import { Course } from '../../lib/structs';
 import { ReplaySubject } from 'rxjs';
+import { StorageService } from './storage.service';
 
 export class User extends Nomad {
   name = "undefined";
@@ -95,5 +96,13 @@ export class UserService extends User {
       reply: this.getReply(),
       secret: this.secret.toHex(),
     }));
+  }
+
+  async recover(secret: Secret, storage: StorageService){
+    const u = await storage.getNomad(secret.hash(), this);
+    await storage.clearNomads(this);
+    this.secret = secret;
+    this.json = u.toJson();
+    this.update();
   }
 }
