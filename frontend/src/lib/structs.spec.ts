@@ -1,4 +1,7 @@
-import { OptionRegexp, OptionsMulti, Question, Quiz, Stats } from "./structs";
+import { NomadID } from "./ids";
+import { ResultsSummaryContainer } from "./results_summary";
+import { DojoAttempt, OptionRegexp, OptionsMulti, Question, Quiz, Stats } from "./structs";
+import { readFileSync } from 'fs';
 
 describe('Structs', () => {
     it('OptionRegexp filters and matches correctly', async () => {
@@ -33,7 +36,7 @@ describe('Structs', () => {
     });
 });
 
-describe('Question', () => {
+describe('Quiz', () => {
     it('gets regexp question', () => {
         const q = Quiz.fromStr(`# Test
 ## Regexp
@@ -100,6 +103,21 @@ extro
         expect(q.questions[0].options.multi).not.toBe(undefined);
         expect(q.questions[1].options.regexp).not.toBe(undefined);
     });
+
+    it('calculates the scores', () => {
+        const q = Quiz.fromStr(readFileSync(`${__dirname}/../selenium/quiz2.md`).toString());
+        const attempts: DojoAttempt[] = JSON.parse(readFileSync(`${__dirname}/../selenium/quiz2.answers.json`).toString())
+            .map((a: any) => new DojoAttempt(new NomadID(), 1, JSON.stringify(a)));
+        attempts.forEach((a) => a.update());
+        const results = new ResultsSummaryContainer();
+        results.updateAttempts(q, attempts);
+        const scores = q.sortScores(attempts);
+        for (let entry = 0; entry < q.questions.length; entry++){
+            const question = scores[entry][0];
+            console.log(`Question ${question + 1} - ${q.questions[question].summary()}`);
+            console.log(results.chosen[question], Math.round(scores[entry][1] * 100)/100);
+        }
+    })
 });
 
 describe("(de)serialization", () => {
@@ -110,4 +128,4 @@ describe("(de)serialization", () => {
         s.update();
         expect(s.toJson()).toBe(json_s);
     })
-})
+});

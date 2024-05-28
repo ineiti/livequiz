@@ -72,28 +72,18 @@ export class CorrectionsComponent {
     }
   }
 
-  updateAttempts() {
-    for (let question = 0; question < this.quiz.questions.length; question++) {
-      const attemptsAnswered = this.attempts
-        .filter((attempt) => attempt.choicesFilled(this.quiz.questions)[question].isAnswered());
-      if (attemptsAnswered.length > 0) {
-        const sum = attemptsAnswered
-          .map<number>((attempt) =>
-            this.quiz.questions[question].options.scoreStats(attempt.choices[question]).score)
-          .concat([1])
-          .reduce((prev, curr) => prev + (1 - curr) ** 2);
-        this.sorted[question] = [question, 1 - sum / attemptsAnswered.length];
-      } else {
-        this.sorted[question] = [question, 0]
-      }
-    }
-    this.sorted.sort((a, b) => b[1] - a[1]);
+  async updateAttempts() {
+    this.sorted = this.quiz.sortScores(this.attempts);
   }
 
   updateClasses() {
+    let scores = [...this.sorted.map((s) => s[1])];
+    const [min, max] = [Math.min(...scores), Math.max(...scores)];
+    if (min < max){
+      scores = scores.map((s) => 1 - (s - min) / (max - min));
+    }
     for (let question = 0; question < this.quiz.questions.length; question++) {
-      const score = Math.round(this.sorted[question][1] * 8);
-      console.log(question, score);
+      const score = Math.round(scores[question] * 8);
       this.tileClasses[question] = "questionTile" +
         (question % 2 === 1 ? " questionTileOdd" : "") +
         ` questionTileColor${score}`;

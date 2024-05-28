@@ -102,7 +102,7 @@ describe("E2E tests", () => {
         admin.browser.quit();
     });
 
-    it("Sorts wrong regexps", async () => {
+    it("Sorts and merges wrong regexps", async () => {
         // Create two quizzes and change the quiz in the dojo
         const admin = await Livequiz.reset();
         await admin.id('cname').sendKeys('Testing');
@@ -132,7 +132,7 @@ describe("E2E tests", () => {
         await user1.browser.quit();
         await user2.browser.quit();
         await user3.browser.quit();
-    }, 10000)
+    }, 10000);
 });
 
 async function throwError(f: () => Promise<any>): Promise<void> {

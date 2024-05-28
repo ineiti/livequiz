@@ -164,9 +164,6 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 # TODO v2
 
 - bugs:
-  - corrections
-    - order is still buggy with db_240523
-    - even in reverse order, the result is not satisfactory
   - ui
     - on mobile devices, long answers are hidden partially
   - stats
@@ -190,6 +187,8 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 - corrections bug:
   - when called with course/id/corrections, all fields are green
   - even when clicking directly on "corrections" the first time, it shows all green.
+  - order is still buggy with db_240523
+  - even in reverse order, the result is not satisfactory
 
 2024-05-23:
 - regroup wrong answers in regexps

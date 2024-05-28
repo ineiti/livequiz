@@ -60,7 +60,7 @@ export class ResultsSummary extends ResultsSummaryContainer {
     async init() {
         this.dojo = await this.livequiz.getDojo(this.dojoId!);
         this.quiz = await this.livequiz.getQuiz(this.dojo.quizId);
-        this.updateDojo();
+        await this.updateDojo();
     }
 
     deInit() {

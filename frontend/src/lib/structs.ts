@@ -54,6 +54,26 @@ export class Quiz extends Nomad {
       this.questions.map((q) => q.toText() + "\n").join("\n");
   }
 
+  sortScores(attempts: DojoAttempt[]) {
+    const sorted: [number, number][] = [];
+    for (let question = 0; question < this.questions.length; question++) {
+      const attemptsAnswered = attempts
+        .filter((attempt) => attempt.choicesFilled(this.questions)[question].isAnswered());
+      if (attemptsAnswered.length > 0) {
+        const sum = attemptsAnswered
+          .map<number>((attempt) =>
+            this.questions[question].options.scoreStats(attempt.choices[question]).score)
+          .concat([1])
+          .reduce((prev, curr) => prev + curr ** 2);
+        sorted[question] = [question, sum / attempts.length];
+      } else {
+        sorted[question] = [question, 0]
+      }
+    }
+    sorted.sort((a, b) => a[1] - b[1]);
+    return sorted;
+  }
+
   static fromStr(text: string): Quiz {
     const q = new Quiz();
 
@@ -155,6 +175,14 @@ export class Question {
       explanation: this.explanation
     };
   }
+
+  summary(): string {
+    if (this.options.multi !== undefined) {
+      return `Multi (${this.options.multi?.correct.length} / ${this.options.multi?.total()})`;
+    } else {
+      return `Regexp`;
+    }
+  }
 }
 
 export class Options {
@@ -223,7 +251,7 @@ export class Options {
         score -= 0.5;
       }
     }
-    return { score: score > 0 ? score : 0, stats };
+    return { score: Math.max(score, 0), stats };
   }
 }
 
@@ -421,8 +449,9 @@ export class Dojo extends Nomad {
 
   async getAttempts(storage: StorageService): Promise<DojoAttempt[]> {
     const attemptIds = [...this.attempts.values()];
-    return await storage.getNomads(attemptIds,
+    const attempts = await storage.getNomads(attemptIds,
       (id: NomadID) => { return new DojoAttempt(id) });
+    return attempts;
   }
 
   async getUsers(storage: StorageService): Promise<User[]> {
