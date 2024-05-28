@@ -75,6 +75,9 @@ export class StorageHandler {
     // Avoid calling updateLoop in parallel - while updateNomads is called,
     // another setTimeout might call updateLoop again. Ignore if this happens.
     if (this.timeout === undefined) {
+      console.warn("Waiting for update because syncNomads currently running");
+      await new Promise((resolve) => setTimeout(resolve, environment.syncInterval / 2));
+      await this.updateLoop();
       return;
     }
     // updateLoop can be called from the outside to force an update. In this

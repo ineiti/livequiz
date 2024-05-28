@@ -167,8 +167,6 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
   - corrections
     - order is still buggy with db_240523
     - even in reverse order, the result is not satisfactory
-    - when called with course/id/corrections, all fields are green
-    - even when clicking directly on "corrections" the first time, it shows all green.
   - ui
     - on mobile devices, long answers are hidden partially
   - stats
@@ -189,6 +187,9 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 
 2024-05-28:
 - recover user with a `/recover#secret` path
+- corrections bug:
+  - when called with course/id/corrections, all fields are green
+  - even when clicking directly on "corrections" the first time, it shows all green.
 
 2024-05-23:
 - regroup wrong answers in regexps

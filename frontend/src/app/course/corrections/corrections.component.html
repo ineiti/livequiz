@@ -1,4 +1,4 @@
-<div *ngIf="course.state.isCorrections() && quiz && results">
+<div *ngIf="course.state.isCorrections() && quiz && results && question">
     <div *ngIf="results.chosen.length === 0">
         <h3>No results available</h3>
     </div>
