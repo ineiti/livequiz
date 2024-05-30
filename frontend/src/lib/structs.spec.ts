@@ -104,6 +104,12 @@ extro
         expect(q.questions[1].options.regexp).not.toBe(undefined);
     });
 
+    it('doesn\'t lose last comment', () => {
+        const q = Quiz.fromStr(quiz1);
+        const qText = q.toText();
+        expect(qText.trim()).toBe(quiz1);
+    })
+
     it('calculates the scores', () => {
         const q = Quiz.fromStr(readFileSync(`${__dirname}/../selenium/quiz2.md`).toString());
         const attempts: DojoAttempt[] = JSON.parse(readFileSync(`${__dirname}/../selenium/quiz2.answers.json`).toString())
@@ -129,3 +135,14 @@ describe("(de)serialization", () => {
         expect(s.toJson()).toBe(json_s);
     })
 });
+
+const quiz1 = `# Test
+## Multi
+
+Question
+
+= 1
+- one
+- three
+
+some more comments`;

@@ -166,6 +166,7 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 - bugs:
   - ui
     - on mobile devices, long answers are hidden partially
+    - stats: unuseful numbering (1.4, 2.8) for small values
   - stats
     - when all values are 0, it doesn't show nicely
 - features
@@ -181,6 +182,11 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
     - groups of students for race
 
 # CHANGELOG
+
+2024-05-30:
+- when editing a quiz, the last comment gets lost
+- deleting a quiz doesn't update the list (but does delete it)
+- uploading a new version doesn't work
 
 2024-05-28:
 - recover user with a `/recover#secret` path

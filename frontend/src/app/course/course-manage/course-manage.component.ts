@@ -94,6 +94,7 @@ export class CourseManageComponent {
       }
       this.stats.add(StatsService.quiz_delete);
       await this.updateDojo();
+      await this.updateQuizzes();
     }
   }
 
@@ -106,6 +107,7 @@ export class CourseManageComponent {
           const quiz = await this.livequiz.getQuiz(this.updateQuizId!);
           quiz.json = q.toJson();
           quiz.update();
+          quiz.json = "";
           this.stats.add(StatsService.quiz_update);
         } else {
           q.owners.push(this.user.id);

@@ -87,7 +87,7 @@ export class Quiz extends Nomad {
         continue;
       }
       const linePre = line.replace(/`(.*?)`/g, "<span class='pre'>$1</span>");
-      const interpret = linePre.match(/([#=~;-]*) *(.*)/);
+      const interpret = linePre.match(/^([#=~;-]*) *(.*) *$/);
       if (interpret?.length != 3) {
         console.error(`Cannot parse line ${line}`);
         continue;
@@ -103,6 +103,8 @@ export class Quiz extends Nomad {
               if (maxChoices < 0) {
                 current.options.regexp = new OptionRegexp(reg);
               }
+              current.intro = current.intro.trim();
+              current.explanation = current.explanation.trim();
               q.questions.push(current);
             }
             current = new Question();
@@ -164,7 +166,7 @@ export class Question {
   }
 
   toText(): string {
-    return `## ${this.title}\n\n${this.intro}\n\n` + this.options.toText();
+    return `## ${this.title}\n\n${this.intro}\n\n` + this.options.toText() + `\n\n${this.explanation}`;
   }
 
   toJson(): JSONQuestion {
