@@ -166,9 +166,6 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
 - bugs:
   - ui
     - on mobile devices, long answers are hidden partially
-    - stats: unuseful numbering (1.4, 2.8) for small values
-  - stats
-    - when all values are 0, it doesn't show nicely
 - features
   - propose link with `/recover#secret`
   - visit old dojos
@@ -182,6 +179,11 @@ This software is licensed under AGPL-3.0 or later, at your convenience.
     - groups of students for race
 
 # CHANGELOG
+
+2024-06-04:
+- stats
+  - not nice numbering (1.4, 2.8) for small values
+  - when all values are 0, it doesn't show nicely
 
 2024-05-30:
 - when editing a quiz, the last comment gets lost

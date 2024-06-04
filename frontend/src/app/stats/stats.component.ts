@@ -14,8 +14,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 type LabelNames = ('All' | 'User' | 'Course' | 'Dojo' | 'Quiz');
 
-let focusListener: () => void;
-
 @Component({
   selector: 'app-stats',
   standalone: true,
@@ -44,19 +42,26 @@ export class StatsComponent {
     'Quiz': [StatsService.quiz_create_upload, StatsService.quiz_create_editor, StatsService.quiz_edit, StatsService.quiz_update, StatsService.quiz_delete]
   }
 
+  static toValue(v: number): string {
+    return `${v === 0 ? '0' : Math.round(Math.pow(2, v - 1))}`;
+  }
+
   options: EChartsOption = {
     legend: {},
-    tooltip: {},
-    // Declare an x-axis (category axis).
-    // The category map the first column in the dataset by default.
-    xAxis: { type: 'category' },
-    // Declare a y-axis (value axis).
-    yAxis: {
-      type: 'value', min: 0,
-      axisLabel: {
-        formatter: (value) => `${value === 0 ? 0 : `${Math.pow(2, value - 1)}`.slice(0, 3)}`
-      },
+    tooltip: {
+      valueFormatter: (v) => StatsComponent.toValue(v as number),
     },
+    xAxis: { type: 'category' },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: (value) => StatsComponent.toValue(value),
+      },
+      minInterval: 1,
+    },
+    label: {
+      formatter: (value: any) => `${value}something`
+    }
   };
 
   updateOptions: EChartsOption[] = [];
@@ -66,19 +71,11 @@ export class StatsComponent {
 
   async ngOnInit() {
     this.bcs.push("Stats", 'stats');
-    // No idea why I echart loses the chart, and why I have to call
-    // it twice here :(
-    focusListener = () => {
-      setTimeout(() => this.updateStats(), 100);
-      setTimeout(() => this.updateStats(), 200);
-    };
     this.updateStats();
-    window.addEventListener('focus', focusListener);
   }
 
   async ngOnDestroy() {
     this.bcs.pop();
-    window.removeEventListener('focus', focusListener);
   }
 
   async updateStats() {
@@ -120,7 +117,7 @@ export class StatsComponent {
     this.updateOptions.push({
       dataset: [
         {
-          source: source.map((line, i) => line.map((e, j) => (i * j === 0) ? e : (e === 0 ? -1 : Math.log2(e as number) + 1))),
+          source: source.map((line, i) => line.map((e, j) => (i * j === 0) ? e : (e === 0 ? 0 : Math.log2(e as number) + 1))),
         },
       ],
       series: source[0].slice(1).map((_) => { return { type: 'bar' } }),
