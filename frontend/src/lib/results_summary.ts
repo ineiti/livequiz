@@ -85,6 +85,7 @@ export class ResultsSummary extends ResultsSummaryContainer {
           this.users[i].isIn(this.quiz.owners)){
             this.attempts.splice(i, 1);
             this.users.splice(i, 1);
+            i--;
           }
         }
         this.updateAttempts(this.quiz, this.attempts);

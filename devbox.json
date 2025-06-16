@@ -12,6 +12,7 @@
   ],
   "shell": {
     "init_hook": [
+      "if [ -z \"$( find $RUSTUP_HOME | grep toolchains/stable )\" ]; then rustup default 1.76; fi",
       "alias ls='ls --color'"
     ],
     "scripts": {
