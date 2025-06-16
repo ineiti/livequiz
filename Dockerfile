@@ -5,7 +5,7 @@ RUN npm ci
 COPY frontend .
 RUN npm run build
 
-FROM rust:1.76-buster as server
+FROM rust:1.87-bullseye as server
 WORKDIR /root
 COPY backend .
 RUN cargo build -r

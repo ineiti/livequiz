@@ -80,6 +80,13 @@ export class ResultsSummary extends ResultsSummaryContainer {
     async updateDojo() {
         this.attempts = await this.dojo.getAttempts(this.storage);
         this.users = await this.dojo.getUsers(this.storage);
+        for (var i = 0; i < this.attempts.length; i++){
+          if (!this.attempts[i].choices.some((dc) => dc.isAnswered()) ||
+          this.users[i].isIn(this.quiz.owners)){
+            this.attempts.splice(i, 1);
+            this.users.splice(i, 1);
+          }
+        }
         this.updateAttempts(this.quiz, this.attempts);
     }
 
